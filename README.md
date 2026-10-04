@@ -7,6 +7,16 @@ Free and open source (GPL-3.0), based on <a href="https://github.com/hugelton/Fe
 
 SLOOP turns the FM-1 into a four-track beat machine you play live: three synths and a drum machine with 16 sounds on the white keys. No factory patterns, nothing to load: everything you hear, you play.
 
+## Screenshots
+
+<p align="center"><img src="assets/screens/screens.png" alt="SLOOP screens on the FM-1" width="760"></p>
+
+<p align="center"><sub>The FM-1's screen: start-up, the four tracks, the drum grid and kit, the layers (punch-in FX, steps, key and chords, mix, erase, roll), a free take, the master page.</sub></p>
+
+<p align="center"><img src="assets/screens/editor-drums.png" alt="SLOOP web editor: the drum track" width="760"></p>
+
+<p align="center"><sub>The web editor: the drum track as a 16-lane grid, with levels and ratchets.</sub></p>
+
 ## Features
 
 - **Hold a button, touch a key.** Every function button is a layer: hold it and the 16 white keys and the four knobs change job, and the screen shows how. Tap it and its pages open.
