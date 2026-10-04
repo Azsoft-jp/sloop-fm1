@@ -2,7 +2,7 @@
 
 # SLOOP 2.1
 
-**The hip-hop beat machine firmware for the M-VAVE FM-1.** Four tracks — three synths and a drum machine with 16 sounds on the white keys — 54 sounds for hip-hop and drum & bass, 34 drum kits, ghost notes and ratchets, note repeat, one-key chords, 16 punch-in effects, a vinyl / sidechain / DJ-filter master, and a teenage-engineering-style screen that always shows what your hands can do next. No factory patterns, nothing to load: everything you hear, you play.
+**A live groovebox firmware for the M-VAVE FM-1 — for any style.** Four tracks — three synths and a drum machine with 16 sounds on the white keys — nine synthesis engines, 54 sounds, 34 drum kits (808, 909, techno, house, jungle, afro, reggaeton, synthwave, chiptune, ambient, jazz…), your own samples, ghost notes and ratchets, note repeat, one-key chords, 16 punch-in effects, a vinyl / sidechain / DJ-filter master, and a teenage-engineering-style screen that always shows what your hands can do next. No factory patterns, nothing to load: everything you hear, you play.
 
 SLOOP is free and open source (GPL-3.0), based on [Felucca](https://github.com/hugelton/Felucca) by Leo Kuroshita / Hügelton Instruments.
 
@@ -231,7 +231,7 @@ Hold **FX**, then hold a white key — the 16 white keys from the lowest F to th
 
 ## The sound bank
 
-54 sounds made for hip-hop and drum & bass — boom bap, trap and drill, lo-fi, R&B and soul, jungle. **PRESETS** browses them all on a synth track (the engine follows). SLOOP starts (on a new project) at **90 BPM** with *808 BOOM* on track 1, *RHODES* on track 2, *LOFI FLUTE* on track 3 and the 808 kit on track 4.
+54 starting points — basses, keys, organs, plucks, stabs, leads, pads — for any style: house and techno, hip-hop and trap, drum & bass, synthwave, lo-fi, ambient, soul. Every one is a full patch on one of the nine engines: change it, save your own (32 user presets), or load your own samples. **PRESETS** browses them all on a synth track (the engine follows). SLOOP starts (on a new project) at **90 BPM** with *808 BOOM* on track 1, *RHODES* on track 2, *LOFI FLUTE* on track 3 and the 808 kit on track 4.
 
 | Role | Sounds (engine) |
 | --- | --- |
@@ -311,7 +311,7 @@ The full Felucca engine is underneath: nine synthesis engines (analog, 4-op FM, 
 | | |
 | --- | --- |
 | Tracks | 3 synth parts (8 voices shared) + drums (16 sounds, 6 voices) |
-| Sounds | 54 hip-hop / drum & bass presets on 9 engines, 8 sampled sets (CC0) |
+| Sounds | 54 presets on 9 engines, 8 sampled sets (CC0), 3 slots for your own samples |
 | Sequencer | 64 steps per track, own length and division each; chords with a level and ratchet per note; drums with a level and ratchet per sound; ties, slide; MPC swing 50–75 %; one sample-accurate clock for steps, arp, rolls, slicer and song (no drift) |
 | Performance | layers (hold a button: keys and knobs change job): punch-in FX, erase, note repeat, step entry, key / chords, mute / solo / tap tempo |
 | Drum kits | 34 (5 sampled, 29 synthesised) |
