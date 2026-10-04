@@ -1,4 +1,4 @@
-<p align="center"><img src="assets/logo/sloop-logo.png" alt="SLOOP" width="420"></p>
+﻿<p align="center"><img src="assets/logo/sloop-logo.png" alt="SLOOP" width="420"></p>
 
 <p align="center"><b>A hip-hop beat machine firmware for the M-VAVE FM-1.</b><br>
 Free and open source (GPL-3.0), based on <a href="https://github.com/hugelton/Felucca">Felucca</a>.</p>
@@ -27,9 +27,9 @@ SLOOP turns the FM-1 into a four-track beat machine you play live: three synths 
 
 ## Install
 
-1. Get the `.fwsc` of the latest [release](../../releases), or build it (below).
-2. On Windows, double-click **`INSTALL-SLOOP.bat`**: it builds the firmware and opens the installer in the browser.
-3. Connect the FM-1 by USB (a data cable, no hub), open the installer in **Chrome or Edge**, press **INSTALL** and wait for *Done*.
+**From the browser:** open **[the SLOOP installer](https://isod89.github.io/sloop-fm1/)** in **Chrome or Edge**, connect the FM-1 by USB (a data cable, no hub), press **INSTALL** and wait for *Done*. Nothing to download or compile. The [web editor](https://isod89.github.io/sloop-fm1/webapp/editor/) works the same way.
+
+Other ways: the `.fwsc` of each [release](../../releases) with `python tools/fm1_install.py sloop-2.0.fwsc` (needs `pip install mido python-rtmidi`), or build it yourself and run `INSTALL-SLOOP.bat` (Windows).
 
 Going back: M-VAVE's own updater (M-UPGRADE) and the official FM-1 firmware. If an install is cut off, the FM-1 stays in update mode: press Install again and it finishes.
 
