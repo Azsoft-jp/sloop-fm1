@@ -1,19 +1,24 @@
 <p align="center"><img src="assets/logo/sloop-logo.png" alt="SLOOP" width="480"></p>
 
-# SLOOP 2.0
+# SLOOP 2.1
 
 **The hip-hop beat machine firmware for the M-VAVE FM-1.** Four tracks — three synths and a drum machine with 16 sounds on the white keys — 54 sounds for hip-hop and drum & bass, 34 drum kits, ghost notes and ratchets, note repeat, one-key chords, 16 punch-in effects, a vinyl / sidechain / DJ-filter master, and a teenage-engineering-style screen that always shows what your hands can do next. No factory patterns, nothing to load: everything you hear, you play.
 
 SLOOP is free and open source (GPL-3.0), based on [Felucca](https://github.com/hugelton/Felucca) by Leo Kuroshita / Hügelton Instruments.
 
-> **Status:** 2.0, running on the FM-1. Still a beta: install at your own risk, and please report what you find (GitHub issues).
+> **Status:** 2.1, running on the FM-1. Still a beta: install at your own risk, and please report what you find (GitHub issues).
+
+### New in 2.1
+
+- **Songs, live:** hold SAVE — keys 1–4 play sections A–D on the next bar, keys 5–8 save the loop into them, key 14 records the song as you play it (each section and its bars). See [Song mode](#song-mode).
+- **Landmarks on the keys:** while a layer is held, and on the drum track, keys 1, 5, 9 and 13 glow dimly — the first key of each row of the 4 × 4 grid on the screen. What is on (an effect, a step, a sound) stays fully lit.
 
 ### New in 2.0
 
 - **Hold a button, touch a key.** Every function button is a *layer*: hold it and the 16 white keys and the four knobs change job, the screen shows how. Tap it and its pages open as before.
 - **16 drum sounds on the white keys**, black keys double them. **OCT− / OCT+ held** = ghost / hard hits. Hits keep their level and a **ratchet** (x1–x4) in the pattern.
 - **Note repeat** (ARP + key), **erase as it plays** (EDIT + key), **steps under your fingers** (SEQ + key, Elektron style), **one-key chords in the song's key** (SCL), **mute / solo / tap tempo** (GLO).
-- **Undo / redo** (EDIT + OCT− / OCT+), **hold REC to clear**, **hold SAVE to save**, and an **autosave** that brings your beat back at power-on.
+- **Undo / redo** (EDIT + OCT− / OCT+), **hold REC to clear**, and an **autosave** that brings your beat back at power-on.
 - **MPC swing** (50–75 %), a sample-accurate clock (no drift, any tempo), tighter glides for the 808s.
 - **Master:** **DUST** (an old sampler and a record: bits, rate, crackle), **DUCK** (the kick pumps the synths), **FILT** (DJ filter: low-pass ← OFF → high-pass).
 - **Web editor:** the drum track as a 16-lane grid with levels and ratchets, the kit, the master page.
@@ -78,6 +83,8 @@ The four dials at the bottom of the screen show what KNOB 1–4 do now. White al
 
 Every function button has two lives. **Tap** it (press and let go, touching nothing else): its pages open, as on any FM-1 firmware. **Hold** it: a **layer** — the 16 white keys and KNOB 1–4 change job while it is held, and after 0.14 s the screen shows the 16 keys as tiles and the knobs as dials. Let go: back to playing.
 
+The tiles are four rows of four, keys 1–4, 5–8, 9–12, 13–16. To find them without looking at the screen, the first key of each row (1, 5, 9, 13) glows dimly while a layer is held, and on the drum track; the keys at full light are what is on.
+
 | Hold | Keys | KNOB 1 · 2 · 3 · 4 | Tap |
 | --- | --- | --- | --- |
 | **FX** — *punch* | a punch-in effect while the key is held | FILTER · DUST · DUCK · — | FX pages |
@@ -86,6 +93,7 @@ Every function button has two lives. **Tap** it (press and let go, touching noth
 | **SEQ** — *steps* | steps 1–16 of the page | SOUND / NOTE · DIV · SWING · LENGTH | SEQ pages (drums: grid / kit) |
 | **SCL** — *key* | the key of the song | CHORD · SCALE · KEYS · TRANSPOSE | SCL pages |
 | **GLO** — *mix* | 1–4 mute · 5–8 solo · 16 tap tempo | level of tracks 1 · 2 · 3 · 4 | GLO pages |
+| **SAVE** — *song* | 1–4 play section A–D (next bar) · 5–8 save the loop into A–D · 13 loop / song · 14 SONG REC · 16 the chain | — | TRACKS: the SONG screen · else the SAVE pages |
 
 Other controls:
 
@@ -95,7 +103,6 @@ Other controls:
 | **REC** | playing: record now / stop · stopped: arm (the first note starts) · free take: close the loop |
 | hold **REC** | clear the selected track (a ring fills: keep holding ~2 s; let go before and nothing happens) |
 | **SAVE** | on TRACKS: the SONG screen · elsewhere: the SAVE pages |
-| hold **SAVE** | save the project into its slot (PROJECT page, SLOT 1–4) |
 | **EDIT + OCT− / OCT+** | undo / redo |
 | **ALGORITHM** | select the track (on every page) |
 | **PRESETS** | the selected track's sound, or the drum kit |
@@ -184,7 +191,7 @@ Changing a sound (PRESETS, a user preset) never changes the key, the chord mode,
 
 - **Undo / redo:** hold EDIT, press OCT− / OCT+. One level: the last recording pass, erase, clear, step or pattern edit; redo takes it back again.
 - **Clear a track:** hold REC. After 0.7 s the press is cancelled and a ring fills; keep holding ~1.3 s more and the selected track is cleared (*TRACK 2 CLEARED*). Let go before: nothing. Undo brings it back.
-- **Save:** hold SAVE: the ring, then the project is saved into its slot (SAVE → PROJECT: SLOT 1–4, LOAD, SAVE).
+- **Save:** SAVE + keys 5–8 save the loop into section / project A–D (= SLOT 1–4); SAVE → PROJECT has SLOT, LOAD, SAVE too.
 - **Autosave:** when the transport is stopped and you have not touched anything for 2.5 s (at most every 20 s), the working project is kept in flash; at power-on SLOOP comes back exactly as you left it.
 - **New project:** SAVE → TOOLS → NEW (turn to GO): the four tracks back to their power-on sounds, empty patterns (undoable).
 
@@ -218,7 +225,7 @@ Hold **FX**, then hold a white key — the 16 white keys from the lowest F to th
 - **Layers** — while a layer button is held: 16 tiles (the white keys) and the knobs' dials, in the layer's colour.
 - **DRUMS** (EDIT or SEQ tapped on TRACKS with the drum track) — **grid**: the 16 sounds × 16 steps, levels as shades, ratchets as notches; dials *sound · step · hit · level*. **kit**: 16 pads that flash on every hit; dials *kit · level · reverb · pan*. EDIT / SEQ tapped switches grid ↔ kit.
 - **REC READY / FREE TAKE** — while REC is armed, and during a free take: the seconds and the loop it makes.
-- **Holds** — the ring of REC (clear) and SAVE (save) while held.
+- **Holds** — the ring of REC (clear) while held.
 - **SONG** — the section chain.
 - **Sound pages** (ENV, LFO, FX, SCL, EDIT, ARP, SEQ, GLO, SAVE) — the full synth, colour-coded.
 
@@ -275,10 +282,14 @@ Three slots of about 7.4 s each hold your own sounds, played by a synth track: e
 
 ## Song mode
 
-1. Build a loop, stop, and press **SAVE** on TRACKS: the SONG screen.
-2. **KNOB 2** picks section A–D; **REC** stores the four tracks into it (a used section asks for REC again within 3 s).
-3. **KNOB 1** picks a step of the chain, **KNOB 3** its length in bars, **KNOB 4** the chain length. **SAVE** stores the chain.
-4. **OCT−** switches loop / song, **PLAY** plays the chain to the end; your working loop is back when it stops. **OCT+ twice** (within 3 s) loads a section to edit it.
+A song is up to 16 steps of 4 sections, **A–D** (each holds the four tracks: sounds, patterns, kit). Make it live, by playing:
+
+1. Make a loop (the verse). Hold **SAVE** and press the **5th white key** (*save A*). Change the loop (the chorus) and save it into **B** with the 6th key, a bridge into **C**, an end into **D**. Saving over a used section asks for the key again within 3 s.
+2. **Play the sections live:** hold SAVE and press white key **1–4**. Playing, the section starts on the next bar, every track from its first step, always in time; stopped, it becomes the loop at once.
+3. **Record the song as you play it:** SAVE + key **14** (*rec*): from the next bar, every section you play and how many bars it plays are written into the song. Press it again, or STOP, to end: *SONG PARTS 5*. It is saved by itself once you stop.
+4. **Play it back:** SAVE + key **13** switches *loop* / *song*; in song mode **PLAY** plays the whole song and stops at the end (your loop is back afterwards).
+
+The **SONG screen** (SAVE tapped on TRACKS, or SAVE + key 16) shows the chain and edits it by hand: **KNOB 1** the step, **KNOB 2** its section, **KNOB 3** its bars, **KNOB 4** the number of steps; **REC** stores the loop into the step's section; **SAVE** (tap) saves the chain; **OCT−** loop / song; **OCT+ twice** loads a section. The four sections are the four project slots.
 
 ## The web editor
 

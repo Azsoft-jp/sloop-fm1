@@ -222,6 +222,9 @@ static void fm1_main(void)
         ui_draw();
         felucca_dbg.stage = 8;
         autosave_tick();                                /* the working project into flash, when quiet */
+#if FELUCCA_ARRANGER
+        sections_flush();                               /* live sections / the recorded song, when quiet */
+#endif
         felucca_dbg.stage = 9;
         while (fm1_ms - m < 15u) {                               /* ~60 UI frames/s at most */
             ui_input();

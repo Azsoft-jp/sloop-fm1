@@ -10,11 +10,17 @@
  *   SCL   any key: the key of the song     knobs: CHORD  SCALE  KEYS  TRANSPOSE
  *   GLO   keys 1..4 mute, 5..8 solo,       knobs: the levels of tracks 1..4
  *         the last white key: tap tempo
+ *   SAVE  keys 1..4 play section A..D (on the next bar), 5..8 store the loop into A..D, 13 loop / song,
+ *         14 SONG REC (the order you play becomes the song), 16 the song page
  * The keys' part runs in the audio ISR (seq.c layer_now: no lag, no lost press); the SEQ, SCL and
  * GLO keys come to the UI through seq.c lk_q. HOLD: REC held clears the track, SAVE held saves the
  * project (a ring fills; let go before and nothing happens). */
-static const uint8_t LAYER_BTN[LY_COUNT] = {NB, B_FX, B_EDIT, B_ARP, B_SEQ, B_SCL, B_GLO};
-static const char *const LAYER_NAME[LY_COUNT] = {"", "punch", "erase", "roll", "steps", "key", "mix"};
+static const uint8_t LAYER_BTN[LY_COUNT] = {NB, B_FX, B_EDIT, B_ARP, B_SEQ, B_SCL, B_GLO, B_SAVE};
+static const char *const LAYER_NAME[LY_COUNT] = {"", "punch", "erase", "roll", "steps", "key", "mix", "song"};
+static void section_store(uint32_t s);                  /* project.c */
+static void section_load(uint32_t s);
+static uint8_t sec_armed;                               /* store over a used section: the key again within 3 s */
+static uint32_t sec_armed_ms;
 #define TAP_MS 450u                                     /* a press shorter than this, untouched: a tap */
 #define SHOW_MS 140u                                    /* the layer shows after this (a tap does not flash it) */
 
@@ -243,6 +249,58 @@ static void layer_key(uint32_t layer, uint32_t k, uint32_t down)
         for (i = 0; i < NPART; i++)
             trk[i].p[P_ROOT] = (int16_t)root;
         ui_say("KEY ", N_NOTE[root]);
+        return;
+    }
+    case LY_SONG: {                                     /* sections A..D: play, store; loop / song; SONG REC */
+        char b[2] = {0, 0};
+        if (w < 0)
+            return;
+        b[0] = (char)('A' + (w & 3));
+        if (w < 4) {
+            if (arrangement_clock.running) {
+                ui_message("SONG PLAYS");
+            } else if (!((arrangement_ready() >> w) & 1u)) {
+                ui_say("EMPTY ", b);
+            } else if (song.playing) {
+                live_req = (int8_t)w;
+                ui_say("NEXT: ", b);
+            } else {
+                section_load((uint32_t)w);
+                ui_say("LOADED ", b);
+            }
+        } else if (w < 8) {
+            uint32_t s = (uint32_t)w - 4u;
+            if (((arrangement_ready() >> s) & 1u) && !(sec_armed == s + 1u && fm1_ms - sec_armed_ms < 3000u)) {
+                sec_armed = (uint8_t)(s + 1u);
+                sec_armed_ms = fm1_ms;
+                ui_say("AGAIN: ", b);
+            } else {
+                sec_armed = 0;
+                section_store(s);
+                ui_say("SAVED ", b);
+            }
+        } else if (w == 12) {
+            if (srec) {
+                ui_message("REC IS ON");
+            } else {
+                arrangement_enabled ^= 1u;
+                ui_message(arrangement_enabled ? "SONG MODE" : "LOOP MODE");
+            }
+        } else if (w == 13) {
+            if (srec) {
+                fm1_irq_off();
+                srec_stop();                            /* (playing: the order so far is the song) */
+                fm1_irq_on();
+            } else if (arrangement_clock.running) {
+                ui_message("STOP FIRST");
+            } else {
+                arrangement_enabled = 0;
+                srec = 1;
+                ui_message(live_sec < 0 ? "PICK A PART" : "REC: NEXT BAR");
+            }
+        } else if (w == 15) {
+            studio_open(SC_SONG);
+        }
         return;
     }
     case LY_MIX:
@@ -614,6 +672,44 @@ static void layer_screen_draw(void)
             fmt_int(v[i], (int32_t)lv * 100 / 127);
             ratio[i] = (int32_t)lv * 1000 / 127;
         }
+        break;
+    }
+    case LY_SONG: {                                     /* A..D (playing lit, next one framed), store, modes */
+        uint32_t ready = arrangement_ready();
+        static const char *const SL[4] = {"A", "B", "C", "D"};
+        col = C_WHITE;
+        if (srec == 2u) {
+            char b[8];
+            str_cpy(sub, "rec ", sizeof sub);
+            str_cpy(sub + 4, SL[srec_e[srec_n ? srec_n - 1u : 0u].scene & 3u], 2);
+            str_cpy(sub + str_len(sub), " bar ", 6);
+            fmt_int(b, srec_n ? srec_e[srec_n - 1u].bars + 1 : 1);
+            str_cpy(sub + str_len(sub), b, 6);
+        } else {
+            str_cpy(sub, arrangement_enabled ? "song mode" : srec ? "rec armed" : "play  store", sizeof sub);
+        }
+        for (i = 0; i < 4u; i++) {
+            int used = (ready >> i) & 1u, playing = live_sec == (int8_t)i && !arrangement_clock.running;
+            str_cpy(tl[i].lab, SL[i], 8);
+            tl[i].bg = used ? (playing ? TE_COL[i] : TE_DIM[i]) : TE_G1;
+            tl[i].fg = used ? C_BLACK : TE_G3;
+            tl[i].top = live_req == (int8_t)i ? C_WHITE : 0;
+            str_cpy(tl[4 + i].lab, "save A", 8);
+            tl[4 + i].lab[5] = (char)('A' + i);
+            tl[4 + i].bg = sec_armed == i + 1u ? TE_RED : TE_G1;
+            tl[4 + i].fg = sec_armed == i + 1u ? C_BLACK : TE_G4;
+            tl[4 + i].top = TE_DIM[i];
+        }
+        str_cpy(tl[12].lab, arrangement_enabled ? "song" : "loop", 8);
+        tl[12].bg = arrangement_enabled ? C_WHITE : TE_G2;
+        tl[12].fg = arrangement_enabled ? C_BLACK : C_WHITE;
+        str_cpy(tl[13].lab, "rec", 8);
+        tl[13].bg = srec == 2u ? TE_RED : TE_G1;
+        tl[13].fg = srec == 2u ? C_BLACK : TE_RED;
+        tl[13].top = srec == 1u ? TE_RED : 0;
+        str_cpy(tl[15].lab, "chain", 8);
+        tl[15].bg = TE_G1;
+        tl[15].fg = TE_G4;
         break;
     }
     default:

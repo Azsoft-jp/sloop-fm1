@@ -109,10 +109,19 @@ static uint32_t keys_lit(void)
     return m;
 }
 
+/* the keys' landmarks, dim: the first key of each row of the 4 x 4 grid on screen (white keys
+ * 1, 5, 9, 13) while a layer is held, and on the drum track (its 16 sounds, 4 x 4 as on KIT) */
+static uint32_t keys_guide(void)
+{
+    if (ui.layer == LY_PLAY && !is_drum(TSEL))
+        return 0u;
+    return 1u << key_of_white(0) | 1u << key_of_white(4) | 1u << key_of_white(8) | 1u << key_of_white(12);
+}
+
 static void ui_leds(void)
 {
-    uint8_t nl[FM1_NCOL] = {0};
-    uint32_t k, c, keys;
+    uint8_t nl[FM1_NCOL] = {0}, dl[FM1_NCOL] = {0};
+    uint32_t k, c, keys, guide;
     static uint8_t ready;
     if (!ready) {
         led_pos_init();
@@ -130,10 +139,15 @@ static void ui_leds(void)
         led_put(nl, panel.btn[B_OCTUP], song.octave > 0);
     }
     keys = keys_lit();
-    for (k = 0; k < 27u; k++)
+    guide = keys_guide() & ~keys;
+    for (k = 0; k < 27u; k++) {
         led_put(nl, 14u + k, (int)((keys >> k) & 1u));
-    for (c = 0; c < FM1_NCOL; c++)
+        led_put(dl, 14u + k, (int)((guide >> k) & 1u));
+    }
+    for (c = 0; c < FM1_NCOL; c++) {
         fm1_led[c] = nl[c];
+        fm1_led_dim[c] = dl[c];
+    }
 }
 
 /* ---------------------------------------------------------- input --- */
@@ -429,6 +443,16 @@ static void layer_tap(uint32_t layer)
     case LY_MIX:
         open_family(FAM_GLO);
         break;
+    case LY_SONG:                                         /* SAVE tapped: TRACKS -> the song, else the SAVE pages */
+        if (on_song_page())
+            arrangement_save();
+        else if (!ui.home && cur_page()->scope == SC_TRK)
+            studio_open(SC_SONG);
+        else if (on_drum_page())
+            studio_open(SC_SONG);
+        else
+            open_family(FAM_SAVE);
+        break;
     default:
         break;
     }
@@ -516,7 +540,7 @@ static int layers_input(uint32_t note_edges)
 
 /* REC: acts on the press (no lag). Held 0.7 s the press is undone and a ring fills: held on to the
  * end, the selected track is cleared (EDIT + OCT- brings it back); let go before, nothing happens.
- * SAVE: tapped, its pages (TRACKS: the song); held, the ring, then the project is saved into its slot */
+ * (SAVE is the SONG layer: ui_layers.c; tapped, layer_tap) */
 static void holds_input(uint32_t pressed, uint32_t now_ms)
 {
     static uint8_t prev_rec, prev_wait, eaten, rec_on, save_on;   /* *_on: pressed, *_t0 its time */
@@ -565,38 +589,7 @@ static void holds_input(uint32_t pressed, uint32_t now_ms)
         }
         rec_on = 0;
     }
-    /* SAVE */
-    if (pressed & sb) {
-        save_t0 = now_ms;
-        save_on = 1;
-    }
-    if (save_down && save_on && !ui.hold_kind && now_ms - save_t0 >= 600u && !on_song_page()) {
-        ui.hold_kind = 2;
-        ui.hold_t0 = now_ms;
-        ui.force = 1;
-    }
-    if (ui.hold_kind == 2u && save_down && now_ms - ui.hold_t0 >= HOLD_SAVE_MS) {
-        ui.hold_kind = 0;
-        save_on = 0;
-        ui.force = 1;
-        project_save((uint32_t)clamp(song.g[G_SLOT], 1, 4) - 1u);
-    }
-    if (!save_down) {
-        if (ui.hold_kind == 2u) {
-            ui.hold_kind = 0;
-            ui.force = 1;
-        } else if (save_on && now_ms - save_t0 < 600u) {  /* a tap: TRACKS -> the song, else the SAVE pages */
-            if (on_song_page())
-                arrangement_save();
-            else if (!ui.home && cur_page()->scope == SC_TRK)
-                studio_open(SC_SONG);
-            else if (on_drum_page())
-                studio_open(SC_SONG);
-            else
-                open_family(FAM_SAVE);
-        }
-        save_on = 0;
-    }
+    (void)sb, (void)save_down, (void)save_on, (void)save_t0;   /* (SAVE is a layer now: ui_layers.c) */
 }
 
 static void ui_input(void)
@@ -625,7 +618,8 @@ static void ui_input(void)
         return;
     }
     layered = layers_input(notes);
-    pressed &= ~(ly_bit[LY_FX] | ly_bit[LY_ERASE] | ly_bit[LY_ROLL] | ly_bit[LY_STEP] | ly_bit[LY_SCALE] | ly_bit[LY_MIX]);
+    pressed &= ~(ly_bit[LY_FX] | ly_bit[LY_ERASE] | ly_bit[LY_ROLL] | ly_bit[LY_STEP] | ly_bit[LY_SCALE] | ly_bit[LY_MIX] |
+                 ly_bit[LY_SONG]);
     holds_input(pressed, fm1_ms);
     pressed &= ~((on_song_page() ? 0u : 1u << panel.btn[B_REC]) | (1u << panel.btn[B_SAVE]));
     if (layered || ui.hold_kind) {                      /* a layer / a hold: the rest waits */

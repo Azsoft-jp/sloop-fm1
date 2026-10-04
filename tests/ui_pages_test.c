@@ -12,7 +12,7 @@
  *   SCL     held + a key: the key of the song
  *   GLO     held + keys: mute, solo, tap tempo; knobs: levels
  *   REC     press: arm / record at once; held: the clear ring, to the end: cleared (undo brings it back)
- *   SAVE    tapped: the song page; held: the save ring, then saved
+ *   SAVE    tapped: the song page; held: the SONG layer (sections A..D: play / store, SONG REC)
  *   DRUMS   the grid: sound / step / hit / level knobs, GRID <-> KIT
  * then 20000 frames of random use: every draw stays on the screen. */
 #define FELUCCA_ARRANGER 1
@@ -31,7 +31,7 @@ static int32_t encs[7];
 static uint32_t fm1_ticks(void) { return fm1_ms * 1000u * 24u; }
 #define FM1_TICKS_PER_US 24u
 static int32_t fm1_enc_take(uint32_t e) { int32_t s = encs[e]; encs[e] = 0; return s; }
-static uint8_t fm1_led[16];
+static uint8_t fm1_led[16], fm1_led_dim[16];
 #define FM1_NCOL 16u
 static const int8_t FM1_KEYMAP[5][16];
 static void fm1_led_key(uint32_t id, int on) { (void)id; (void)on; }
@@ -56,6 +56,9 @@ static uint32_t arrangement_ready(void) { return 3; }
 static void arrangement_apply(uint32_t s) { (void)s; }
 static void song_backup(void) {}
 static void song_restore(void) {}
+static uint32_t sec_stores, sec_loads;
+static void section_store(uint32_t s) { sec_stores++; live_sec = (int8_t)s; }
+static void section_load(uint32_t s) { sec_loads++; live_sec = (int8_t)s; }
 static int up_used(uint32_t k) { return k < 2; }
 static int up_load(uint32_t k) { (void)k; return 0; }
 static uint32_t up_count(void) { return 2; }
@@ -121,11 +124,14 @@ int main(int argc, char **argv)
 
     /* ---- taps open pages, holds are layers */
     go_home(); ui.force = 1; frame();
+    { uint8_t was = song.sel; song.sel = 0; check(keys_guide() == 0u, "synth track, no layer: no landmarks (a piano)"); song.sel = was; }
     tap(B_SEQ); check(cur_fam() == FAM_SEQ, "SEQ tapped: the SEQ pages");
     go_home(); frame();
     tap(B_FX); check(cur_fam() == FAM_FX, "FX tapped: the FX pages");
     go_home(); frame();
     press(B_FX); frames(12); check(ui.layer == LY_FX && punch.hold, "FX held: the punch layer shows");
+    check(keys_guide() == (1u << key_of_white(0) | 1u << key_of_white(4) | 1u << key_of_white(8) | 1u << key_of_white(12)),
+          "FX held: keys 1, 5, 9, 13 lit dim (the rows of the grid)");
     ppm("layer-punch");
     fm1_in.notes = 1u << 4; frame(); check(punch.req == 2, "FX + the 3rd white key: punch effect 3");
     ppm("layer-punch-on");
@@ -219,10 +225,25 @@ int main(int argc, char **argv)
     press(B_REC); frames(60); release(B_REC);         /* let go before the end: nothing */
     check(trk[0].step[3].n == 1 && !rec_wait, "REC let go before the end: nothing cleared");
 
-    /* ---- SAVE: tap = the song page; hold = saved */
+    /* ---- SAVE: tap = the song page; held = the SONG layer (live sections, SONG REC) */
     go_home(); frame();
-    press(B_SAVE); frames(40); check(ui.hold_kind == 2u, "SAVE held: the save ring"); ppm("hold-save"); frames(70); release(B_SAVE);
-    check(saves == 1 && !on_song_page(), "SAVE held: the project saved (no song page)");
+    song.playing = 0; live_sec = -1; live_req = -1; srec = 0; arrangement_enabled = 0;
+    press(B_SAVE); frames(15); check(ui.layer == LY_SONG, "SAVE held: the song layer");
+    key(key_of_white(4)); check(sec_stores == 0 && sec_armed == 1u, "store over a used A: asks again");
+    key(key_of_white(4)); check(sec_stores == 1 && live_sec == 0, "again: the loop stored in A");
+    key(key_of_white(6)); check(sec_stores == 2 && live_sec == 2, "an empty C: stored at once");
+    key(key_of_white(1)); check(sec_loads == 1 && live_sec == 1, "stopped: B loaded as the loop");
+    key(key_of_white(3)); check(sec_loads == 1, "an empty D: not played");
+    song.playing = 1; clk_beat = 1; clk_pos = 0;
+    key(key_of_white(0)); check(live_req == 0, "playing: A asked for the next bar");
+    live_req = -1; song.playing = 0;
+    key(key_of_white(13)); check(srec == 1u && !arrangement_enabled, "SONG REC armed (loop mode)");
+    ui.force = 1; frame(); ppm("layer-song");
+    key(key_of_white(13)); check(srec == 0u, "SONG REC again: off");
+    key(key_of_white(12)); check(arrangement_enabled == 1u, "loop / song: song mode");
+    key(key_of_white(12)); check(arrangement_enabled == 0u, "again: loop mode");
+    release(B_SAVE);
+    check(!on_song_page() && saves == 0, "SAVE held and let go: no song page, no save");
     tap(B_SAVE); check(on_song_page(), "SAVE tapped on TRACKS: the song page");
     ui.force = 1; frame(); ppm("page-song");
 
@@ -287,6 +308,6 @@ int main(int argc, char **argv)
         fm1_in.buttons = 0; fm1_in.notes = 0; frames(4);
         #undef R
     }
-    printf("ui: %s\n", fails ? "FAILED" : "pages, layers (punch, steps, erase, roll, key, mix), holds (clear, save), drums, REC, 20000-frame fuzz PASS");
+    printf("ui: %s\n", fails ? "FAILED" : "pages, layers (punch, steps, erase, roll, key, mix), song layer, REC hold, drums, REC, 20000-frame fuzz PASS");
     return fails;
 }

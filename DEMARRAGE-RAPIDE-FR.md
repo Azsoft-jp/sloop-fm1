@@ -41,6 +41,8 @@ Blanc = ce que tu touches. Rouge = enregistrement.
 
 Chaque bouton de fonction a deux vies. **Tapé** (appuyé puis relâché sans rien toucher d'autre) : ses pages s'ouvrent, comme avant. **Maintenu** : un **calque** — les 16 touches blanches et les KNOB 1–4 changent de rôle, l'écran affiche les 16 touches en tuiles et les boutons en cadrans. Relâché : on rejoue.
 
+**Repères lumineux :** les tuiles sont 4 rangées de 4 (touches 1–4, 5–8, 9–12, 13–16). Tant qu'un calque est maintenu, et sur la piste batterie, la première touche de chaque rangée (1, 5, 9, 13) s'allume faiblement ; ce qui est actif (un effet, un pas, un son) reste allumé à fond.
+
 | Maintenir | Touches | KNOB 1 · 2 · 3 · 4 |
 | --- | --- | --- |
 | **FX** — *punch* | effet punch-in tant que la touche est tenue | FILTRE · DUST · DUCK · — |
@@ -49,6 +51,7 @@ Chaque bouton de fonction a deux vies. **Tapé** (appuyé puis relâché sans ri
 | **SEQ** — *pas* | les pas 1–16 de la page | SON / NOTE · DIV · SWING · LONGUEUR |
 | **SCL** — *tonalité* | la tonalité du morceau | ACCORD · GAMME · TOUCHES · TRANSPOSER |
 | **GLO** — *mix* | 1–4 mute · 5–8 solo · 16 tap tempo | volume des pistes 1 · 2 · 3 · 4 |
+| **SAVE** — *chanson* | 1–4 joue la section A–D (mesure suivante) · 5–8 sauve la boucle dans A–D · 13 boucle / chanson · 14 REC chanson · 16 la chaîne | — |
 
 | Commande | Action |
 | --- | --- |
@@ -56,7 +59,6 @@ Chaque bouton de fonction a deux vies. **Tapé** (appuyé puis relâché sans ri
 | **REC** | en lecture : enregistre tout de suite / arrête · à l'arrêt : arme (la première note démarre) · prise libre : ferme la boucle |
 | **REC maintenu** | efface la piste choisie (un anneau se remplit, ~2 s ; relâche avant et rien ne se passe) |
 | **SAVE** | sur TRACKS : l'écran SONG · ailleurs : les pages SAVE |
-| **SAVE maintenu** | sauvegarde le projet dans son emplacement (SAVE → PROJECT, SLOT 1–4) |
 | **EDIT + OCT− / OCT+** | annuler / rétablir |
 | **ALGORITHM** | choisit la piste (sur toutes les pages) |
 | **PRESETS** | le son de la piste, ou le kit de batterie |
@@ -110,7 +112,7 @@ Les notes vont au pas le plus proche **tel que tu l'as entendu** (la latence de 
 
 - **Annuler / rétablir :** EDIT + OCT− / OCT+ (un niveau : le dernier passage d'enregistrement, effacement, piste effacée, modification de pas ou de motif).
 - **Effacer une piste :** maintiens REC ; après 0,7 s un anneau se remplit ; tiens encore ~1,3 s. Relâche avant : rien. Annuler la ramène.
-- **Sauvegarder :** maintiens SAVE, l'anneau, puis le projet est écrit dans son emplacement (SAVE → PROJECT : SLOT 1–4).
+- **Sauvegarder :** SAVE + touches 5–8 sauvent la boucle dans la section / le projet A–D (= SLOT 1–4).
 - **Sauvegarde automatique :** à l'arrêt, 2,5 s sans toucher (au plus toutes les 20 s), le projet en cours est gardé ; au rallumage, SLOOP revient comme tu l'as laissé.
 - **Nouveau projet :** SAVE → TOOLS → NEW (tourner sur GO).
 
@@ -124,10 +126,14 @@ Réglables avec FX maintenu (KNOB 1–3) ou GLO → MASTER.
 
 ## Mode chanson
 
-1. Fais une boucle, arrête, et appuie sur **SAVE** sur TRACKS : l'écran SONG.
-2. **KNOB 2** choisit la section A–D ; **REC** y mémorise les quatre pistes (une section occupée demande un second REC dans les 3 s).
-3. **KNOB 1** choisit une étape de la chaîne, **KNOB 3** sa durée en mesures, **KNOB 4** la longueur de la chaîne. **SAVE** sauvegarde la chaîne.
-4. **OCT−** bascule boucle / chanson, **PLAY** joue la chaîne jusqu'au bout ; ta boucle de travail revient à l'arrêt. **OCT+ deux fois** (en 3 s) recharge une section pour la modifier.
+Une chanson enchaîne 4 sections, **A–D** (chacune garde les 4 pistes : sons, motifs, kit). Elle se construit en jouant :
+
+1. Fais une boucle (le couplet). Maintiens **SAVE** et appuie sur la **5ᵉ touche blanche** (*save A*). Change la boucle (le refrain) et sauve-la dans **B** (6ᵉ touche), un pont dans **C**, une fin dans **D**. Sur une section déjà utilisée, rappuie dans les 3 s pour confirmer.
+2. **Jouer les sections en direct :** SAVE + touche blanche **1–4**. En lecture, la section démarre à la mesure suivante, toujours en rythme ; à l'arrêt, elle devient la boucle tout de suite.
+3. **Enregistrer la chanson en jouant :** SAVE + touche **14** (*rec*) : dès la mesure suivante, chaque section jouée et son nombre de mesures sont écrits dans la chanson. Rappuie (ou STOP) pour finir : *SONG PARTS 5*. Elle se sauvegarde toute seule une fois arrêtée.
+4. **La rejouer :** SAVE + touche **13** bascule *loop* / *song* ; en mode song, **PLAY** joue tout le morceau et s'arrête à la fin.
+
+L'écran **SONG** (SAVE tapé sur TRACKS, ou SAVE + touche 16) montre la chaîne et permet de la retoucher aux boutons (KNOB 1 étape, 2 section, 3 mesures, 4 nombre d'étapes).
 
 ## L'éditeur web
 

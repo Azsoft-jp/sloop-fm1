@@ -415,7 +415,7 @@ const sayK = (k, arg = "") => { lastKey = k; lastArg = arg; $("status").textCont
 const say = (txt) => { lastKey = null; $("status").textContent = txt; };
 const log = (t) => { $("log").textContent += t + "\n"; };
 let image = null;
-const meta = {"version": "2.0", "product": "FM-1_900", "pkg": "../../firmware/sloop-2.0.fwsc", "sha256": "dbafa1eec6940ba4fd1597dd5b1be38f0ddf2e7cf26529ebd2fbaa71625a6617"};
+const meta = {"version": "2.1", "product": "FM-1_900", "pkg": "../../firmware/sloop-2.1.fwsc", "sha256": "acf2c754d58cf884c22cc1dea2ff564cfcda7b575e533b7a4c8ec8b62ce166fa"};
 
 let writing = false;
 window.addEventListener("beforeunload", (e) => { if (writing) { e.preventDefault(); e.returnValue = t("leave"); } });

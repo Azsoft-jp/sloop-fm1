@@ -26,7 +26,8 @@
  * One click = one step at any speed, whether a detent is a half or a full
  * quadrature cycle. fm1_enc_take() returns the steps.
  * LEDs: set fm1_led[col] (packed row bits, bit1 PA5..bit4 PA8); they are lit
- * while that column is selected. fm1_led_key/btn helpers address them by id.
+ * while that column is selected; fm1_led_dim[col] the same, lit one frame in four
+ * (dim). fm1_led_key/btn helpers address them by id.
  */
 #pragma once
 #include <stdint.h>
@@ -81,6 +82,10 @@ static volatile struct {
     uint32_t frames;
 } fm1_in;
 static uint8_t fm1_led[FM1_NCOL];
+#ifndef FM1_LED_DIM_MASK
+#define FM1_LED_DIM_MASK 3u      /* dim LEDs: lit one scan frame in (mask + 1), ~225 Hz, no flicker */
+#endif
+static uint8_t fm1_led_dim[FM1_NCOL];   /* same layout as fm1_led: half-light marks */
 
 static void fm1__led_lines(uint32_t rowmask)
 {
@@ -196,7 +201,7 @@ static void fm1_input_scan(void)
         fm1__sr_word(0xFFFFu ^ (1u << p) ^ (p < 2u ? 1u << (11u + p) : 0u));
         fm1__wait(FM1_SETTLE_US);
         fm1_in.raw[p] = (uint8_t)fm1__rows();
-        fm1__led_lines(fm1_led[p]);
+        fm1__led_lines(fm1_led[p] | ((fm1_in.frames & FM1_LED_DIM_MASK) ? 0u : fm1_led_dim[p]));
         fm1__wait(FM1_LED_US);
     }
     fm1__led_lines(0);
@@ -259,7 +264,7 @@ static void fm1_input_tick(void)
     fm1__led_lines(0);
     fm1_in.raw[p] = (uint8_t)fm1__rows();          /* column p has been latched one tick */
     fm1__sr_word(0xFFFFu ^ (1u << n) ^ (n < 2u ? 1u << (11u + n) : 0u));
-    fm1__led_lines(fm1_led[n]);
+    fm1__led_lines(fm1_led[n] | ((fm1_in.frames & FM1_LED_DIM_MASK) ? 0u : fm1_led_dim[n]));
     fm1__tick_col = (uint8_t)n;
     if (n == 0u)
         fm1__frame();

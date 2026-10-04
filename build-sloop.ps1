@@ -5,13 +5,13 @@ Set-Location $PSScriptRoot
 $Distro = if ($env:SLOOP_WSL_DISTRO) { $env:SLOOP_WSL_DISTRO } else { 'Ubuntu' }
 $Toolchain = if ($env:SLOOP_TOOLCHAIN) { $env:SLOOP_TOOLCHAIN } else { '/root/.jieli/toolchain' }
 Write-Host ""
-Write-Host "  S L O O P   2.0" -ForegroundColor White
+Write-Host "  S L O O P   2.1" -ForegroundColor White
 Write-Host "  ---- ---- ---- ----" -ForegroundColor DarkGray
 Write-Host "== Building the firmware (WSL $Distro)" -ForegroundColor Cyan
 python tools/build_windows.py --distro $Distro --toolchain $Toolchain --sdk build/deps/ac79
 if ($LASTEXITCODE -ne 0) { throw "The build failed" }
 Write-Host "== Making the installer site" -ForegroundColor Cyan
-python web/make_site.py build/felucca.fwsc 2.0 build/sloop-site
+python web/make_site.py build/felucca.fwsc 2.1 build/sloop-site
 if ($LASTEXITCODE -ne 0) { throw "make_site failed" }
 Write-Host ""
 Write-Host "Installer: http://localhost:8766/webapp/installer/  (Chrome or Edge, FM-1 on USB)" -ForegroundColor Green

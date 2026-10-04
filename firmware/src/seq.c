@@ -66,7 +66,7 @@ static uint32_t scale_mask(const track_t *t)
 }
 
 /* ---------------------------------------------------------- layers --- */
-enum { LY_PLAY, LY_FX, LY_ERASE, LY_ROLL, LY_STEP, LY_SCALE, LY_MIX, LY_COUNT };
+enum { LY_PLAY, LY_FX, LY_ERASE, LY_ROLL, LY_STEP, LY_SCALE, LY_MIX, LY_SONG, LY_COUNT };
 static uint32_t ly_bit[LY_COUNT];        /* the button (fm1_in.buttons bit) of each layer: the UI sets them */
 static uint32_t dyn_bit[2];              /* OCT- / OCT+: ghost / hard on the drum track */
 /* the layer the keys are in: the held function button (FX, EDIT, ARP, SEQ, SCL, GLO in that order) */
@@ -953,7 +953,8 @@ static void key_down(uint32_t k)
     }
     case LY_STEP:
     case LY_SCALE:
-    case LY_MIX:                                      /* the UI's: steps, the key, the mix */
+    case LY_MIX:
+    case LY_SONG:                                     /* the UI's: steps, the key, the mix, the sections */
         kb_kind[k] = KS_UI;
         kb_nt[k][0] = (uint8_t)layer;                 /* (its key-up goes to the same layer) */
         lk_push(layer, k, 1);
@@ -1124,6 +1125,90 @@ static void click_tick(void)
 }
 
 /* -------------------------------------------------------- sequencer --- */
+#if FELUCCA_ARRANGER
+/* ---- LIVE SECTIONS (SAVE held + key, ui_layers.c): a section asked for while playing starts on the
+ * next bar, every track from its step 0 (as the song does). SONG REC writes the order you play into the
+ * song chain (arrangement): each section with the bars it played, from the bar after the arm. */
+static volatile int8_t live_req = -1;              /* section asked for (UI), applied on the next bar */
+static volatile int8_t live_sec = -1;              /* the section playing: last jumped to, loaded or stored */
+static uint32_t live_bar = 0xFFFFFFFFu;            /* clk_beat / 4 of the last bar seen */
+static volatile uint8_t srec;                      /* SONG REC: 0 off, 1 armed (from the next bar), 2 recording */
+static arr_entry_t srec_e[ARR_STEPS];
+static volatile uint8_t srec_n;                    /* entries so far (the last one still growing) */
+static volatile uint8_t srec_done;                 /* the chain was written: n parts (0xFF: nothing played) */
+
+static void srec_finish(void)                      /* (audio ISR, or the UI with the IRQ off) */
+{
+    uint32_t i, n = 0;
+    for (i = 0; i < srec_n; i++)
+        if (srec_e[i].bars)
+            srec_e[n++] = srec_e[i];
+    if (n) {
+        arrangement.count = (uint8_t)n;
+        arrangement.loop = 0;
+        for (i = 0; i < n; i++)
+            arrangement.entry[i] = srec_e[i];
+    }
+    srec_done = (uint8_t)(n ? n : 0xFFu);
+    srec = 0;
+    srec_n = 0;
+}
+static void srec_add(uint32_t s)
+{
+    if (srec_n >= ARR_STEPS) {
+        srec_finish();                              /* the chain is full: what was played so far */
+        return;
+    }
+    srec_e[srec_n].scene = (uint8_t)s;
+    srec_e[srec_n].bars = 0;
+    srec_n++;
+}
+/* STOP (or SONG REC pressed again): the bar playing counts if it had begun */
+static void srec_stop(void)
+{
+    if (srec == 2u && srec_n && (clk_beat & 3u || clk_pos) && srec_e[srec_n - 1u].bars < 64u)
+        srec_e[srec_n - 1u].bars++;
+    if (srec == 2u)
+        srec_finish();
+    srec = 0;
+}
+static void seq_reset_tracks(uint32_t pos);
+static void live_block(void)                       /* once a block while playing a loop (not the song) */
+{
+    if ((clk_beat & 3u) || (clk_beat >> 2) == live_bar)
+        return;
+    live_bar = clk_beat >> 2;                       /* a new bar */
+    if (srec == 2u && srec_n) {
+        arr_entry_t *e = &srec_e[srec_n - 1u];
+        if (e->bars < 64u) {
+            e->bars++;
+        } else {                                    /* (64 bars of one section: it goes on in the next entry) */
+            srec_add(e->scene);
+            if (srec == 2u)
+                srec_e[srec_n - 1u].bars = 1;
+        }
+    }
+    if (live_req >= 0) {
+        uint32_t s = (uint32_t)live_req;
+        live_req = -1;
+        {                                           /* (the UI asked for a section it checked: no hash here) */
+            arrangement_apply(s);
+            song.rec = 0;                           /* (a take does not run on into another section) */
+            live_sec = (int8_t)s;
+            seq_reset_tracks(clk_pos);              /* on the bar: every track from its step 0 */
+            live_bar = 0;
+            if (srec == 2u)
+                srec_add(s);
+        }
+    }
+    if (srec == 1u && live_sec >= 0) {
+        srec = 2;
+        srec_n = 0;
+        srec_add((uint32_t)live_sec);
+    }
+}
+#endif
+
 /* every track from its step 0, together, at pos units into beat 0 (a song section: the arranger's
  * remainder, so the new section starts exactly on its bar) */
 static void seq_reset_tracks(uint32_t pos)
@@ -1143,11 +1228,15 @@ static void seq_reset_tracks(uint32_t pos)
         roll[i].last = SEQ_NONE - 1u;               /* (a roll held over the start: on the grid from here) */
     clk_beat = 0;
     clk_pos = pos;
+#if FELUCCA_ARRANGER
+    live_bar = 0xFFFFFFFFu;                        /* (bar 0 is a new bar: SONG REC can start on it) */
+#endif
     click_last = SEQ_NONE;
     song.tick = 0;
     song.playing = 1;
     slicer_start(pos);                             /* slicer.c: its step 0 with the sequencer's */
 }
+
 
 static void song_backup(void);                     /* project.c: song mode keeps the loop you made */
 static void song_restore(void);
@@ -1177,6 +1266,11 @@ static void seq_release(track_t *t)
 static void seq_stop(void)
 {
     uint32_t i;
+#if FELUCCA_ARRANGER
+    if (song.playing)
+        srec_stop();                                /* SONG REC: the order played so far is the song */
+    live_req = -1;
+#endif
     song.playing = 0;
     for (i = 0; i < NTRK; i++) {
         seq_release(&trk[i]);
@@ -1402,6 +1496,8 @@ static void events_block(uint32_t n)
             arrangement_apply((uint32_t)scene);
             seq_reset_tracks(arrangement_clock.phase);   /* (the remainder: exactly on the bar) */
         }
+    } else if (song.playing) {
+        live_block();
     }
 #endif
     pr = panic_req;

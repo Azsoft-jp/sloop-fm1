@@ -103,6 +103,27 @@ int main(int argc, char **argv)
     arrangement.entry[1].scene = 3;
     transport_req = 1; events_block(CTL);
     assert(!song.playing && arrangement_clock.error);
+    {   /* LIVE: A as the loop, SONG REC armed; B asked for in bar 2 starts on bar 3; stop in B's 3rd bar */
+        uint32_t bar = 4u * 60u * FS / (uint32_t)song.g[G_BPM], t, jumped = 0;
+        arrangement.entry[1].scene = 1;
+        arrangement_enabled = 0;
+        proj_apply(&proj_slot[0], 1);
+        live_sec = 0;
+        srec = 1;
+        transport_req = 1;
+        for (t = 0; t < bar * 5u - bar / 2u; t += CTL) {
+            if (t >= bar + bar / 2u && t < bar + bar / 2u + CTL) live_req = 1;
+            mix_block(out, CTL);
+            if (live_sec == 1 && !jumped) jumped = t;
+        }
+        transport_req = 2;
+        mix_block(out, CTL);
+        assert(jumped >= 2u * bar && jumped < 2u * bar + CTL);      /* exactly on the bar */
+        assert(trk[0].step[0].note[0] == 41 && srec == 0 && srec_done == 2u);
+        assert(arrangement.count == 2u && arrangement.entry[0].scene == 0 && arrangement.entry[0].bars == 2u &&
+               arrangement.entry[1].scene == 1 && arrangement.entry[1].bars == 3u);
+        printf("song live: B on the bar (%u), SONG REC -> A 2 bars, B 3 bars PASS\n", jumped);
+    }
     printf("song audio: 3 synth parts + drums, section at %u, stop at %u, no held sequencer notes PASS\n",at_change,at_stop);
     return 0;
 }

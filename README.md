@@ -32,6 +32,7 @@ SLOOP turns the FM-1 into a four-track beat machine you play live: three synths 
 - **Groove:** MPC-style swing (50–75 %), a sample-accurate clock (no drift at any tempo), polymeters.
 - **Master:** DUST (old sampler + vinyl), DUCK (the kick pumps the synths), a DJ filter.
 - **Memory:** undo / redo, autosave of the working project, 4 projects, 32 user presets, a song mode of 4 sections.
+- **Songs, live:** hold SAVE and press a key — sections A–D start on the next bar, always in time; SONG REC writes the order you play into the song, PLAY in song mode plays it back.
 - **Your own samples:** three user slots; the web editor chops a recording into 16 pieces (tap along while it plays) and uploads them.
 - **Web editor:** every parameter, the drum track as a 16-lane grid, the mixer, a preset library, sample upload. Live sync with the device.
 

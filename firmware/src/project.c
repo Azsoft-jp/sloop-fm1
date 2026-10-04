@@ -534,5 +534,54 @@ static void arrangement_save(void)
 #endif
     ui_message("SONG IN RAM ONLY");
 }
+
+/* ---- live sections (SAVE + key, ui_layers.c). A section is a project slot (A..D = 1..4): stored into RAM
+ * at once (playing too), written to flash once the transport is stopped and nothing sounds (an erase
+ * stops the audio for ~50 ms); a song recorded with SONG REC is saved the same way. */
+static uint8_t sec_dirty, song_dirty;
+static void section_store(uint32_t s)
+{
+    s &= 3u;
+    fm1_irq_off();                                      /* (the audio ISR may be applying a section) */
+    proj_capture(&proj_slot[s]);
+    live_sec = (int8_t)s;
+    fm1_irq_on();
+    sec_dirty |= (uint8_t)(1u << s);
+}
+static void section_load(uint32_t s)                    /* stopped: the section is the loop now */
+{
+    s &= 3u;
+    project_apply(&proj_slot[s]);
+    live_sec = (int8_t)s;
+}
+static void sections_flush(void)                        /* main loop */
+{
+    uint32_t i;
+    if (srec_done) {
+        song_dirty = srec_done != 0xFFu;
+        if (song_dirty) {
+            char b[8];
+            fmt_int(b, srec_done);
+            ui_say("SONG PARTS ", b);
+        } else {
+            ui_message("NO SONG");
+        }
+        srec_done = 0;
+    }
+    if ((!sec_dirty && !song_dirty) || song.playing || transport_req || !audio_quiet() || fm1_ms - ui_input_ms < 1500u)
+        return;
+#if FELUCCA_FLASH
+    if (flash_ok)
+        for (i = 0; i < 4u; i++)
+            if ((sec_dirty >> i) & 1u)
+                st_save(OBJ_PROJECT0 + i, &proj_slot[i], sizeof proj_slot[i]);
+#endif
+    (void)i;
+    sec_dirty = 0;
+    if (song_dirty) {
+        song_dirty = 0;
+        settings_save();
+    }
+}
 #endif
 #endif /* PROJ_HOST */
