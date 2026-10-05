@@ -69,10 +69,15 @@ static uint32_t scale_mask(const track_t *t)
 enum { LY_PLAY, LY_FX, LY_ERASE, LY_ROLL, LY_STEP, LY_SCALE, LY_MIX, LY_SONG, LY_COUNT };
 static uint32_t ly_bit[LY_COUNT];        /* the button (fm1_in.buttons bit) of each layer: the UI sets them */
 static uint32_t dyn_bit[2];              /* OCT- / OCT+: ghost / hard on the drum track */
-/* the layer the keys are in: the held function button (FX, EDIT, ARP, SEQ, SCL, GLO in that order) */
+/* a layer locked open (its button held + HOME tapped: ui_input.c), LY_PLAY = none: the keys and knobs
+ * stay in it with the button let go, as if it were held */
+static volatile uint8_t ly_lock = LY_PLAY;
+static uint32_t layer_buttons(void) { return fm1_in.buttons | (ly_lock != LY_PLAY ? ly_bit[ly_lock % LY_COUNT] : 0u); }
+/* the layer the keys are in: the held function button (FX, EDIT, ARP, SEQ, SCL, GLO in that order),
+ * else the locked one */
 static uint32_t layer_now(void)
 {
-    uint32_t b = fm1_in.buttons, l;
+    uint32_t b = layer_buttons(), l;
     for (l = LY_FX; l < LY_COUNT; l++)
         if (b & ly_bit[l])
             return l;
@@ -709,6 +714,8 @@ static void arp_tick(track_t *t, uint32_t adv)
             t->arp_new = 0;
             t->arp_abs = into * 4u >= slen * 3u ? abs : abs - 1u;   /* the last quarter: the grid plays it */
         }
+        if (abs + 1u == t->arp_abs)
+            abs = t->arp_abs;                       /* ARP SWG turned up inside an odd step: no replay */
         fire = abs != t->arp_abs;
         t->arp_abs = abs;
     } else {
@@ -1081,7 +1088,7 @@ static void key_up(uint32_t k)
 static void keyboard_block(void)
 {
     uint32_t cur = fm1_in.notes, ch = cur ^ kb_prev, k, r;
-    if (!(fm1_in.buttons & ly_bit[LY_ROLL]))          /* ARP up: the rolls end (the keys stay silent) */
+    if (!(layer_buttons() & ly_bit[LY_ROLL]))         /* ARP up (and not locked): the rolls end (the keys stay silent) */
         for (r = 0; r < NROLL; r++)
             if (roll[r].on)
                 roll_end(r);
@@ -1166,7 +1173,8 @@ static void srec_add(uint32_t s)
 /* STOP (or SONG REC pressed again): the bar playing counts if it had begun */
 static void srec_stop(void)
 {
-    if (srec == 2u && srec_n && (clk_beat & 3u || clk_pos) && srec_e[srec_n - 1u].bars < 64u)
+    if (srec == 2u && srec_n && srec_e[srec_n - 1u].bars < 64u &&
+        ((!(clk_beat & 3u) && (clk_beat >> 2) != live_bar) || (clk_beat & 3u)))
         srec_e[srec_n - 1u].bars++;
     if (srec == 2u)
         srec_finish();
@@ -1406,6 +1414,8 @@ static void seq_tick(track_t *t, uint32_t adv)
     if (!song.playing)
         return;
     abs = trk_grid(t, &into, &slen);
+    if (t->seq_abs != SEQ_NONE && abs + 1u == t->seq_abs)
+        abs = t->seq_abs;                            /* SWING turned up inside a played odd step */
     if (abs != t->seq_abs) {                         /* a new step: one a block at most */
         t->seq_abs = abs;
         idx = abs % len;
@@ -1491,7 +1501,10 @@ static void events_block(uint32_t n)
 #if FELUCCA_ARRANGER
     if (song.playing && arrangement_clock.running) {
         int scene = arr_next(&arrangement_clock, &arrangement, FS);
-        if (scene == ARR_DONE) seq_stop();
+        if (scene == ARR_DONE) {
+            arrangement_clock.running = 1;          /* (arr_next cleared it: seq_stop brings the loop back) */
+            seq_stop();
+        }
         else if (scene >= 0) {
             arrangement_apply((uint32_t)scene);
             seq_reset_tracks(arrangement_clock.phase);   /* (the remainder: exactly on the bar) */

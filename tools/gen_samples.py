@@ -8,10 +8,11 @@ from the WAV 'smpl' chunk; the ADPCM state at the loop start is stored so loops
 restart exactly.
 
 Sources:
-  assets/samples-cc0/   CC0 samples (CREDITS.txt there): DUSTY, BASS, VIBES, HORNS, STRGS, FLUTE,
+  assets/samples-cc0/   CC0 samples (CREDITS.txt there): PIANO (a grand), BASS, VIBES, HORNS, STRGS, FLUTE,
                         SCRCH (tools/gen_builtin_hiphop.py makes them; FLUTE and the KIT:
-                        tools/fetch_cc0.py), and hand percussion for the GM kit
-  gen_waves.py          Felucca's own drum sounds (the Hügelton Sample Pack)
+                        tools/fetch_cc0.py), and the acoustic drum kit of the GM map (KIT)
+  gen_waves.py          Felucca's own drum sounds (the Hügelton Sample Pack): only SLICE's BREAK, or a
+                        GM kit role the CC0 kit lacks
 One SAMPLE preset is written per set (SET_PRESETS: its name and sound), plus EXTRA_PRESETS.
 A file named ..._m<n>.wav has its root given (MIDI note n); else it comes from the note in the name.
 
@@ -23,6 +24,7 @@ slices) is written with it: SLC_BREAK_INIT.
 The header is cached in build/gen_samples.cache under a hash of every input.
 """
 import hashlib
+import math
 import os
 import re
 import subprocess
@@ -39,16 +41,17 @@ CACHE = SRC / "build" / "gen_samples.cache"
 CC0 = SRC / "assets" / "samples-cc0"
 TR = 22050                                   # stored sample rate
 
-# set -> kind ("oneshot" decaying, "sus" looped sustain, "kit" one sample per key).
+# set -> kind ("oneshot" decaying, "sus" looped sustain, "piano" its attack then a steady loop that the
+# envelope fades, "kit" one sample per key).
 # The other slots are user sets loaded from the web editor.
-CC0_SETS = [("DUSTY", "oneshot"), ("BASS", "oneshot"), ("VIBES", "oneshot"), ("HORNS", "oneshot"),
+CC0_SETS = [("PIANO", "piano"), ("BASS", "oneshot"), ("VIBES", "oneshot"), ("HORNS", "oneshot"),
             ("STRGS", "oneshot"), ("FLUTE", "sus"), ("SCRCH", "oneshot"), ("KIT", "kit")]
 MEASURED_TUNING = ()                         # sets recorded off A440 (measured near the named note)
 
 # the preset of each set: name, {SET (filled in), TUNE, BITS, LOOP (filled in), CUT, -, DRV, -}, env, mono,
 # sends (DIST, CHORUS, DELAY, REVERB), more (track parameter, value) pairs (preset_t.x)
 SET_PRESETS = {
-    "DUSTY": ("DUSTY PNO", [0, 0, 20, 0, 104, 0, 14, 0], (0, 127, 127, 52), 0, (0, 8, 10, 22), ()),
+    "PIANO": ("GRAND PNO", [0, 0, 0, 0, 127, 0, 0, 0], (0, 110, 0, 58), 0, (0, 6, 8, 24), ()),
     "BASS": ("UP BASS", [0, 0, 0, 0, 118, 0, 12, 0], (0, 127, 127, 26), 1, (0, 0, 0, 4), ()),
     "VIBES": ("VIBES", [0, 0, 0, 0, 127, 0, 0, 0], (0, 127, 127, 72), 0, (0, 24, 22, 30), ("P_LD_AMP", 18, "P_LRATE", 86)),
     "HORNS": ("HORN STAB", [0, 0, 0, 0, 120, 0, 20, 0], (0, 127, 127, 22), 0, (8, 0, 14, 18), ()),
@@ -59,7 +62,8 @@ SET_PRESETS = {
 }
 # more presets on a set: (set, name, E[], env, mono, sends, more)
 EXTRA_PRESETS = [
-    ("DUSTY", "LOFI KEYS", [0, 0, 45, 0, 78, 0, 30, 0], (0, 127, 110, 60), 0, (0, 30, 18, 34), ("P_LD_PIT", 1, "P_LRATE", 38)),
+    ("PIANO", "DUSTY PNO", [0, 0, 34, 0, 96, 0, 24, 0], (0, 98, 0, 52), 0, (0, 8, 10, 22), ()),
+    ("PIANO", "LOFI KEYS", [0, 0, 45, 0, 78, 0, 30, 0], (0, 108, 0, 60), 0, (0, 30, 18, 34), ("P_LD_PIT", 1, "P_LRATE", 38)),
     ("BASS", "DEEP BASS", [0, -12, 0, 0, 90, 0, 40, 0], (0, 127, 127, 30), 1, (0, 0, 0, 0), ()),
 ]
 
@@ -72,18 +76,28 @@ NOTE = {"C": 0, "C#": 1, "D": 2, "D#": 3, "E": 4, "F": 5, "F#": 6, "G": 7, "G#":
 GM_KIT = {
     "kick": [(35, 36, 36)], "rim": [(37, 37, 37)], "snare": [(38, 38, 38), (40, 40, 40)],
     "clap": [(39, 39, 39)], "chh": [(42, 42, 42), (44, 44, 44)], "ohh": [(46, 46, 46)],
-    "tomlo": [(41, 45, 43)], "tomhi": [(47, 50, 48)], "tom": [(41, 50, 47)],
+    # (the toms skip the hi-hats' 42, 44, 46: a zone over them would win, the hats would play a tom)
+    "tomlo": [(41, 41, 43), (43, 43, 43), (45, 45, 43)], "tomhi": [(47, 48, 48), (50, 50, 48)],
+    "tom": [(41, 41, 47), (43, 43, 47), (45, 45, 47), (47, 48, 47), (50, 50, 47)],
     "crash": [(49, 49, 49), (52, 52, 52), (55, 55, 55), (57, 57, 57)],
     "ride": [(51, 51, 51), (53, 53, 53), (59, 59, 59)],
     "tamb": [(54, 54, 54)], "cowbell": [(56, 56, 56)], "conga": [(62, 64, 63)],
     "shaker": [(69, 70, 70), (82, 82, 82)], "claves": [(75, 75, 75)], "wood": [(76, 77, 76)],
 }
 GM_ROLE_WORDS = [("bassdrum", "kick"), ("kick", "kick"), ("snare", "snare"), ("hihat", "chh"), ("chat", "chh"),
-                 ("ohat", "ohh"), ("clap", "clap"), ("tom lo", "tomlo"), ("tom hi", "tomhi"), ("tom", "tom"),
+                 ("ohat", "ohh"), ("clap", "clap"), ("tom lo", "tomlo"), ("tom hi", "tomhi"), ("tomlo", "tomlo"),
+                 ("tomhi", "tomhi"), ("tom", "tom"),
                  ("rim", "rim"), ("cowbell", "cowbell"), ("tamb", "tamb"), ("shaker", "shaker"),
                  ("conga", "conga"), ("claves", "claves"), ("wood", "wood"), ("crash", "crash"), ("ride", "ride")]
-GM_KEEP = {"crash": 0.8, "ride": 0.8, "ohh": 0.5}
-GM_CC0_ROLES = ("tamb", "shaker", "conga", "claves", "wood")   # the CC0 set is orchestral: hand percussion only
+GM_KEEP = {"crash": 1.0, "ride": 1.0, "ohh": 0.6}
+GM_RATE = {"chh": 32000, "ohh": 32000, "crash": 32000, "ride": 32000}   # the metal keeps its top (else TR)
+# an acoustic kit from the CC0 recordings (assets/samples-cc0/KIT: VCSL): the concert bass drum and the toms
+# get a shorter body (a kit's tuned-up, damped heads): their level falls as exp(-t / tau) after a hold
+GM_SHAPE = {"kick": (0.03, 0.13), "tomlo": (0.04, 0.22), "tomhi": (0.04, 0.2)}
+# the balance of the kit (dB under full scale): the kick and the snare up front, the metal and the hand
+# percussion further back, as the synthesised kits (tools/level_drumkits.py); the click's wood block stays
+GM_GAIN = {"chh": -9, "ohh": -9, "crash": -8, "ride": -9, "shaker": -8, "tamb": -6, "conga": -4, "cowbell": -4,
+           "claves": -4}
 
 # SLICE's BREAK: (step, GM role, gain) on a bar of 16ths; the open hat is choked by the next hat
 BREAK_BPM, BREAK_STEPS = 120, 16
@@ -147,10 +161,21 @@ def cc0_entries(setname, kind):
         else:
             root = hz_to_midi(detect_hz(x, sr))
         x = resample(x, sr, TR)
-        keep = {"oneshot": 1.0, "sus": 0.95, "kit": 0.6}[kind]
+        keep = {"oneshot": 1.0, "sus": 0.95, "kit": 0.6, "piano": 1.0}[kind]
         x = x[:int(keep * TR)]
         n = len(x)
-        if kind == "sus":                            # crossfaded sustain loop in the steady part
+        if kind == "piano":                          # the attack, then a steady tone the envelope (DEC) fades:
+            ls, le, xf, a0 = int(0.55 * TR), n - 1, int(0.08 * TR), int(0.30 * TR)   # long notes in 1 s
+            w = int(0.02 * TR)
+            env = [max(1e-6, (sum(v * v for v in x[max(0, i - w):i + w]) / (2 * w)) ** 0.5) for i in range(0, n, w)]
+            ref = env[a0 // w]
+            x = [v * (ref / env[min(len(env) - 1, i // w)] if i >= a0 else 1.0) for i, v in enumerate(x)]
+            ls = best_loop_start(x, le, xf, int(0.45 * TR), int(0.65 * TR))   # (the tone in phase: no dip)
+            for i in range(xf):
+                a = i / xf
+                x[le - xf + i] = x[le - xf + i] * (1 - a) + x[ls - xf + i] * a
+            loop = (ls, le)
+        elif kind == "sus":                          # crossfaded sustain loop in the steady part
             ls, le, xf = int(0.40 * TR), n - 1, int(0.06 * TR)
             for i in range(xf):
                 a = i / xf
@@ -166,42 +191,62 @@ def cc0_entries(setname, kind):
     return out
 
 
+def best_loop_start(x, le, xf, lo, hi):
+    """the loop start in [lo, hi) whose last xf samples look most like the loop end's (correlation, on
+    every 4th sample, every 2nd start: plain Python, no numpy): the crossfade then joins two copies of the
+    same wave, not two phases that cancel"""
+    tail = x[le - xf:le:4]
+    tn = sum(v * v for v in tail) ** 0.5 + 1e-9
+    best, bl = -2.0, (lo + hi) // 2
+    for ls in range(lo, hi, 2):
+        seg = x[ls - xf:ls:4]
+        c = sum(a * b for a, b in zip(seg, tail)) / ((sum(v * v for v in seg) ** 0.5 + 1e-9) * tn)
+        if c > best:
+            best, bl = c, ls
+    return bl
+
+
 def gm_role(name):
     n = name.lower()
     return next((r for w, r in GM_ROLE_WORDS if w in n), None)
 
 
 def gm_kit_sources(have_cc0):
-    """role -> wav path: Felucca's own synthesized drum kit (generated by
-    gen_waves.py), plus CC0 hand percussion for the roles it does not make"""
+    """role -> wav path: the CC0 acoustic kit (assets/samples-cc0/KIT); without it (and for SLICE's BREAK)
+    Felucca's own synthesized drums (gen_waves.py) for the roles it lacks"""
     src = {}
+    if have_cc0 and (CC0 / "KIT").exists():
+        for p in sorted((CC0 / "KIT").glob("*.wav")):
+            r = gm_role(p.name)
+            if r and r not in src:
+                src[r] = p
     for p in sorted(GENDIR.glob("D *.wav")):
         r = gm_role(p.stem)
         if r and r not in src:
             src[r] = p
-    if have_cc0 and (CC0 / "KIT").exists():
-        for p in sorted((CC0 / "KIT").glob("*.wav")):
-            r = gm_role(p.name)
-            if r in GM_CC0_ROLES and r not in src:
-                src[r] = p
     if "tomlo" in src or "tomhi" in src:
         src.pop("tom", None)
     return src
 
 
-def gm_kit_entry(role, path):
+def gm_kit_entry(role, path, rate=TR):
     sr, x = wav(path)
-    x = resample(x[max(0, onset(x) - 16):], sr, TR)
-    x = x[:int(GM_KEEP.get(role, 0.45) * TR)]
+    x = resample(x[max(0, onset(x) - 16):], sr, rate)
+    x = x[:int(GM_KEEP.get(role, 0.45) * rate)]
+    if role in GM_SHAPE:
+        hold, tau = GM_SHAPE[role]
+        h = int(hold * rate)
+        x = [v * (1.0 if i < h else math.exp(-(i - h) / (tau * rate))) for i, v in enumerate(x)]
     pk = peak(x)
     end = len(x)                                    # drop the silent tail
     while end > 64 and abs(x[end - 1]) < 0.004 * pk:
         end -= 1
     x = x[:end]
-    fade = min(len(x) // 4, int(0.03 * TR))
+    fade = min(len(x) // 4, int(0.03 * rate))
     for i in range(fade):
         x[len(x) - fade + i] *= 1 - i / fade
-    return [int(v * 30000 / pk) for v in x]
+    g = 30000 / pk * 10 ** (GM_GAIN.get(role, 0) / 20) if path.parent.name == "KIT" else 30000 / pk
+    return [int(v * g) for v in x]
 
 
 def ima_states(data, positions):
@@ -284,13 +329,14 @@ class Builder:
         self.kinds[name] = kind
 
     def gm_kit(self, have_cc0):
-        """one GM-mapped kit: generated drums + CC0 hand percussion"""
+        """one GM-mapped kit: the CC0 acoustic kit"""
         z0 = len(self.zones)
         for role, path in gm_kit_sources(have_cc0).items():
-            smp = gm_kit_entry(role, path)
+            rate = GM_RATE.get(role, TR) if path.parent.name == "KIT" else TR
+            smp = gm_kit_entry(role, path, rate)
             off, st = self.add(smp, len(smp))
             for lo, hi, root in GM_KIT[role]:
-                self.zones.append(dict(off=off, n=len(smp), ls=len(smp), le=len(smp), looped=False, sr=TR,
+                self.zones.append(dict(off=off, n=len(smp), ls=len(smp), le=len(smp), looped=False, sr=rate,
                                        root16=root * 16, pred=st[0], idx=st[1], lo=lo, hi=hi))
         self.sets.append(("PERC", z0, len(self.zones) - z0))
         self.kinds["PERC"] = "kit"

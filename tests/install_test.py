@@ -140,11 +140,30 @@ class FakeFM1:
 
 # ----------------------------------------------------------------- helpers ---
 
-def package(product="FM-1_900", marker=True, size=0x2000):
-    raw = bytearray((i * 7) & 0xFF for i in range(size + I.BLOCKS))
+def package(product="FM-1_900", marker=True, size=0x2000, damage=False):
+    """a package with a valid header and file list (one file: 0x400 to the end), as fm1pkg_make writes"""
+    img = bytearray((i * 7) & 0xFF for i in range(size))
+    img[0x1800:0x1800 + 16] = I.LOADER_MARK if marker else bytes(16)
+    data = bytes(img[0x400:])
+    e = bytearray(0x50)
+    e[0:16] = (0).to_bytes(2, "little") + (0).to_bytes(2, "little") + I._crc16(data).to_bytes(2, "little") + bytes(2) + \
+        (0x400).to_bytes(4, "little") + len(data).to_bytes(4, "little")
+    e[0x40:0x49] = b"flash.bin"
+    lst = I._dec(bytes(e))
+    hdr = bytearray(0x40)
+    hdr[4:8] = size.to_bytes(4, "little")
+    hdr[8:10] = (1).to_bytes(2, "little")
+    hdr[2:4] = I._crc16(lst).to_bytes(2, "little")
+    hdr[0:2] = I._crc16(bytes(hdr[2:0x40])).to_bytes(2, "little")
+    img[0:0x40] = I._dec(bytes(hdr))
+    img[0x40:0x90] = lst
+    if damage:
+        img[0x1000] ^= 1
+    raw = bytearray()
     for i in range(I.BLOCKS):
-        raw[i * I.BLK + I.KEEP] = (ord(product[i]) + i + 1) & 0xFF if i < len(product) else 0x7D
-    raw[0x1800:0x1800 + 16] = I.LOADER_MARK if marker else bytes(16)
+        m = (ord(product[i]) + i + 1) & 0xFF if i < len(product) else 0x7D
+        raw += img[i * I.KEEP:(i + 1) * I.KEEP] + bytes([m])
+    raw += img[I.BLOCKS * I.KEEP:]
     return bytes(raw)
 
 
@@ -257,6 +276,9 @@ def errors():
     dev = FakeFM1(I.logical_image(package(marker=False)))
     rc, out, err = cli([plain, "--yes", "--force"], dev)
     ok(rc == 0 and dev.bad == 0, "... installs with --force")
+    dev = FakeFM1(image)
+    rc, out, err = cli([pkgfile("damaged.fwsc", package(damage=True)), "--yes"], dev)
+    ok(rc == 2 and "damaged package" in err and dev.sent == [], "damaged package (a file's CRC) -> exit 2, no MIDI")
     rc, out, err = cli([pkgfile("short.fwsc", b"\0" * 100), "--yes"], FakeFM1(image))
     ok(rc == 2 and "too short" in err, "not a package -> exit 2")
     rc, out, err = cli([str(TMP / "missing.fwsc"), "--yes"], FakeFM1(image))

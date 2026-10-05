@@ -2,7 +2,7 @@
 
 # SLOOP 2.0 — démarrage rapide
 
-**SLOOP** transforme le M-VAVE FM-1 en groovebox à jouer en live, pour tous les styles : trois synthés et une batterie de 16 sons sur les touches blanches, 9 moteurs de synthèse, 54 sons, 34 kits (808, 909, techno, house, jungle, afro, synthwave, chiptune, ambient…), tes propres samples, ghost notes et ratchets, note repeat, accords sur une touche, 16 effets punch-in, et un écran à la teenage engineering qui montre toujours ce que tes mains peuvent faire. Aucun motif d'usine : tout ce que tu entends, tu le joues.
+**SLOOP** transforme le M-VAVE FM-1 en groovebox à jouer en live, pour tous les styles : trois synthés et une batterie de 16 sons sur les touches blanches, 9 moteurs de synthèse, 68 sons rangés par famille (basses, claviers, orgues, nappes, leads, plucks, stabs), 37 kits de batterie (808, 909, trap, phonk, house, techno, UK garage, jungle, amapiano, synthwave, chiptune, ambient…), tes propres samples, ghost notes et ratchets, note repeat, accords sur une touche, 16 effets punch-in, et un écran à la teenage engineering qui montre toujours ce que tes mains peuvent faire. Aucun motif d'usine : tout ce que tu entends, tu le joues.
 
 Le manuel complet (en anglais) : [SLOOP.md](SLOOP.md).
 
@@ -43,6 +43,8 @@ Chaque bouton de fonction a deux vies. **Tapé** (appuyé puis relâché sans ri
 
 **Repères lumineux :** les tuiles sont 4 rangées de 4 (touches 1–4, 5–8, 9–12, 13–16). Tant qu'un calque est maintenu, et sur la piste batterie, la première touche de chaque rangée (1, 5, 9, 13) s'allume faiblement ; ce qui est actif (un effet, un pas, un son) reste allumé à fond.
 
+**Verrouiller un calque :** maintiens son bouton et tape **HOME** : le calque reste ouvert quand tu lâches le bouton, tes deux mains sont libres pour les touches et les potards (*LOCK* à l'écran, le bouton clignote). N'importe quel autre bouton le referme (HOME, son propre bouton, ENV…) ; PLAY, REC et OCT− / OCT+ continuent de marcher dedans.
+
 | Maintenir | Touches | KNOB 1 · 2 · 3 · 4 |
 | --- | --- | --- |
 | **FX** — *punch* | effet punch-in tant que la touche est tenue | FILTRE · DUST · DUCK · — |
@@ -64,7 +66,7 @@ Chaque bouton de fonction a deux vies. **Tapé** (appuyé puis relâché sans ri
 | **PRESETS** | le son de la piste, ou le kit de batterie |
 | **SELECT** | tempo (toujours, même dans un calque) |
 | **OCT− / OCT+** | synthés : octave (les deux : retour à 0) · batterie, maintenus : ghost / fort |
-| **HOME** | l'écran TRACKS · maintenu : menu (couleur, coupe-bas, zoom, calibration, à propos) |
+| **HOME** | l'écran TRACKS · maintenu : menu (couleur, coupe-bas, zoom, calibration, à propos) · tapé pendant qu'un calque est maintenu : le verrouille |
 
 ## La batterie : 16 sons sur les touches blanches
 

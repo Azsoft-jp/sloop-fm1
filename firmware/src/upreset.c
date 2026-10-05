@@ -307,6 +307,10 @@ static void up_ui(uint32_t op, uint32_t k)     /* 0 load, 1 erase, 2 save */
         ui_say("LOADED ", l);
         return;
     }
+    if (song.playing || transport_req) {               /* a flash erase stops the audio ~50 ms */
+        ui_message("STOP BEFORE SAVE");
+        return;
+    }
     rc = op == 1u ? up_put(k, 0) : up_store(k, 0);
     if (rc == 3)
         ui_message(op == 1u ? "ERASED (RAM)" : "SAVED (RAM)");

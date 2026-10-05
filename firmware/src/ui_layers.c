@@ -435,13 +435,19 @@ static void tiles_draw(const tile_t *tl, uint32_t *cache)
 
 static void layer_title(const char *name, const char *sub, uint16_t col, uint32_t *cache)
 {
-    uint32_t sig = studio_hash(studio_hash(col, name), sub) + (ui.msg_t ? studio_hash(3u, ui.msg) : 0u);
+    uint32_t locked = ly_lock != LY_PLAY;
+    uint32_t sig = studio_hash(studio_hash(col, name), sub) + (ui.msg_t ? studio_hash(3u, ui.msg) : 0u) + locked * 7919u;
     if (!ui.force && sig == *cache)
         return;
     *cache = sig;
     cv_begin(240, 40, C_BLACK);
     cv_text(4, 2, &FONT_L, name, col);
     cv_text(4 + text_w(&FONT_L, name) + 10, 18, &FONT_S, ui.msg_t ? ui.msg : sub, ui.msg_t ? C_WHITE : TE_G3);
+    if (locked) {                                         /* locked open (HOME): any button lets it go */
+        int32_t w = (int32_t)text_w(&FONT_S, "LOCK") + 8;
+        cv_rect(236 - w, 4, w, 15, C_WHITE);
+        cv_text(240 - w, 4, &FONT_S, "LOCK", C_BLACK);
+    }
     cv_rect(0, 38, 240, 1, TE_G1);
     cv_blit(0, 0);
 }

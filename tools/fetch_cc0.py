@@ -30,6 +30,18 @@ PICK = {
         ("Membranophones/Struck Membranophones/Conga", r"Conga_HitN_v2_rr1"),
         ("Idiophones/Struck Idiophones/Claves", r"Claves1_Hit_v2"),
         ("Idiophones/Struck Idiophones/Woodblock", r"wood_click_mp"),
+        # the acoustic kit (gen_samples.py names them by role and cuts them; ATTRIBUTION.txt lists each)
+        ("Membranophones/Struck Membranophones/Bass Drum 1", r"BDrumNew_hit_v5_rr1"),
+        ("Membranophones/Struck Membranophones/Snare Drum, Modern 1", r"Snare2_HitSN_v7_rr1"),
+        ("Membranophones/Struck Membranophones/Legacy Snares/OldSnare", r"snare_rim"),
+        ("Idiophones/Struck Idiophones/Claps", r"Clap_rr1"),
+        ("Idiophones/Struck Idiophones/Hi-Hat Cymbal", r"HiHat_HitC_v3_rr1"),
+        ("Idiophones/Struck Idiophones/Hi-Hat Cymbal", r"HiHat_HitO_rr1"),
+        ("Membranophones/Struck Membranophones/Tom 2/Stick", r"TomL_HitS_v4_rr1"),
+        ("Membranophones/Struck Membranophones/Tom 1/Stick", r"TomH_HitS_v4_rr1"),
+        ("Idiophones/Struck Idiophones/Suspended Cymbal 2", r"susCymb2_hit_f1"),
+        ("Idiophones/Struck Idiophones/Suspended Cymbal 2", r"susCymb2_hit_stick_mf1"),
+        ("Idiophones/Struck Idiophones/Cowbells", r"Cowbell1_Normal_v3_rr1"),
     ]),
 }
 

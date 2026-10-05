@@ -142,6 +142,8 @@ def flash_image(app, key):
     cfg = entry(crc16(cfg_body), 0x20, 0x20 + len(cfg_body), 0x83, 0xFF, 1, "cfg") + cfg_body
     region = bytearray(area + cfg)
     sfc(region, 0, len(region), 0, key)
+    if 0x4000 + len(region) > FLASH_SIZE:          # (the update loader writes up to FLASH_SIZE only)
+        raise SystemExit(f"app area too large: ends at 0x{0x4000 + len(region):x}, past 0x{FLASH_SIZE:x}")
     f[0x4000:0x4000 + len(region)] = region
     return bytes(f)
 

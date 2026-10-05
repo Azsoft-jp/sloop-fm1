@@ -288,6 +288,7 @@ static void proj_apply(const project_t *p, int all)
 #if FELUCCA_ARRANGER
 #include "arranger_scene.c"
 #endif
+static uint8_t sec_dirty, song_dirty;           /* live sections / the song: in RAM, not yet in flash */
 #if FELUCCA_FLASH
 /* slot from flash into RAM (format 4, or an old one converted) */
 static union {
@@ -484,11 +485,18 @@ static void persist_boot(void)                    /* before settings_init / pane
                 panel = old;
         }
     }
-    {   /* projects: fill empty RAM slots from flash, so the slot list is right after power-on */
+    {   /* projects: fill empty RAM slots from flash, so the slot list is right after power-on. A slot
+         * still valid in RAM (a warm reset: an update, UPDATE MODE, a crash) may never have reached
+         * flash (a live section stored while playing): marked to be written when quiet */
         uint32_t i;
         for (i = 0; i < 4u; i++)
-            if (!proj_ok(&proj_slot[i]))
+            if (!proj_ok(&proj_slot[i])) {
                 proj_fetch(i);
+            } else {
+                int n = st_load(OBJ_PROJECT0 + i, &proj_tmp, sizeof proj_tmp);
+                if (n != (int)sizeof proj_slot[i] || memcmp(&proj_tmp.v4, &proj_slot[i], sizeof proj_slot[i]))
+                    sec_dirty |= (uint8_t)(1u << i);
+            }
     }
     up_boot();                                     /* user presets */
 #endif
@@ -538,7 +546,6 @@ static void arrangement_save(void)
 /* ---- live sections (SAVE + key, ui_layers.c). A section is a project slot (A..D = 1..4): stored into RAM
  * at once (playing too), written to flash once the transport is stopped and nothing sounds (an erase
  * stops the audio for ~50 ms); a song recorded with SONG REC is saved the same way. */
-static uint8_t sec_dirty, song_dirty;
 static void section_store(uint32_t s)
 {
     s &= 3u;
@@ -554,9 +561,39 @@ static void section_load(uint32_t s)                    /* stopped: the section 
     project_apply(&proj_slot[s]);
     live_sec = (int8_t)s;
 }
-static void sections_flush(void)                        /* main loop */
+static void sections_write(void)                        /* the dirty sections and song into flash */
 {
     uint32_t i;
+#if FELUCCA_FLASH
+    if (flash_ok)
+        for (i = 0; i < 4u; i++)
+            if (((sec_dirty >> i) & 1u) && st_save(OBJ_PROJECT0 + i, &proj_slot[i], sizeof proj_slot[i]) == 0)
+                sec_dirty &= (uint8_t)~(1u << i);       /* (a failed write stays dirty: tried again later) */
+    if (!flash_ok)
+#endif
+        sec_dirty = 0;
+    (void)i;
+    if (song_dirty) {
+        song_dirty = 0;
+        settings_save();
+    }
+}
+/* before an intentional reset (an update, UPDATE MODE, UBOOT from the host): the audio is stopped, so
+ * whatever is only in RAM goes to flash now: the live sections, the song, the working project */
+static void persist_flush_now(void)
+{
+    sections_write();
+#if FELUCCA_FLASH
+    if (flash_ok && !arrangement_clock.running) {     /* (a song playing: the tracks hold a section) */
+        proj_capture(&autosave_buf);
+        if (autosave_buf.sum != autosave_hash && st_save(OBJ_AUTOSAVE, &autosave_buf, sizeof autosave_buf) == 0)
+            autosave_hash = autosave_buf.sum;
+    }
+#endif
+}
+static void sections_flush(void)                        /* main loop */
+{
+    static uint32_t tried;
     if (srec_done) {
         song_dirty = srec_done != 0xFFu;
         if (song_dirty) {
@@ -568,20 +605,17 @@ static void sections_flush(void)                        /* main loop */
         }
         srec_done = 0;
     }
-    if ((!sec_dirty && !song_dirty) || song.playing || transport_req || !audio_quiet() || fm1_ms - ui_input_ms < 1500u)
-        return;
-#if FELUCCA_FLASH
-    if (flash_ok)
-        for (i = 0; i < 4u; i++)
-            if ((sec_dirty >> i) & 1u)
-                st_save(OBJ_PROJECT0 + i, &proj_slot[i], sizeof proj_slot[i]);
-#endif
-    (void)i;
-    sec_dirty = 0;
-    if (song_dirty) {
-        song_dirty = 0;
-        settings_save();
+    if (settings_later) {                               /* the menu closed while playing */
+        settings_later = 0;
+        song_dirty = 1;                                 /* (settings_save when quiet, with the song) */
     }
+    if ((!sec_dirty && !song_dirty) || song.playing || transport_req || !audio_quiet() || fm1_ms - ui_input_ms < 1500u ||
+        fm1_ms - tried < 5000u)
+        return;
+    tried = fm1_ms;                                     /* (a failed write: again in 5 s, not every frame) */
+    sections_write();
+    if (sec_dirty)
+        ui_message("SAVE ERROR: RETRYING");
 }
 #endif
 #endif /* PROJ_HOST */

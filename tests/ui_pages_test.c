@@ -104,6 +104,24 @@ int main(int argc, char **argv)
 {
     uint32_t i;
     outdir = argc > 1 ? argv[1] : "build/host";
+    {   /* the preset list by kind (ui.c BANK): every factory preset of every engine once, every name found */
+        uint32_t e, k, n, hits;
+        bank_resolve();
+        for (n = 0; n < NBANK; n++)
+            if (bank_pi[n] == 0xFF) {
+                printf("ui: BANK %s: no such preset in engine %u\n", BANK[n].name, BANK[n].e);
+                fails++;
+            }
+        for (e = 0; e < NENGINES; e++)
+            for (k = 0; k < ENGINES[e]->npresets; k++) {
+                for (hits = 0, n = 0; n < NBANK; n++)
+                    hits += BANK[n].e == e && bank_pi[n] == k;
+                if (hits != 1) {
+                    printf("ui: preset %s (engine %u) is %u times in BANK\n", ENGINES[e]->presets[k].name, e, hits);
+                    fails++;
+                }
+            }
+    }
     panel = PANEL_DEFAULT;
     layers_init();
     settings.palette = 4;
@@ -139,6 +157,37 @@ int main(int argc, char **argv)
     encs[panel.enc[EN_K2]] = 10; frame(); check(song.g[G_DUST] > 0, "FX + KNOB 2: DUST");
     encs[panel.enc[EN_K1]] = -10; frame(); check(song.g[G_FILT] < 0, "FX + KNOB 1: the filter (low-pass)");
     release(B_FX); check(cur_page()->scope == SC_TRK && ui.layer == LY_PLAY, "FX used then let go: no FX page");
+    song.g[G_DUST] = 0; song.g[G_FILT] = 0;
+
+    /* ---- a layer locked open: held + HOME tapped; any other button (not PLAY, REC, OCT) lets it go */
+    go_home(); frame();
+    press(B_FX); frames(3); tap(B_HOME); release(B_FX); frames(3);
+    check(ly_lock == LY_FX && ui.layer == LY_FX && punch.hold, "FX held + HOME: locked open, FX let go");
+    check(cur_page()->scope == SC_TRK, "FX + HOME: no FX page, no HOME jump");
+    fm1_in.notes = 1u << 4; frame(); check(punch.req == 2, "locked FX + the 3rd white key: punch effect 3 (no hands on FX)");
+    fm1_in.notes = 0; frame(); check(punch.req == -1, "locked FX, key up: the mix comes back");
+    encs[panel.enc[EN_K2]] = 6; frame(); check(song.g[G_DUST] > 0, "locked FX + KNOB 2: DUST");
+    ui.force = 1; frame(); ppm("layer-locked");
+    { uint8_t was = song.playing; tap(B_PLAY); frames(2);
+      check(ly_lock == LY_FX && song.playing != was, "locked: PLAY plays and keeps the lock"); tap(B_PLAY); frames(2); }
+    tap(B_ENV); frames(2);
+    check(ly_lock == LY_PLAY && ui.layer == LY_PLAY && !punch.hold && cur_page()->scope == SC_TRK,
+          "locked, ENV pressed: unlocked, and only that (no ENV page)");
+    press(B_FX); frames(3); tap(B_HOME); release(B_FX); frames(3);
+    tap(B_HOME); frames(2);
+    check(ly_lock == LY_PLAY && ui.layer == LY_PLAY && cur_page()->scope == SC_TRK, "locked, HOME tapped: unlocked");
+    press(B_FX); frames(3); tap(B_HOME); release(B_FX); frames(3);
+    tap(B_FX); frames(2);
+    check(ly_lock == LY_PLAY && ui.layer == LY_PLAY && cur_fam() != FAM_FX, "locked, FX tapped: unlocked, no FX page");
+    go_home(); frame();
+    press(B_SEQ); frames(3); tap(B_HOME); release(B_SEQ); frames(3);
+    press(B_FX); frames(12);
+    check(ly_lock == LY_PLAY && ui.layer == LY_FX, "locked SEQ, FX held: unlocked, the FX layer");
+    release(B_FX); frames(2); check(ui.layer == LY_PLAY, "and FX let go: back to playing");
+    press(B_FX); frames(3); tap(B_HOME); release(B_FX); frames(3);
+    press(B_HOME); frames(50); release(B_HOME); frames(2);
+    check(ui.menu && ly_lock == LY_PLAY, "locked, HOME held: the menu, unlocked");
+    ui.menu = 0; ui.force = 1; frames(2);
     song.g[G_DUST] = 0; song.g[G_FILT] = 0;
 
     /* ---- SEQ layer: drum steps on the white keys */
@@ -299,6 +348,7 @@ int main(int argc, char **argv)
                 if (bt != B_HOME && R(3) == 0) held ^= 1u << panel.btn[bt];
             }
             if (R(30) == 0) held = 0;
+            if (R(700) == 0) ly_lock = (uint8_t)R(LY_COUNT);              /* (a layer locked open, at random) */
             fm1_in.buttons = held & ~(1u << panel.btn[B_HOME]);
             if (R(4) == 0) encs[R(7)] += (int32_t)R(5) - 2;
             fm1_in.notes = R(10) == 0 ? (1u << R(27)) : (R(3) ? fm1_in.notes : 0);
@@ -308,6 +358,6 @@ int main(int argc, char **argv)
         fm1_in.buttons = 0; fm1_in.notes = 0; frames(4);
         #undef R
     }
-    printf("ui: %s\n", fails ? "FAILED" : "pages, layers (punch, steps, erase, roll, key, mix), song layer, REC hold, drums, REC, 20000-frame fuzz PASS");
+    printf("ui: %s\n", fails ? "FAILED" : "pages, layers (punch, steps, erase, roll, key, mix), layer lock, song layer, REC hold, drums, REC, 20000-frame fuzz PASS");
     return fails;
 }

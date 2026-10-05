@@ -378,7 +378,57 @@ def load_package(path, force):
     if LOADER_MARK not in raw and not force:
         raise InstallError("badpkg", f"{path}: no Felucca update loader in this package; "
                                      "only Felucca's own packages are installed (--force overrides)")
-    return product, logical_image(raw)
+    image = logical_image(raw)
+    bad = package_damage(image)
+    if bad:
+        raise InstallError("badpkg", f"{path}: damaged package ({bad}); nothing was written. "
+                                     "Download it again.")
+    return product, image
+
+
+def _crc16(data, crc=0):
+    """CRC-16/XMODEM, as the package and the device use"""
+    for b in data:
+        crc ^= b << 8
+        for _ in range(8):
+            crc = ((crc << 1) ^ 0x1021) & 0xFFFF if crc & 0x8000 else (crc << 1) & 0xFFFF
+    return crc
+
+
+def _dec(b):
+    """JieLi ENC stream cipher (its own inverse)"""
+    out, key = bytearray(b), 0xFFFF
+    for i in range(len(out)):
+        out[i] ^= key & 0xFF
+        key = ((key << 1) ^ (0x1021 if key & 0x8000 else 0)) & 0xFFFF
+    return bytes(out)
+
+
+def package_damage(image):
+    """what is wrong with the update image (header, file list, each file's CRC), or None; the device
+    only checks the loader before it rewrites the firmware, so a damaged file is caught here"""
+    if len(image) < 0x40:
+        return "too short"
+    hdr = _dec(image[0:0x40])
+    if _crc16(hdr[2:0x40]) != int.from_bytes(hdr[0:2], "little"):
+        return "header CRC"
+    count = int.from_bytes(hdr[8:10], "little")
+    if not 1 <= count <= 8 or len(image) < 0x40 + 0x50 * count:
+        return "file list"
+    lst = image[0x40:0x40 + 0x50 * count]
+    if _crc16(lst) != int.from_bytes(hdr[2:4], "little"):
+        return "file list CRC"
+    for i in range(count):
+        e = _dec(lst[i * 0x50:(i + 1) * 0x50])
+        dcrc = int.from_bytes(e[4:6], "little")
+        off = int.from_bytes(e[8:12], "little")
+        size = int.from_bytes(e[12:16], "little")
+        name = e[0x40:0x50].split(b"\0")[0].decode("ascii", "replace")
+        if off + size > len(image):
+            return f"{name}: cut short"
+        if _crc16(image[off:off + size]) != dcrc:
+            return f"{name}: CRC"
+    return None
 
 
 def not_found(up):

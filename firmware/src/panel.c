@@ -52,9 +52,13 @@ static uint32_t panel_btn_of(uint32_t matrix_id)        /* label of a matrix but
 static void panel_led(uint32_t label, int on) { fm1_led_key(panel.btn[label], on); }
 
 /* steps of a role, + = clockwise */
+static uint32_t ui_input_ms;                    /* the last button, key or knob turn (ui_input.c; autosave) */
 static int32_t panel_enc(uint32_t role)
 {
-    return fm1_enc_take(panel.enc[role]) * panel.dir[role];
+    int32_t s = fm1_enc_take(panel.enc[role]) * panel.dir[role];
+    if (s)
+        ui_input_ms = fm1_ms;                      /* a knob turning is not idle either: autosave waits */
+    return s;
 }
 
 /* user settings that survive a reset */
@@ -62,6 +66,7 @@ static int32_t panel_enc(uint32_t role)
 struct { uint32_t magic, palette, lowcut, zoom; } settings __attribute__((section(".noinit")));
 
 static void settings_save(void);              /* project.c: flash copy (FELUCCA_FLASH) */
+static uint8_t settings_later;                 /* changed while playing: saved once stopped (project.c) */
 
 static void settings_init(void)
 {

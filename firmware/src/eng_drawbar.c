@@ -272,6 +272,8 @@ static const preset_t DRAWBAR_PRESETS[] = {
     {"GOSPEL", {6, 0, 0, 0, 1, 60, 40, 2}, {0, 64, 127, 45}, 0, 0, FX(0, 0, 0, 30)},
     {"JAZZ ORGAN", {4, 0, 0, 0, 2, 50, 8, 1}, {0, 64, 127, 40}, 0, 0, FX(0, 0, 0, 22)},
     {"DIRTY B3", {5, 0, 0, 0, 0, 60, 90, 2}, {0, 64, 127, 40}, 0, 0, FX(30, 0, 6, 20)},
+    /* 90s house: the percussive organ that plays bass lines and chords */
+    {"HOUSE ORGN", {13, 2, 0, 1, 1, 80, 22, 0}, {0, 60, 96, 22}, 0, 0, FX(0, 10, 12, 18)},
 };
 
 static const engine_t ENG_DRAWBAR = {

@@ -102,6 +102,7 @@ static void host_preset_req(track_t *t, uint32_t e, uint32_t pi)
     t->p[P_SUS] = p->env[2];
     t->p[P_REL] = p->env[3];
     t->p[P_ED_FLT] = p->fenv;
+    t->p[P_ED_FX] = preset_trim(e, pi % ENGINES[e]->npresets);
     t->p[P_VOICE] = p->mono ? V_LEGATO : V_POLY;
     for (i = 0; i < 4u; i++) {
         t->p[P_DIST + i] = (int16_t)(p->fx[i] ? p->fx[i] - 1 : FX_DEF[i]);
@@ -425,7 +426,10 @@ static int steal_test(const char *dir)
  * Writes DIR/engine_switch.wav. */
 static void xfade_sine(track_t *t)
 {
-    host_preset(t, 0, 5);                          /* ANALOG SINE KEY, as a plain held sine */
+    host_preset(t, 0, 5);                          /* ANALOG, as a plain held sine */
+    t->p[P_E0] = 3;                                /* (SIN, whichever preset that is) */
+    t->p[P_E1] = t->p[P_E2] = t->p[P_E3] = 0;
+    t->p[P_ED_FX] = 0;
     t->p[P_E4] = 127;
     t->p[P_E5] = t->p[P_E6] = 0;
     t->p[P_ED_FLT] = 0;

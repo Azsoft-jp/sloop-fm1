@@ -11,11 +11,21 @@ SLOOP turns the FM-1 into a four-track groovebox you play live: three synths and
 
 <p align="center"><img src="assets/screens/screens.png" alt="SLOOP screens on the FM-1" width="760"></p>
 
-<p align="center"><sub>The FM-1's screen: start-up, the four tracks, the drum grid and kit, the layers (punch-in FX, steps, key and chords, mix, erase, roll), a free take, the master page.</sub></p>
+<p align="center"><sub>The FM-1's screen: start-up, the four tracks (recording), the drum grid and the acoustic kit, the sounds by kind, the layers (punch-in FX, steps, key and chords, mix, erase), a free take, the FX sends.</sub></p>
 
 <p align="center"><img src="assets/screens/editor-drums.png" alt="SLOOP web editor: the drum track" width="760"></p>
 
 <p align="center"><sub>The web editor: the drum track as a 16-lane grid, with levels and ratchets.</sub></p>
+
+## New in 2.2
+
+- **A new drum engine** built like the classic machines (tuned body and pitch drop, click, noise through a resonant filter, drive; softer hits are darker). 32 synthesised kits rebuilt on it — new: PHONK, AMAPIANO, UK GARAGE, deep house — and a sampled **acoustic kit** (CC0 studio recordings). Every kit is level-matched.
+- **68 sounds, browsed by kind** (basses, keys, organs, pads, leads, plucks and bells, stabs), all level-matched. 14 new, among them 808 SLIDE, ACID 303, SUPERSAW, M1 PIANO, AFRO KEYS, KALIMBA, DUB CHORD, HOUSE ORGN — and **GRAND PNO**, a real Steinway grand (CC0).
+- **Lock a layer:** hold a layer button and tap HOME — it stays open with both hands free (FX on the keys with one hand, FILTER / DUST / DUCK with the other). Any other button lets it go.
+- **Stereo chorus and a new stereo reverb** (a feedback delay network: dense, no metallic ring).
+- **More reliable:** saves retried until they succeed, the song end gives your loop back, swing never plays a step twice, no click on retriggered voices, the installer refuses a damaged package, no more flicker on the button lights.
+
+Everything in [SLOOP.md](SLOOP.md#new-in-22).
 
 ## Features
 
@@ -28,8 +38,9 @@ SLOOP turns the FM-1 into a four-track groovebox you play live: three synths and
   - **GLO**: mute, solo, tap tempo, track levels
   - **SAVE**: play sections A–D live, record the song as you play
   - Keys 1, 5, 9 and 13 glow dimly as landmarks: the rows of the 4 × 4 grid on the screen
-- **Drums:** 16 sounds on the white keys, ghost and hard hits (hold OCT− / OCT+), ratchets x1–x4, 34 kits (5 sampled, 29 synthesised: 808, 909, 606, house, techno, minimal, electro, trap, drill, jungle, dubstep, reggaeton, afrobeat, latin, disco, synthwave, chiptune, industrial, hyperpop, ambient, jazz brushes…).
-- **Synths:** 9 engines — analog, 4-op FM, phase distortion, three-oscillator, tonewheel organ, formant voice, granular, lo-fi chip, sampler — with envelopes, LFO, arpeggiator, glide, drive, slicer and chorus / delay / reverb sends. 54 presets to start from (sliding 808s, reese and FM basses, Rhodes, organs, plucks, stabs, leads, pads, talkbox, scratches) and 32 slots for your own.
+  - Hold a layer button and tap HOME to lock the layer open: both hands free
+- **Drums:** 16 sounds on the white keys, ghost and hard hits (hold OCT− / OCT+), ratchets x1–x4, 37 kits (a sampled acoustic kit in 5 treatments, 32 synthesised: 808, 909, 606, house, deep house, techno, minimal, electro, trap, drill, phonk, UK garage, jungle, dubstep, reggaeton, amapiano, afrobeat, latin, disco, synthwave, chiptune, industrial, hyperpop, ambient, jazz brushes…), all level-matched.
+- **Synths:** 9 engines — analog, 4-op FM, phase distortion, three-oscillator, tonewheel organ, formant voice, granular, lo-fi chip, sampler — with envelopes, LFO, arpeggiator, glide, drive, slicer and sends to a stereo chorus, a tempo delay and a stereo reverb. 68 presets to start from, browsed by kind and level-matched (sliding 808s, acid, reese and FM basses, a Steinway grand, Rhodes, house and afro keys, organs, supersaw, plucks and bells, stabs and dub chords, pads, talkbox, scratches) and 32 slots for your own.
 - **Recording with no click:** a free take sets the loop length and the tempo from your playing; REC records at once while playing; notes land where you heard them (latency-compensated).
 - **Groove:** MPC-style swing (50–75 %), a sample-accurate clock (no drift at any tempo), polymeters.
 - **Master:** DUST (old sampler + vinyl), DUCK (the kick pumps the synths), a DJ filter.
@@ -42,7 +53,7 @@ SLOOP turns the FM-1 into a four-track groovebox you play live: three synths and
 
 **From the browser:** open **[the SLOOP installer](https://isod89.github.io/sloop-fm1/)** in **Chrome or Edge**, connect the FM-1 by USB (a data cable, no hub), press **INSTALL** and wait for *Done*. Nothing to download or compile. The [web editor](https://isod89.github.io/sloop-fm1/webapp/editor/) works the same way.
 
-Other ways: the `.fwsc` of each [release](../../releases) with `python tools/fm1_install.py sloop-2.1.fwsc` (needs `pip install mido python-rtmidi`), or build it yourself and run `INSTALL-SLOOP.bat` (Windows).
+Other ways: the `.fwsc` of each [release](../../releases) with `python tools/fm1_install.py sloop-2.2.fwsc` (needs `pip install mido python-rtmidi`), or build it yourself and run `INSTALL-SLOOP.bat` (Windows).
 
 Going back: M-VAVE's own updater (M-UPGRADE) and the official FM-1 firmware. If an install is cut off, the FM-1 stays in update mode: press Install again and it finishes.
 
@@ -61,7 +72,7 @@ See [BUILDING.md](BUILDING.md). In short: the JieLi toolchain and three files of
 
 ## Credits
 
-SLOOP is a fork of **[Felucca](https://github.com/hugelton/Felucca)** by Leo Kuroshita (@kurogedelic), Hügelton Instruments: the engines, the sequencer, the editor and the installer come from there. Font: Terminus (SIL OFL 1.1). Samples: Versilian Studios VSCO-2 CE and VCSL (CC0), Hügelton Sample Pack. PHASE engine after CrispyZebra; VOICE after klattsch. Icons: Fukiai.
+SLOOP is a fork of **[Felucca](https://github.com/hugelton/Felucca)** by Leo Kuroshita (@kurogedelic), Hügelton Instruments: the engines, the sequencer, the editor and the installer come from there. Font: Terminus (SIL OFL 1.1). Samples: Versilian Studios VSCO-2 CE and VCSL, Sonic Pi (all CC0). PHASE engine after CrispyZebra; VOICE after klattsch. Icons: Fukiai.
 
 ## Licence
 

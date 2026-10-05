@@ -1,12 +1,21 @@
 <p align="center"><img src="assets/logo/sloop-logo.png" alt="SLOOP" width="480"></p>
 
-# SLOOP 2.1
+# SLOOP 2.2
 
-**A live groovebox firmware for the M-VAVE FM-1 — for any style.** Four tracks — three synths and a drum machine with 16 sounds on the white keys — nine synthesis engines, 54 sounds, 34 drum kits (808, 909, techno, house, jungle, afro, reggaeton, synthwave, chiptune, ambient, jazz…), your own samples, ghost notes and ratchets, note repeat, one-key chords, 16 punch-in effects, a vinyl / sidechain / DJ-filter master, and a teenage-engineering-style screen that always shows what your hands can do next. No factory patterns, nothing to load: everything you hear, you play.
+**A live groovebox firmware for the M-VAVE FM-1 — for any style.** Four tracks — three synths and a drum machine with 16 sounds on the white keys — nine synthesis engines, 68 sounds, 37 drum kits (808, 909, trap, phonk, house, techno, UK garage, jungle, amapiano, reggaeton, synthwave, chiptune, ambient, jazz…), your own samples, ghost notes and ratchets, note repeat, one-key chords, 16 punch-in effects, a vinyl / sidechain / DJ-filter master, and a teenage-engineering-style screen that always shows what your hands can do next. No factory patterns, nothing to load: everything you hear, you play.
 
 SLOOP is free and open source (GPL-3.0), based on [Felucca](https://github.com/hugelton/Felucca) by Leo Kuroshita / Hügelton Instruments.
 
-> **Status:** 2.1, running on the FM-1. Still a beta: install at your own risk, and please report what you find (GitHub issues).
+> **Status:** 2.2, running on the FM-1. Still a beta: install at your own risk, and please report what you find (GitHub issues).
+
+### New in 2.2
+
+- **A new drum engine.** Every synthesised drum is now built like on the classic machines: a tuned body with a pitch drop and a hold, a second partial for the drum heads, a click for the attack, noise through a resonant filter, drive. Softer hits are darker as well as quieter. The 32 synthesised kits are rebuilt on it, each with 16 sounds of its own — new: **PHONK** (melodic cowbell), **AMAPIANO** (log drum), **GARAGE**, **D.HOUSE**. Kits 1–5 are now a sampled **ACOUSTIC** kit (CC0 studio recordings) and its treatments. Every kit is level-matched. See [Drum kits](#drum-kits).
+- **68 sounds, browsed by kind.** PRESETS goes through basses, keys, organs, pads, leads, plucks and bells, stabs; the kind is shown next to the name. 14 new: 808 SLIDE, ACID 303, PLUGG BASS, SUPERSAW, M1 PIANO, AFRO KEYS, GRAND PNO, KALIMBA, PLUGG BELL, GLASS PAD, SAW PAD, RAVE STAB, DUB CHORD, HOUSE ORGN. Every factory sound is level-matched: the same LEVEL gives the same loudness. See [The sound bank](#the-sound-bank).
+- **A real grand piano.** GRAND PNO is a Steinway recorded note by note (CC0); long notes fade as on the real one. DUSTY PNO and LOFI KEYS are the same piano through an old sampler.
+- **Lock a layer.** Hold a layer button and tap HOME: the layer stays open with the button let go, both hands free (FX with one hand on the keys and the other on FILTER / DUST / DUCK). Any other button lets it go. See [The panel](#the-panel-tap-hold-layers).
+- **Stereo effects.** The chorus is stereo, and the reverb is new: a feedback delay network, dense and wide, with no metallic ring.
+- **More reliable.** Saves that fail are retried (*SAVE ERROR: RETRYING*) and everything is saved before an update; the end of a song gives your loop back; swing never plays a step twice; SONG REC counts bars right; a voice retriggered in UNISON, TRIO or PHASE no longer clicks; NEW PROJECT and saving a user preset wait until the song stops; the installer refuses a damaged package before writing it; the button lights no longer flicker.
 
 ### New in 2.1
 
@@ -85,6 +94,8 @@ Every function button has two lives. **Tap** it (press and let go, touching noth
 
 The tiles are four rows of four, keys 1–4, 5–8, 9–12, 13–16. To find them without looking at the screen, the first key of each row (1, 5, 9, 13) glows dimly while a layer is held, and on the drum track; the keys at full light are what is on.
 
+**Lock a layer:** hold its button and tap **HOME** — the layer stays open when you let the button go, both hands free for the keys and the knobs (*LOCK* on the screen, the button blinks). Any other button lets it go (HOME, the layer's own button, ENV…) and does only that; PLAY, REC and OCT− / OCT+ keep working inside it.
+
 | Hold | Keys | KNOB 1 · 2 · 3 · 4 | Tap |
 | --- | --- | --- | --- |
 | **FX** — *punch* | a punch-in effect while the key is held | FILTER · DUST · DUCK · — | FX pages |
@@ -108,7 +119,7 @@ Other controls:
 | **PRESETS** | the selected track's sound, or the drum kit |
 | **SELECT** | tempo (always, even inside a layer) |
 | **OCT− / OCT+** | synth tracks: octave (both: back to 0) · drum track, held: ghost / hard hits |
-| **HOME** | the TRACKS screen · hold: menu (colour, low cut, zoom, calibration, about) |
+| **HOME** | the TRACKS screen · hold: menu (colour, low cut, zoom, calibration, about) · tapped while a layer is held: lock it open |
 | **ENV / LFO** | their pages |
 
 ## The drum track
@@ -231,45 +242,46 @@ Hold **FX**, then hold a white key — the 16 white keys from the lowest F to th
 
 ## The sound bank
 
-54 starting points — basses, keys, organs, plucks, stabs, leads, pads — for any style: house and techno, hip-hop and trap, drum & bass, synthwave, lo-fi, ambient, soul. Every one is a full patch on one of the nine engines: change it, save your own (32 user presets), or load your own samples. **PRESETS** browses them all on a synth track (the engine follows). SLOOP starts (on a new project) at **90 BPM** with *808 BOOM* on track 1, *RHODES* on track 2, *LOFI FLUTE* on track 3 and the 808 kit on track 4.
+68 starting points for any style: house and techno, hip-hop, trap and plugg, drum & bass, amapiano, synthwave, lo-fi, ambient, soul. Every one is a full patch on one of the nine engines: change it, save your own (32 user presets), or load your own samples. **PRESETS** browses them on a synth track **by kind** — basses, keys, organs, pads, leads, plucks and bells, stabs — the kind shown next to the name (the engine follows); your own presets come after. Every sound is level-matched: they all come out as loud at the same LEVEL. SLOOP starts (on a new project) at **90 BPM** with *808 BOOM* on track 1, *RHODES* on track 2, *LOFI FLUTE* on track 3 and the 808 kit on track 4.
 
-| Role | Sounds (engine) |
+| Kind | Sounds (engine) |
 | --- | --- |
-| **808 & sub** | 808 BOOM, 808 DIRTY, SUB BASS (ANALOG) — they slide between held notes (~70 ms) with a punch of pitch on the attack, two octaves under the keys |
-| **Basses** | REESE, WOBBLE, FUNK BASS (ANALOG) · FM BASS (DIGITAL) · CZ BASS (PHASE) · FAT BASS (TRIO) · WOW BASS (VOICE) · GB BASS (LOFI) · UP BASS, DEEP BASS (SAMPLE: a real upright) |
-| **Keys** | RHODES, DX RHODES, WURLI, CLAV (DIGITAL) · SOFT KEYS (PHASE) · DUSTY PNO, LOFI KEYS (SAMPLE: an old upright piano) |
-| **Organ** | SOUL ORGAN, GOSPEL, JAZZ ORGAN, DIRTY B3 (WHEEL) |
-| **Bells & plucks** | TRAP BELL, MUSIC BOX, MARIMBA (DIGITAL) · TRAP PLUCK (ANALOG) · RESO PLUCK (PHASE) · VIBES (SAMPLE) |
-| **Stabs** | HORN STAB, STRING STB (SAMPLE) · MIN STAB, MIN7 STAB (TRIO) · SYN BRASS (ANALOG) · CZ BRASS (PHASE) |
-| **Leads** | G-FUNK LD (ANALOG) · TALKBOX (VOICE) · SYNC LEAD, HOOVER (TRIO) · LOFI FLUTE (SAMPLE) · GAME LEAD, 8BIT ARP (LOFI) |
-| **Pads & voices** | WARM PAD, DARK STR, ATMOS PAD (ANALOG) · CZ STRING (PHASE) · CHOIR AAH, SOUL OOH (VOICE) · LOFI CLOUD, VIBE HAZE, FLUTE DUST (GRAIN) |
-| **DJ & drums** | SCRATCH — scratch, backspin, rewind across the keys · GM KIT (SAMPLE) |
+| **Bass** | 808 BOOM, 808 DIRTY, 808 SLIDE, SUB BASS, PLUGG BASS — they slide between held notes, two octaves under the keys · REESE, WOBBLE, ACID 303 (the resonant acid line, sliding where notes overlap), FUNK BASS (ANALOG) · FM BASS (DIGITAL) · CZ BASS (PHASE) · FAT BASS (TRIO) · WOW BASS (VOICE) · GB BASS (LOFI) · UP BASS, DEEP BASS (SAMPLE: a real upright) |
+| **Keys** | RHODES, DX RHODES, WURLI, M1 PIANO (the house piano), AFRO KEYS (afro house, amapiano), CLAV (DIGITAL) · GRAND PNO (SAMPLE: a Steinway grand; long notes fade as on the real one), DUSTY PNO, LOFI KEYS (the same grand through an old sampler) · SOFT KEYS (PHASE) |
+| **Organ** | SOUL ORGAN, GOSPEL, JAZZ ORGAN, DIRTY B3, HOUSE ORGN (the 90s house organ: bass lines and chords) (WHEEL) |
+| **Pad** | WARM PAD, DARK STR, ATMOS PAD (ANALOG) · SAW PAD (TRIO) · GLASS PAD (DIGITAL) · CZ STRING (PHASE) · LOFI CLOUD, VIBE HAZE (GRAIN) · CHOIR AAH, SOUL OOH (VOICE) |
+| **Lead** | SUPERSAW (eight detuned saws: trance, EDM), G-FUNK LD (ANALOG) · SYNC LEAD, HOOVER (TRIO) · TALKBOX (VOICE) · GAME LEAD (LOFI) · LOFI FLUTE (SAMPLE) · FLUTE DUST (GRAIN) |
+| **Pluck & bell** | TRAP PLUCK (ANALOG) · RESO PLUCK (PHASE) · PLUGG BELL, TRAP BELL, MUSIC BOX, KALIMBA, MARIMBA (DIGITAL) · VIBES (SAMPLE) · 8BIT ARP (LOFI) |
+| **Stab** | MIN STAB, MIN7 STAB, RAVE STAB, DUB CHORD (dub techno, into the delay) (TRIO: one key plays the chord) · SYN BRASS (ANALOG) · CZ BRASS (PHASE) · HORN STAB, STRING STB (SAMPLE) |
+| **FX** | SCRATCH — scratch, backspin, rewind across the keys · GM KIT (SAMPLE) |
 
-The sampled sounds (SAMPLE engine, **SET**: DUSTY (piano), BASS, VIBES, HORNS, STRGS, FLUTE, SCRCH, PERC) are free recordings (CC0: Versilian Studios VSCO-2 CE and VCSL, Sonic Pi), retuned and coloured like a record through an old sampler.
+The sampled sounds (SAMPLE engine, **SET**: PIANO (a grand), BASS, VIBES, HORNS, STRGS, FLUTE, SCRCH, PERC) are free recordings (CC0: Versilian Studios VSCO-2 CE and VCSL, Sonic Pi), retuned and coloured like a record through an old sampler.
 
 ## Drum kits
 
-34 kits — **PRESETS** on the drum track, KNOB 1 on the kit page, or the editor. 1–5 are the sampled GM kit and its treatments; 6–34 are synthesised (analogue-style kick, snare, clap, six-oscillator metallic hats and cymbals, toms, congas, rim, cowbell, clave; FM and 8-bit voices for the game kits), so they cost almost no memory.
+37 kits — **PRESETS** on the drum track, KNOB 1 on the kit page, or the editor. 1–5 are a sampled acoustic kit (CC0 recordings of a real snare, hi-hat, toms and cymbals) and its treatments; 6–37 are synthesised, so they cost almost no memory. Every synthesised kit has 16 sounds of its own, one per white key — KICK 2 and SNARE 2 are other sounds, not the same one retuned (the long 808 in TRAP, the log drum in AMAPIANO, the rumble in TECHNO). Each sound is built like on the classic machines: a tuned body with a pitch drop and a hold before it fades, a second partial for the drum heads, a click for the attack, noise through a resonant filter, drive. Softer hits are darker as well as quieter. The levels are measured: every kit is as loud as the others, each sound at its place in the mix.
 
 | # | Kit | Style | # | Kit | Style |
 | --- | --- | --- | --- | --- | --- |
-| 1 | ORIGINAL | acoustic | 18 | ELECTRO | electro |
-| 2 | DEEP | soft | 19 | JUNGLE | drum & bass |
-| 3 | TIGHT | punchy | 20 | DUBSTEP | bass music |
-| 4 | BRIGHT | bright | 21 | DEMBOW | reggaeton |
-| 5 | DUST | dusty | 22 | AFRO | afrobeat |
-| 6 | 808 | hip hop | 23 | LATIN | latin |
-| 7 | 909 | house | 24 | DISCO | disco |
-| 8 | 606 | acid | 25 | SYNTHWV | synthwave |
-| 9 | VINTAGE | rhythm box | 26 | CHIP | chiptune |
-| 10 | 80S | 80s pop | 27 | 8BIT | handheld |
-| 11 | TRAP | trap | 28 | ARCADE | video game |
-| 12 | DRILL | UK drill | 29 | GLITCH | glitch |
-| 13 | BOOMBAP | hip hop | 30 | INDUSTR | industrial |
-| 14 | LO-FI | lo-fi | 31 | TRIBAL | tribal |
-| 15 | HOUSE | house | 32 | HYPER | hyperpop |
-| 16 | TECHNO | techno | 33 | AMBIENT | ambient |
-| 17 | MINIMAL | minimal | 34 | JAZZ | jazz (brushes) |
+| 1 | ACOUSTIC | studio | 20 | ELECTRO | electro |
+| 2 | DEEP | soft | 21 | DISCO | disco |
+| 3 | TIGHT | punchy | 22 | GARAGE | UK garage |
+| 4 | BRIGHT | bright | 23 | JUNGLE | drum & bass |
+| 5 | DUST | dusty | 24 | DUBSTEP | bass music |
+| 6 | 808 | hip hop | 25 | DEMBOW | reggaeton |
+| 7 | 909 | house | 26 | AMAPIANO | amapiano (log drum) |
+| 8 | 606 | acid | 27 | AFRO | afrobeat |
+| 9 | 80S | 80s pop | 28 | LATIN | latin |
+| 10 | VINTAGE | rhythm box | 29 | TRIBAL | tribal |
+| 11 | TRAP | trap | 30 | SYNTHWV | synthwave |
+| 12 | DRILL | UK drill | 31 | CHIP | chiptune |
+| 13 | BOOMBAP | hip hop | 32 | ARCADE | video game |
+| 14 | LO-FI | lo-fi | 33 | GLITCH | glitch |
+| 15 | PHONK | phonk (melodic cowbell) | 34 | INDUSTR | industrial |
+| 16 | HOUSE | house | 35 | HYPER | hyperpop |
+| 17 | D.HOUSE | deep house | 36 | AMBIENT | ambient |
+| 18 | TECHNO | techno | 37 | JAZZ | jazz (brushes) |
+| 19 | MINIMAL | minimal | | | |
 
 The kit is saved with projects and song sections. MIDI notes in on the drum channel (10) play the nearest of the 16 sounds.
 
@@ -304,18 +316,18 @@ The protocol is documented in [web/EDITOR_PROTOCOL.md](web/EDITOR_PROTOCOL.md) (
 
 ## Sound design pages
 
-The full Felucca engine is underneath: nine synthesis engines (analog, 4-op FM, phase distortion, lo-fi chip, sampler, formant voice, three-oscillator, tonewheel organ, granular), envelopes (with a pitch punch for the 808s), LFO, arpeggiator, scales and chords, glide and voice modes, per-track drive and slicer, chorus / delay / reverb sends, 32 user presets, 4 projects.
+The full Felucca engine is underneath: nine synthesis engines (analog, 4-op FM, phase distortion, lo-fi chip, sampler, formant voice, three-oscillator, tonewheel organ, granular), envelopes (with a pitch punch for the 808s), LFO, arpeggiator, scales and chords, glide and voice modes, per-track drive and slicer, chorus / delay / reverb sends (a stereo chorus, a tempo delay, a stereo reverb built as a feedback delay network: dense, no metallic ring), 32 user presets, 4 projects.
 
 ## Specifications
 
 | | |
 | --- | --- |
 | Tracks | 3 synth parts (8 voices shared) + drums (16 sounds, 6 voices) |
-| Sounds | 54 presets on 9 engines, 8 sampled sets (CC0), 3 slots for your own samples |
+| Sounds | 68 presets on 9 engines (browsed by kind, level-matched), 8 sampled sets (CC0), 3 slots for your own samples |
 | Sequencer | 64 steps per track, own length and division each; chords with a level and ratchet per note; drums with a level and ratchet per sound; ties, slide; MPC swing 50–75 %; one sample-accurate clock for steps, arp, rolls, slicer and song (no drift) |
 | Performance | layers (hold a button: keys and knobs change job): punch-in FX, erase, note repeat, step entry, key / chords, mute / solo / tap tempo |
-| Drum kits | 34 (5 sampled, 29 synthesised) |
-| Effects | 16 punch-in effects; master DUST, DUCK, DJ filter; per track drive, slicer, chorus / delay / reverb sends; master limiter |
+| Drum kits | 37 (5 sampled, 32 synthesised, 16 sounds each) |
+| Effects | 16 punch-in effects; master DUST, DUCK, DJ filter; per track drive, slicer, sends to a stereo chorus, a tempo delay and a stereo reverb; master limiter |
 | Recording | live, quantised as heard (latency-compensated), overdub; records at once while playing; free take sets loop length and tempo |
 | Memory | undo / redo, 4 projects, 32 user presets, autosave of the working project, song of 4 sections × 16 steps × 1–64 bars |
 | Audio | 44.1 kHz, fixed-point DSP |
@@ -327,5 +339,5 @@ The full Felucca engine is underneath: nine synthesis engines (analog, 4-op FM, 
 - **USB rescue:** hold **OCT−** alone while switching on (*SLOOP USB RESCUE*), then install again.
 - **Interrupted install:** the FM-1 stays in update mode; press Install again and it finishes. A damaged package is refused, and the FM-1 keeps waiting for a good one.
 - **Back to the official firmware:** M-VAVE's updater, M-UPGRADE, and the FM-1 firmware from m-vave.com.
-- **Credits:** SLOOP is based on Felucca by Leo Kuroshita (@kurogedelic), Hügelton Instruments — engines, sequencer, editor and installer. Font: Terminus (SIL OFL 1.1). Samples: Versilian Studios VSCO-2 CE and VCSL (CC0), Hügelton Sample Pack. PHASE: CrispyZebra (GPL). VOICE after klattsch (MIT). Interface ideas after teenage engineering's pocket operators and EP-133, Elektron's step entry and Akai's MPC (swing, note repeat, erase) — SLOOP is not affiliated with any of them.
+- **Credits:** SLOOP is based on Felucca by Leo Kuroshita (@kurogedelic), Hügelton Instruments — engines, sequencer, editor and installer. Font: Terminus (SIL OFL 1.1). Samples: Versilian Studios VSCO-2 CE and VCSL, Sonic Pi (all CC0). PHASE: CrispyZebra (GPL). VOICE after klattsch (MIT). Interface ideas after teenage engineering's pocket operators and EP-133, Elektron's step entry and Akai's MPC (swing, note repeat, erase) — SLOOP is not affiliated with any of them.
 - **Licence:** GPL-3.0, no warranty. M-VAVE and FM-1 are trademarks of their owners; SLOOP is not affiliated with them. Drum kit names describe styles; they do not refer to any product.

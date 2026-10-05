@@ -376,7 +376,7 @@ static uint32_t graph_signature(void)
     }
     return h;
 }
-/* preset browser: the global list (every engine), current one in white */
+/* preset browser: the list by kind (ui.c BANK), the current one in white */
 static void graph_browse(void)
 {
     uint32_t total, cur = preset_pos(&total), e, k;
@@ -385,14 +385,15 @@ static void graph_browse(void)
         return;
     for (row = -3; row <= 3; row++) {
         int32_t y = 4 + (row + 3) * 17;
-        char tag[4], nm[13];
+        char tag[5], nm[13];
         int sel = row == 0;
-        e = preset_at((cur + total * 4u + (uint32_t)row) % total, &k);
+        uint32_t n = (cur + total * 4u + (uint32_t)row) % total;
+        e = preset_at(n, &k);
         if (e == NENGINES) {                             /* user preset: "U07" and its name */
             up_slot_label(tag, k);
             up_name(k, nm);
-        } else {
-            str_cpy(tag, ENGINES[e]->name, sizeof tag);
+        } else {                                         /* its kind: BASS, KEYS, PAD... */
+            str_cpy(tag, preset_kind(n), sizeof tag);
             str_cpy(nm, ENGINES[e]->presets[k].name, sizeof nm);
         }
         if (sel)

@@ -3,7 +3,7 @@
 /* Felucca user interface. Four columns map to KNOB 1..4. Rendering is lazy:
  * every element remembers what it last drew and is redrawn only on change. */
 #ifndef FELUCCA_VERSION
-#define FELUCCA_VERSION "SLOOP 2.1"  /* the beat machine firmware for the FM-1 (based on Felucca) */
+#define FELUCCA_VERSION "SLOOP 2.2"  /* the beat machine firmware for the FM-1 (based on Felucca) */
 #endif
 static void project_save(uint32_t slot);
 static void arrangement_save(void);
@@ -85,7 +85,6 @@ static struct {
 
 static const page_t *cur_page(void) { return &PAGES[ui.page]; }
 static int32_t accel(uint32_t role, int32_t s, int32_t range);   /* ui_input.c */
-static uint32_t ui_input_ms;                                    /* the last button / key (ui_input.c; autosave) */
 static void layer_screen_draw(void);                            /* ui_layers.c */
 static void hold_screen_draw(void);
 static uint8_t layer_shown;
@@ -258,6 +257,7 @@ static void apply_preset_to(track_t *t, uint32_t pi)
     t->p[P_SUS] = e->presets[pi].env[2];
     t->p[P_REL] = e->presets[pi].env[3];
     t->p[P_ED_FLT] = e->presets[pi].fenv;
+    t->p[P_ED_FX] = preset_trim(t->eng_req % NENGINES, pi);  /* level-matched (tools/level_presets.py) */
     t->p[P_VOICE] = e->presets[pi].mono ? V_LEGATO : V_POLY;   /* mono presets keep the legato feel */
     {   /* the rest of the patch: sends, arpeggiator (never a pattern: LIVE) */
         static const uint8_t FX_DEF[4] = {0, 24, 28, 36};
@@ -307,30 +307,75 @@ static void select_engine(uint32_t e)
     ui.force = 1;
 }
 
-/* the presets of every engine, then the used user presets, as one list (the PRESETS knob and the PRESETS page browse it) */
+/* the factory presets as one list by kind (basses, keys, organs, pads, leads, plucks and bells, stabs,
+ * the rest), then the used user presets: the PRESETS knob and the PRESETS page browse it. By name: an
+ * engine's preset table may change order; tests/ui_pages_test.c checks every preset is here once */
+enum { BK_BASS, BK_KEYS, BK_ORGAN, BK_PAD, BK_LEAD, BK_PLUCK, BK_STAB, BK_FX };
+static const char *const BANK_KIND[] = {"BASS", "KEYS", "ORGN", "PAD", "LEAD", "PLCK", "STAB", "FX"};
+static const struct { uint8_t kind, e; const char *name; } BANK[] = {
+    {BK_BASS, 0, "808 BOOM"}, {BK_BASS, 0, "808 DIRTY"}, {BK_BASS, 0, "808 SLIDE"}, {BK_BASS, 0, "SUB BASS"},
+    {BK_BASS, 0, "PLUGG BASS"}, {BK_BASS, 0, "REESE"}, {BK_BASS, 0, "WOBBLE"}, {BK_BASS, 0, "ACID 303"},
+    {BK_BASS, 1, "FM BASS"}, {BK_BASS, 2, "CZ BASS"}, {BK_BASS, 6, "FAT BASS"}, {BK_BASS, 0, "FUNK BASS"},
+    {BK_BASS, 5, "WOW BASS"}, {BK_BASS, 3, "GB BASS"}, {BK_BASS, 4, "UP BASS"}, {BK_BASS, 4, "DEEP BASS"},
+    {BK_KEYS, 1, "RHODES"}, {BK_KEYS, 1, "DX RHODES"}, {BK_KEYS, 1, "WURLI"}, {BK_KEYS, 1, "M1 PIANO"},
+    {BK_KEYS, 1, "AFRO KEYS"}, {BK_KEYS, 4, "GRAND PNO"}, {BK_KEYS, 4, "DUSTY PNO"}, {BK_KEYS, 4, "LOFI KEYS"}, {BK_KEYS, 2, "SOFT KEYS"},
+    {BK_KEYS, 1, "CLAV"},
+    {BK_ORGAN, 7, "SOUL ORGAN"}, {BK_ORGAN, 7, "GOSPEL"}, {BK_ORGAN, 7, "JAZZ ORGAN"}, {BK_ORGAN, 7, "DIRTY B3"},
+    {BK_ORGAN, 7, "HOUSE ORGN"},
+    {BK_PAD, 0, "WARM PAD"}, {BK_PAD, 6, "SAW PAD"}, {BK_PAD, 1, "GLASS PAD"}, {BK_PAD, 0, "DARK STR"},
+    {BK_PAD, 2, "CZ STRING"}, {BK_PAD, 0, "ATMOS PAD"}, {BK_PAD, 8, "LOFI CLOUD"}, {BK_PAD, 8, "VIBE HAZE"},
+    {BK_PAD, 5, "CHOIR AAH"}, {BK_PAD, 5, "SOUL OOH"},
+    {BK_LEAD, 0, "SUPERSAW"}, {BK_LEAD, 0, "G-FUNK LD"}, {BK_LEAD, 6, "SYNC LEAD"}, {BK_LEAD, 6, "HOOVER"},
+    {BK_LEAD, 5, "TALKBOX"}, {BK_LEAD, 3, "GAME LEAD"}, {BK_LEAD, 4, "LOFI FLUTE"}, {BK_LEAD, 8, "FLUTE DUST"},
+    {BK_PLUCK, 0, "TRAP PLUCK"}, {BK_PLUCK, 2, "RESO PLUCK"}, {BK_PLUCK, 1, "PLUGG BELL"}, {BK_PLUCK, 1, "TRAP BELL"},
+    {BK_PLUCK, 1, "MUSIC BOX"}, {BK_PLUCK, 1, "KALIMBA"}, {BK_PLUCK, 1, "MARIMBA"}, {BK_PLUCK, 4, "VIBES"},
+    {BK_PLUCK, 3, "8BIT ARP"},
+    {BK_STAB, 6, "MIN STAB"}, {BK_STAB, 6, "MIN7 STAB"}, {BK_STAB, 6, "RAVE STAB"}, {BK_STAB, 6, "DUB CHORD"},
+    {BK_STAB, 0, "SYN BRASS"}, {BK_STAB, 2, "CZ BRASS"}, {BK_STAB, 4, "HORN STAB"}, {BK_STAB, 4, "STRING STB"},
+    {BK_FX, 4, "SCRATCH"}, {BK_FX, 4, "GM KIT"},
+};
+#define NBANK (sizeof BANK / sizeof BANK[0])
+static uint8_t bank_pi[NBANK];                       /* the preset index of each entry in its engine */
+static uint8_t bank_ready;
+static void bank_resolve(void)
+{
+    uint32_t i, k;
+    for (i = 0; i < NBANK; i++) {
+        const engine_t *e = ENGINES[BANK[i].e % NENGINES];
+        bank_pi[i] = 0xFF;
+        for (k = 0; k < e->npresets; k++)
+            if (str_eq(e->presets[k].name, BANK[i].name))
+                bank_pi[i] = (uint8_t)k;
+    }
+    bank_ready = 1;
+}
 static uint32_t preset_pos(uint32_t *total)          /* list index of the selected track's preset */
 {
-    uint32_t n = 0, cur = 0, e;
-    for (e = 0; e < NENGINES; e++) {
-        if (e == TSEL->eng_req)
-            cur = n + TSEL->preset % (ENGINES[e]->npresets ? ENGINES[e]->npresets : 1u);
-        n += ENGINES[e]->npresets;
-    }
+    uint32_t i, cur = 0;
+    if (!bank_ready)
+        bank_resolve();
+    for (i = 0; i < NBANK; i++)
+        if (BANK[i].e == TSEL->eng_req && bank_pi[i] == TSEL->preset)
+            cur = i;
     if (user_of(TSEL) < UP_SLOTS)
-        cur = n + up_rank(user_of(TSEL));
-    *total = n + up_count();
+        cur = NBANK + up_rank(user_of(TSEL));
+    *total = NBANK + up_count();
     return cur;
 }
 
 /* list index n (< total) -> engine, *k its preset; NENGINES = user preset, *k its slot */
 static uint32_t preset_at(uint32_t n, uint32_t *k)
 {
-    uint32_t e;
-    for (e = 0; e < NENGINES && n >= ENGINES[e]->npresets; e++)
-        n -= ENGINES[e]->npresets;
-    *k = e < NENGINES ? n : up_nth(n);
-    return e;
+    if (!bank_ready)
+        bank_resolve();
+    if (n >= NBANK) {
+        *k = up_nth(n - NBANK);
+        return NENGINES;
+    }
+    *k = bank_pi[n] == 0xFF ? 0u : bank_pi[n];
+    return BANK[n].e;
 }
+static const char *preset_kind(uint32_t n) { return n < NBANK ? BANK_KIND[BANK[n].kind] : "USER"; }
 
 static void preset_go(uint32_t n)                    /* load list index n into the selected track */
 {

@@ -6,7 +6,7 @@
 #include "hostsim.c"
 #undef main
 #include <assert.h>
-static const uint8_t DS_NOTE[DS_LANES] = {36, 38, 39, 42, 46, 43, 48, 49, 51, 70, 63, 37, 56, 75};   /* one GM note per synth lane */
+static const uint8_t DS_NOTE[DS_LANES] = {36, 38, 39, 42, 46, 43, 48, 49, 51, 70, 63, 37, 56, 75, 35, 40};   /* one GM note per synth lane */
 static uint32_t one_hit(uint32_t kit, uint32_t note, int32_t *peak, uint64_t *energy)
 {
     uint32_t j, k, blocks = 0;

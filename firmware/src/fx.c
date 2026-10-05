@@ -1,20 +1,24 @@
 /* SPDX-License-Identifier: GPL-3.0-only
  * Copyright (C) 2026 Leo Kuroshita (@kurogedelic), Hügelton Instruments */
-/* Effects: per-track DIST insert, then sends into three
- * shared buses (chorus, tempo delay, reverb). Mono buses, stereo dry mix. */
+/* Effects: per-track DIST insert, then sends into three shared buses (chorus, tempo delay, reverb).
+ * Stereo dry mix; the chorus and the reverb come back in stereo, the delay in the middle. */
 #define DLY_LEN 65536u           /* 1.49 s: 1/4 at 40 BPM fits */
 #define CHO_LEN 2048u
 static int16_t dly_buf[DLY_LEN] __attribute__((section(".pool")));
 static int16_t cho_buf[CHO_LEN] __attribute__((section(".pool")));
-static const uint16_t REV_COMB[4] = {1116, 1188, 1277, 1356};
+/* the reverb: two input diffusers, then four delay lines mixed by a Hadamard matrix (a feedback delay
+ * network: every echo feeds all four, so it thickens instead of ringing like a comb), damped in the
+ * loop, one line slowly modulated (no metallic tone on long tails); left and right take different lines */
+#define REV_MOD 12               /* samples the modulated line moves (+-) */
+static const uint16_t REV_LINE[4] = {1559, 1931, 2389, 2791};   /* 35..63 ms, coprime */
 static const uint16_t REV_AP[2] = {556, 441};
-static int16_t rev_comb[1116 + 1188 + 1277 + 1356] __attribute__((section(".pool")));
+static int16_t rev_line[1559 + 1931 + 2389 + 2791 + REV_MOD + 2];   /* (.bss: the pool is full) */
 static int16_t rev_ap[556 + 441] __attribute__((section(".pool")));
 static struct {
-    uint32_t dly_w, cho_w, cho_ph;
+    uint32_t dly_w, cho_w, cho_ph, rev_ph;
     int32_t dly_lp;
-    uint16_t comb_i[4], ap_i[2];
-    int32_t comb_lp[4];
+    uint16_t line_i[4], ap_i[2];
+    int32_t line_lp[4];
 } fx;
 
 /* DIST: low cut -> drive (1x..8x, exponential) -> asymmetric soft clip
@@ -124,70 +128,98 @@ static uint32_t delay_samples(void)
     return s < 16u ? 16u : s >= DLY_LEN ? DLY_LEN - 1u : s;
 }
 
-/* process the three buses for one block; sends in, wet stereo-equal out */
-static void fx_buses(const int32_t *cho_in, const int32_t *dly_in, const int32_t *rev_in, int32_t *wet,
-                     uint32_t n)
+/* process the three buses for one block; sends in, wet out (stereo). The LFOs (chorus, reverb line)
+ * are computed per block and ramped: no sine per sample */
+static void fx_buses(const int32_t *cho_in, const int32_t *dly_in, const int32_t *rev_in, int32_t *wet_l,
+                     int32_t *wet_r, uint32_t n)
 {
     uint32_t i, k, dl = delay_samples();
     int32_t fb = song.g[G_DFDBK] * 230, col = 2000 + song.g[G_DCOLOR] * 240;
     int32_t dmix = song.g[G_DMIX] * 258;
-    int32_t size = 25000 + song.g[G_RSIZE] * 50, damp = 32767 - song.g[G_RDAMP] * 200;
+    int32_t g = 17000 + song.g[G_RSIZE] * 104, lpk = 32767 - song.g[G_RDAMP] * 200;   /* loop gain (RT60 ~0.4..4 s), damping */
     int32_t cdepth = song.g[G_CDEPTH] * 6;
-    uint32_t cinc = LFO_INC[song.g[G_CRATE] & 127] / CTL;
+    int32_t ca0, ca1, cb0, cb1, ma, mb, dca, dcb;
+    const uint32_t L0 = REV_LINE[0] + REV_MOD + 2u, B1 = L0, B2 = B1 + REV_LINE[1], B3 = B2 + REV_LINE[2];
+    {   /* the chorus' two read points (Q8 samples back) and line 0's extra length, at both ends of the block */
+        int32_t s0 = osc_sine(fx.cho_ph), s1, m0 = osc_sine(fx.rev_ph), m1;
+        fx.cho_ph += LFO_INC[song.g[G_CRATE] & 127];
+        fx.rev_ph += LFO_INC[30];
+        s1 = osc_sine(fx.cho_ph);
+        m1 = osc_sine(fx.rev_ph);
+        ca0 = (400 << 8) + ((s0 + 32768) * cdepth >> 8), ca1 = (400 << 8) + ((s1 + 32768) * cdepth >> 8);
+        cb0 = (400 << 8) + ((32767 - s0) * cdepth >> 8), cb1 = (400 << 8) + ((32767 - s1) * cdepth >> 8);
+        ma = (REV_MOD << 8) + ((m0 * REV_MOD) >> 7), mb = (REV_MOD << 8) + ((m1 * REV_MOD) >> 7);
+        dca = (ca1 - ca0) >> CTL_LOG2, dcb = (cb1 - cb0) >> CTL_LOG2;
+    }
     for (i = 0; i < n; i++) {
-        int32_t y = 0, x, r, a;
-        /* chorus: modulated short delay, 5..15 ms */
+        int32_t yl, yr, x, a, o0, o1, o2, o3;
+        /* chorus: two modulated short delays, 5..15 ms, the LFO half a turn apart: left and right move apart */
         cho_buf[fx.cho_w & (CHO_LEN - 1u)] = (int16_t)clamp(cho_in[i] >> 1, -32768, 32767);
-        fx.cho_ph += cinc;
-        r = (400 << 8) + ((osc_sine(fx.cho_ph) + 32768) * cdepth >> 8);   /* Q8 delay: read between samples */
         {
-            uint32_t ri = (uint32_t)r >> 8;
-            int32_t f = r & 255, c0 = cho_buf[(fx.cho_w - ri) & (CHO_LEN - 1u)];
-            int32_t c1 = cho_buf[(fx.cho_w - ri - 1u) & (CHO_LEN - 1u)];
-            y += (c0 + (((c1 - c0) * f) >> 8)) << 1;
+            int32_t r0 = ca0 + dca * (int32_t)i, r1 = cb0 + dcb * (int32_t)i;
+            uint32_t i0 = (uint32_t)r0 >> 8, i1 = (uint32_t)r1 >> 8;
+            int32_t c0 = cho_buf[(fx.cho_w - i0) & (CHO_LEN - 1u)], c1 = cho_buf[(fx.cho_w - i0 - 1u) & (CHO_LEN - 1u)];
+            int32_t d0 = cho_buf[(fx.cho_w - i1) & (CHO_LEN - 1u)], d1 = cho_buf[(fx.cho_w - i1 - 1u) & (CHO_LEN - 1u)];
+            yl = (c0 + (((c1 - c0) * (r0 & 255)) >> 8)) << 1;
+            yr = (d0 + (((d1 - d0) * (r1 & 255)) >> 8)) << 1;
         }
         fx.cho_w++;
-        /* delay with a low-passed feedback */
+        /* delay with a low-passed feedback (in the middle) */
         x = dly_buf[(fx.dly_w - dl) & (DLY_LEN - 1u)];
         fx.dly_lp += mulq15(x - fx.dly_lp, col);
         dly_buf[fx.dly_w & (DLY_LEN - 1u)] =
             (int16_t)clamp((dly_in[i] >> 1) + mulq15(fx.dly_lp, fb), -32768, 32767);
         fx.dly_w++;
-        y += mulq15(x << 1, dmix);
-        /* reverb: 4 damped combs + 2 allpasses (Freeverb-like, mono) */
-        a = 0;
+        x = mulq15(x << 1, dmix);
+        yl += x;
+        yr += x;
+        /* reverb: two diffusers, then the four lines */
+        a = mulq15(rev_in[i], 13000);
         {
-            int16_t *c = rev_comb;
-            int32_t in = mulq15(rev_in[i], 2580);       /* 1/8 at -4 dB */
-            for (k = 0; k < 4u; k++) {
-                int32_t o = c[fx.comb_i[k]];
-                fx.comb_lp[k] = o + mulq15(fx.comb_lp[k] - o, 32767 - damp);
-                c[fx.comb_i[k]] = (int16_t)clamp(in + mulq15(fx.comb_lp[k], size), -32768, 32767);
-                if (++fx.comb_i[k] >= REV_COMB[k])
-                    fx.comb_i[k] = 0;
-                a += o;
-                c += REV_COMB[k];
-            }
-            c = rev_ap;
+            int16_t *c = rev_ap;
             for (k = 0; k < 2u; k++) {
-                int32_t o = c[fx.ap_i[k]];
-                int32_t v = a + (o >> 1);
+                int32_t b = c[fx.ap_i[k]], v = a + (b >> 1);
                 c[fx.ap_i[k]] = (int16_t)clamp(v, -32768, 32767);
-                a = o - a;                              /* Freeverb: out = buf - in (o - v would be a notch comb) */
+                a = b - (v >> 1);
                 if (++fx.ap_i[k] >= REV_AP[k])
                     fx.ap_i[k] = 0;
                 c += REV_AP[k];
             }
         }
-        y += a;
-        wet[i] = y;
+        {
+            int16_t *c = rev_line;
+            int32_t s0, s1, d0, d1, r = ma + (((mb - ma) * (int32_t)i) >> CTL_LOG2);   /* (between the two: never below 0) */
+            uint32_t ri = fx.line_i[0] + ((uint32_t)r >> 8), rj;
+            if (ri >= L0)                                   /* (the oldest sample is at line_i: reading */
+                ri -= L0;                                   /* past it shortens line 0 by 0..2 REV_MOD) */
+            rj = ri + 1u >= L0 ? 0u : ri + 1u;
+            o0 = c[ri] + (((c[rj] - c[ri]) * (r & 255)) >> 8);
+            o1 = c[B1 + fx.line_i[1]];
+            o2 = c[B2 + fx.line_i[2]];
+            o3 = c[B3 + fx.line_i[3]];
+            s0 = o0 + o1, d0 = o0 - o1, s1 = o2 + o3, d1 = o2 - o3;   /* Hadamard / 2: each feeds all four */
+            fx.line_lp[0] += mulq15(((s0 + s1) >> 1) - fx.line_lp[0], lpk);
+            fx.line_lp[1] += mulq15(((d0 + d1) >> 1) - fx.line_lp[1], lpk);
+            fx.line_lp[2] += mulq15(((s0 - s1) >> 1) - fx.line_lp[2], lpk);
+            fx.line_lp[3] += mulq15(((d0 - d1) >> 1) - fx.line_lp[3], lpk);
+            c[fx.line_i[0]] = (int16_t)clamp(mulq15(fx.line_lp[0], g) + a, -32768, 32767);
+            c[B1 + fx.line_i[1]] = (int16_t)clamp(mulq15(fx.line_lp[1], g) - a, -32768, 32767);
+            c[B2 + fx.line_i[2]] = (int16_t)clamp(mulq15(fx.line_lp[2], g) + a, -32768, 32767);
+            c[B3 + fx.line_i[3]] = (int16_t)clamp(mulq15(fx.line_lp[3], g) - a, -32768, 32767);
+            if (++fx.line_i[0] >= L0) fx.line_i[0] = 0;
+            if (++fx.line_i[1] >= REV_LINE[1]) fx.line_i[1] = 0;
+            if (++fx.line_i[2] >= REV_LINE[2]) fx.line_i[2] = 0;
+            if (++fx.line_i[3] >= REV_LINE[3]) fx.line_i[3] = 0;
+        }
+        wet_l[i] = yl + o0 + o2;
+        wet_r[i] = yr + o1 - o3;
     }
 }
 
 /* one block of the whole mix (shared with tests/hostsim.c): events -> each part
  * -> dist -> SLICER -> level / pan / sends -> drums (-> SLICER) -> buses -> master; out: stereo Q15 */
 static void events_block(uint32_t n);                    /* seq.c */
-static int32_t send_c[CTL], send_d[CTL], send_r[CTL], wet[CTL], mix_l[CTL], mix_r[CTL], part_buf[CTL];
+static int32_t send_c[CTL], send_d[CTL], send_r[CTL], wet_l[CTL], wet_r[CTL], mix_l[CTL], mix_r[CTL], part_buf[CTL];
 
 /* ---- mute / solo: a track that goes silent fades out over ~6 ms (and back in) */
 #define MUTE_STEP 4096                                  /* Q15 per block: 8 blocks */
@@ -243,7 +275,7 @@ static void mix_part(track_t *t, uint32_t n)
         return;
     }
     {
-        int32_t lvl = LEVEL_Q12[t->p[P_LEVEL] & 127], pan = t->p[P_PAN];
+        int32_t lvl = LEVEL_Q12[t->p[P_LEVEL] ? clamp(t->p[P_LEVEL] + t->p[P_ED_FX], 1, 127) : 0], pan = t->p[P_PAN];   /* (+ the sound's trim: 1/2 dB steps, as LEVEL's) */
         int32_t gl = 4096 - (pan > 0 ? pan * 64 : 0), gr = 4096 + (pan < 0 ? pan * 64 : 0);
         int32_t c = t->p[P_CHOR] * 258, d = t->p[P_DLY] * 258, r = t->p[P_REV] * 258, pk = t->peak;
         int32_t xmax = c > d ? c : d;
@@ -251,8 +283,10 @@ static void mix_part(track_t *t, uint32_t n)
         xmax = 0x7FFFFFFF / ((xmax > r ? xmax : r) | 1);   /* sends: loud chords at a high LEVEL */
         track_dist(t, b, n);
         slicer_track(t, b, n);                          /* slicer.c: before the level, pan and sends */
+        int32_t lvl0 = t->lvl ? t->lvl : lvl, dl = (lvl - lvl0) >> CTL_LOG2;   /* a new sound's trim: ramped */
+        t->lvl = lvl;
         for (i = 0; i < n; i++) {
-            int32_t x = ((b[i] >> 2) * lvl) >> 10, a;   /* pre-shift: 8 loud voices */
+            int32_t x = ((b[i] >> 2) * (lvl0 + dl * (int32_t)i)) >> 10, a;   /* pre-shift: 8 loud voices */
             int32_t xs, g = ga + (((gb - ga) * (int32_t)i) >> CTL_LOG2);
             if (g < 32767)
                 x = (x >> 4) * (g >> 3) >> 8;           /* (Q15 in two halves: no 32-bit overflow) */
@@ -384,10 +418,10 @@ static void mix_block(int32_t *out, uint32_t n)
     drums.a0 = TDRUM->att;                              /* the drum track's mute / solo fade */
     drums.a1 = 32767 - gain_next(TDRUM);
     slicer_drums(mix_l, mix_r, send_r, n);              /* drums_render, through the SLICER when on */
-    fx_buses(send_c, send_d, send_r, wet, n);
+    fx_buses(send_c, send_d, send_r, wet_l, wet_r, n);
     for (i = 0; i < n; i++) {
-        mix_l[i] += wet[i];
-        mix_r[i] += wet[i];
+        mix_l[i] += wet_l[i];
+        mix_r[i] += wet_r[i];
     }
     dust_process(mix_l, mix_r, n);
     punch_process(mix_l, mix_r, n);

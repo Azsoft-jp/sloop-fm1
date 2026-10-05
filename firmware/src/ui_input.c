@@ -127,7 +127,8 @@ static void ui_leds(void)
         led_pos_init();
         ready = 1;
     }
-    led_put(nl, panel.btn[ui.layer != LY_PLAY ? LAYER_BTN[ui.layer] : cur_btn()], 1);
+    led_put(nl, panel.btn[ui.layer != LY_PLAY ? LAYER_BTN[ui.layer] : cur_btn()],
+            ly_lock == LY_PLAY || ((fm1_ms / 300u) & 1u) != 0u || (fm1_in.buttons & ly_bit[ly_lock % LY_COUNT]) != 0u);   /* locked: blinks */
     led_put(nl, panel.btn[B_PLAY], play_led() || (song.playing && !song.rec && ft_on));
     led_put(nl, panel.btn[B_REC], song.rec != 0u || ft_on || (rec_wait && ((fm1_ms / 125u) & 1u)) ||
                                      (ui.hold_kind == 1u && ((fm1_ms / 60u) & 1u)));   /* blinks: armed; fast: clearing */
@@ -343,6 +344,12 @@ static void edit_param(uint32_t slot, int32_t steps)
         break;
     case G_NEWPRJ:
         *vp = 0;
+#if FELUCCA_ARRANGER
+        if (song.playing && arrangement_enabled) {      /* (the song's stop would bring the old loop back) */
+            ui_message("STOP THE SONG FIRST");
+            break;
+        }
+#endif
         project_new();
         ui_message("NEW PROJECT");
         break;
@@ -458,18 +465,40 @@ static void layer_tap(uint32_t layer)
     }
 }
 
-/* the layers, once a frame: which one is held, the taps on release, its keys and knobs. Returns 1
- * while one is held (the page does not take the knobs then) */
-static int layers_input(uint32_t note_edges)
+/* a layer locked open: a layer button held + HOME tapped. The layer stays with the button let go (both
+ * hands free for the keys and the knobs); any other button but PLAY, REC and OCT- / OCT+ lets it go
+ * (and does only that: its press is eaten) */
+static uint8_t home_eat;                                  /* HOME pressed to unlock: its tap is eaten */
+static void layer_unlock(void)
+{
+    if (ly_lock != LY_PLAY) {
+        ly_lock = LY_PLAY;
+        ui.force = 1;
+    }
+}
+
+/* the layers, once a frame: which one is held (or locked), the taps on release, its keys and knobs.
+ * Returns 1 while one is held or locked (the page does not take the knobs then) */
+static int layers_input(uint32_t note_edges, uint32_t *pressed, uint32_t home)
 {
     static uint8_t down[LY_COUNT], used[LY_COUNT];
     static uint32_t t0[LY_COUNT];
-    uint32_t l, now = fm1_ms, held = LY_PLAY;
+    uint32_t l, now = fm1_ms, held = LY_PLAY, eat = 0;
+    if (ly_lock != LY_PLAY) {
+        uint32_t keep = 1u << panel.btn[B_PLAY] | 1u << panel.btn[B_REC] | 1u << panel.btn[B_OCTDN] | 1u << panel.btn[B_OCTUP];
+        eat = *pressed & ~keep;
+        if (eat) {
+            layer_unlock();
+            if (eat & 1u << panel.btn[B_HOME])
+                home_eat = 1;
+            *pressed &= ~eat;
+        }
+    }
     for (l = LY_FX; l < LY_COUNT; l++) {
         uint32_t d = (fm1_in.buttons & ly_bit[l]) != 0u;
         if (d && !down[l]) {
             t0[l] = now;
-            used[l] = 0;
+            used[l] = (uint8_t)((eat & ly_bit[l]) != 0u);  /* (the press that unlocked: not a tap) */
         }
         if (d && note_edges)
             used[l] = 1;                                  /* a key while held: not a tap */
@@ -478,6 +507,16 @@ static int layers_input(uint32_t note_edges)
         down[l] = (uint8_t)d;
         if (d && held == LY_PLAY)
             held = l;
+    }
+    if (held != LY_PLAY && home == BT_TAP && !home_eat) {  /* held + HOME: locked open */
+        ly_lock = (uint8_t)held;
+        used[held] = 1;
+        ui.layer = (uint8_t)held;
+        ui.force = 1;
+    }
+    if (held == LY_PLAY && ly_lock != LY_PLAY) {
+        held = ly_lock;
+        used[held] = 1;
     }
     punch.hold = (uint8_t)(held == LY_FX);
     if (held != LY_PLAY && held != ui.layer && ui.layer != LY_PLAY)
@@ -604,6 +643,7 @@ static void ui_input(void)
         if (ui.menu) {
             menu_close();
         } else {
+            layer_unlock();
             ui.menu = 1;
             ui.menu_sel = 0;
             ui.confirm = 0;
@@ -617,7 +657,12 @@ static void ui_input(void)
             menu_input(pressed);
         return;
     }
-    layered = layers_input(notes);
+    layered = layers_input(notes, &pressed, home);
+    if (home_eat && !((fm1_in.buttons >> panel.btn[B_HOME]) & 1u)) {   /* (the HOME that unlocked: let go) */
+        if (home == BT_TAP)
+            home = BT_NONE;
+        home_eat = 0;
+    }
     pressed &= ~(ly_bit[LY_FX] | ly_bit[LY_ERASE] | ly_bit[LY_ROLL] | ly_bit[LY_STEP] | ly_bit[LY_SCALE] | ly_bit[LY_MIX] |
                  ly_bit[LY_SONG]);
     holds_input(pressed, fm1_ms);

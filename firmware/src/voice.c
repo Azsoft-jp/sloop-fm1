@@ -254,6 +254,13 @@ static void voice_start(track_t *t, voice_t *v, uint32_t note, uint32_t vel, int
         } else if (e == &ENG_LOFI) {
             v->s[0] = s0;
             v->s[4] = s4;
+        } else if (e == &ENG_TRIO) {
+            v->s[0] = s0;                               /* filter */
+            v->s[1] = s1;
+            v->s[4] = s4;                               /* the sample waiting for its step corrections */
+        } else if (e == &ENG_PHASE) {
+            v->s[0] = s0;                               /* the WAVE / WAVE2 toggles go with the phases kept */
+            v->s[1] = s1;
         }
     }
 }
@@ -270,11 +277,12 @@ static void mono_play(track_t *t, uint32_t note, uint32_t vel, int retrig, int g
             k = k * (NVOICE - 1) / (int32_t)(nv - 1u);      /* fewer voices: the outer ones as wide */
         v->fine = nv > 1u ? k * t->p[P_DETUNE] * 56 / 889 : 0;   /* up to ~±40 cents */
         if (retrig || !v->active || !v->gate) {
+            int was_sounding = v->active && v->stage != 0;
             if ((!v->active || v->stage == 4u) && !voice_room(t, i > 0))
                 continue;                                   /* no room for this extra UNISON voice */
             /* level: about the same sum for 8 or 4 voices at random phases */
             voice_start(t, v, note, nv >= NVOICE ? vel * 36u / 100u : nv > 1u ? vel / 2u : vel, glide);
-            if (nv > 1u && i && !eng_sampled(ENGINES[t->engine])) {   /* random start phases: */
+            if (nv > 1u && i && !eng_sampled(ENGINES[t->engine]) && !was_sounding) {   /* random start phases: */
                 static uint32_t seed = 0x1234567u;          /* in phase they stack, evenly spread they cancel */
                 seed = seed * 1664525u + 1013904223u;
                 v->ph[0] += seed;

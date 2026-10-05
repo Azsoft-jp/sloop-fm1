@@ -32,10 +32,10 @@ static void draw_menu(void)
             cv_text(4, 88, &FONT_S, "H\xDCGELTON INSTRUMENTS", C_HI);   /* Latin-1 U-umlaut */
             cv_text(4, 104, &FONT_S, "HUGELTON.COM", C_AMB);
             cv_text(4, 119, &FONT_S, "GPL-3.0, NO WARRANTY", C_HI);
-            cv_text(4, 132, &FONT_S, "GITHUB.COM/HUGELTON/FELUCCA", C_AMB);
+            cv_text(4, 132, &FONT_S, "GITHUB.COM/ISOD89/SLOOP-FM1", C_AMB);   /* (the source of this firmware) */
             cv_text(4, 146, &FONT_S, "FONT: TERMINUS (OFL)", C_DIM);
             cv_text(4, 159, &FONT_S, "SAMPLES: VERSILIAN (CC0)", C_DIM);
-            cv_text(4, 172, &FONT_S, "+ H\xDCGELTON SAMPLE PACK", C_DIM);
+            cv_text(4, 172, &FONT_S, "+ SONIC PI (CC0)", C_DIM);
             cv_text(4, 185, &FONT_S, "PHASE: CRISPYZEBRA (GPL)", C_DIM);
             cv_text(4, 198, &FONT_S, "VOICE: REF. KLATTSCH (MIT)", C_DIM);
         } else {
@@ -71,7 +71,10 @@ static void enc_drop(void)                             /* knob turns nobody take
 
 static void menu_close(void)
 {
-    settings_save();                                   /* palette / panel table, if changed */
+    if (song.playing || transport_req)
+        settings_later = 1;                            /* (a flash write stops the audio: once stopped) */
+    else
+        settings_save();                               /* palette / panel table, if changed */
     ui.menu = 0;
     ui.force = 1;
     go_home();

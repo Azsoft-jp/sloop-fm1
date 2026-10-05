@@ -109,6 +109,20 @@ static int32_t punch_ring_fx(int32_t fx)
     return k < 64u ? (y * (int32_t)k) >> 6 : len - k < 64u ? (y * (int32_t)(len - k)) >> 6 : y;
 }
 
+/* the loops, STUTTER, HALF and REVERSE replay ring samples [start, start + len) (REVERSE: up to start,
+ * backwards). The ring keeps recording the mix, and after PUNCH_N samples (0.74 s) the writer comes
+ * round into that span: it skips those slots once the loop is captured, so a held loop plays for as
+ * long as the key is held. The rest of the ring keeps recording (the next effect has its past). */
+static int punch_owns(int32_t fx, uint32_t w)
+{
+    uint32_t d = w - punch.start, len = punch.len;
+    if (fx < 0 || fx > PX_HALF || fx == PX_STOP || punch.pre)
+        return 0;
+    if (fx == PX_REV)
+        return d >= 1u && ((d + len - 1u) & (PUNCH_N - 1u)) < len;
+    return d >= len && (d & (PUNCH_N - 1u)) < len;
+}
+
 /* l, r: the mix before the master (fx.c mix_block), n samples, in place */
 static void punch_process(int32_t *l, int32_t *r, uint32_t n)
 {
@@ -142,7 +156,8 @@ static void punch_process(int32_t *l, int32_t *r, uint32_t n)
         int32_t x = l[i], y = r[i], wl = x, wr = y, m = (x + y) >> 1;
         int32_t fx = punch.cur;
         uint32_t target = want == fx ? 32767u : 0u;
-        punch_ring[punch.w & (PUNCH_N - 1u)] = (int16_t)clamp(m >> 3, -32768, 32767);
+        if (!punch_owns(fx, punch.w))                   /* (a held loop keeps its material) */
+            punch_ring[punch.w & (PUNCH_N - 1u)] = (int16_t)clamp(m >> 3, -32768, 32767);
         switch (fx) {
         case PX_LPF:
             wl = tsvf_lp(&c1, x >> 1, &punch.f1l, &punch.f2l) << 1;

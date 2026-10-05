@@ -12,8 +12,8 @@
  * treatments (as before: old projects keep their kit), 5..: the synthesised kits. */
 #define DRUM_SAMPLED 5u
 #define DRUM_KITS (DRUM_SAMPLED + DS_NKITS)
-static const char *const DRUM_KIT_NAMES[] = {"ORIGINAL", "DEEP", "TIGHT", "BRIGHT", "DUST", DS_KIT_NAME_LIST};
-static const char *const DRUM_KIT_STYLES[] = {"ACOUSTIC", "SOFT", "PUNCHY", "BRIGHT", "DUSTY", DS_KIT_STYLE_LIST};
+static const char *const DRUM_KIT_NAMES[] = {"ACOUSTIC", "DEEP", "TIGHT", "BRIGHT", "DUST", DS_KIT_NAME_LIST};
+static const char *const DRUM_KIT_STYLES[] = {"STUDIO", "SOFT", "PUNCHY", "BRIGHT", "DUSTY", DS_KIT_STYLE_LIST};
 static uint32_t drum_kit(void) { return (uint32_t)clamp(TDRUM->p[P_E0], 0, DRUM_KITS - 1); }
 #define DRUM_DEFAULT_KIT DRUM_SAMPLED   /* power-on: 808 */
 
@@ -252,6 +252,7 @@ static inline void drums_mix(int32_t *ml, int32_t *mr, int32_t *rev, int32_t *mo
         if (!v->active)
             continue;
         g = mulq15(lvl, v->vel * 258);
+        g += g * 3 >> 2;                           /* x1.75 (+5 dB): as loud as the synthesised kits */
         for (i = 0; i < n; i++) {
             int32_t s;
             frac += stepq;

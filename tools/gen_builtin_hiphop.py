@@ -5,8 +5,8 @@ the firmware, under assets/samples-cc0/<SET>/ (all CC0; CREDITS.txt next to them
 
     python tools/gen_builtin_hiphop.py      (numpy, scipy, soundfile; fetches the sources once)
 
-Sets (gen_samples.py CC0_SETS gives their order and kind):
-  DUSTY  a dusty upright piano     (VCSL Upright Piano, Knight)
+Sets (gen_samples.py CC0_SETS gives their order and kind; PIANO, the grand, is cut from VCSL as
+ATTRIBUTION.txt lists):
   BASS   jazz upright bass, pizz   (VSCO-2 CE Solo Contrabass) - two octaves under the keys
   VIBES  vibraphone, hard mallets  (VCSL)
   HORNS  trumpet + trombone stabs  (VSCO-2 CE)
@@ -27,7 +27,6 @@ CC0 = g.ROOT / "assets" / "samples-cc0"
 
 # set: (zones [(MIDI root it sounds at, seconds)], builder, chain, transpose of the stored root)
 SETS = {
-    "DUSTY": ([(48, 1.0), (57, 1.0), (66, 1.0), (75, 1.0)], g.UPR, dict(lp=9500, drive=1.3, warm=2.0, wow=0.0008), 0),
     "BASS": ([(28, 0.9), (35, 0.9), (42, 0.9), (49, 0.85)], g.CB, dict(lp=4500, drive=1.8, warm=3.0, wow=0.0), 24),
     "VIBES": ([(53, 1.0), (62, 1.0), (71, 1.0)], g.VIB, dict(lp=10000, drive=1.2, warm=1.0), 0),
     "HORNS": ([(55, 0.6), (62, 0.6), (69, 0.6), (76, 0.6)],
@@ -39,7 +38,8 @@ SCRATCH = [("vinyl_scratch", 57, 0.8), ("vinyl_backspin", 65, 0.8), ("vinyl_rewi
 
 CREDITS = """Samples in the SAMPLE engine's built-in sets. All CC0 1.0 (public domain).
 
-DUSTY  VCSL (Versilian Community Sample Library), Upright Piano (Knight)
+PIANO  VCSL (Versilian Community Sample Library), Grand Piano (Steinway B), sustain, close mics
+       (until 2.1 the piano was VCSL's Upright Piano (Knight), DUSTY; it is no longer in the tree)
 VIBES  VCSL, Vibraphone (hard mallets)                    https://github.com/sgossner/VCSL
 BASS   VSCO-2 Community Edition, Solo Contrabass pizzicato
 HORNS  VSCO-2 Community Edition, Trumpet + Tenor Trombone staccato
@@ -48,7 +48,8 @@ FLUTE  VSCO-2 Community Edition, Flute (susvib)           https://github.com/sgo
 SCRCH  Sonic Pi sample set (freesound.org CC0 recordings): vinyl_scratch (hello_flowers),
        vinyl_backspin (il112), vinyl_rewind (TasmanianPower)
        https://github.com/sonic-pi-net/sonic-pi/tree/main/etc/samples
-KIT    VCSL hand percussion (tambourine, shaker, conga, claves, woodblock) for the GM kit
+KIT    VCSL: the acoustic drum kit of the GM map (bass drum, snare, side stick, claps, hi-hat, toms,
+       suspended cymbal, cowbell) and hand percussion (tambourine, shaker, conga, claves, woodblock)
 
 Thanks to Versilian Studios / Sam Gossner and to the Sonic Pi project.
 Retuned, cut and coloured by tools/gen_builtin_hiphop.py (gen_hiphop_pack.py's chain).
@@ -75,7 +76,7 @@ def main():
         return real(url, nominal, target)
     g.source = source
     att = []
-    for old in ("PIANO", "TRANH", "SAX"):                  # (TRANH and SAX are gone; PIANO is new)
+    for old in ("DUSTY", "TRANH", "SAX"):                  # (sets of earlier releases; PIANO is kept)
         shutil.rmtree(CC0 / old, ignore_errors=True)
     total = 0
     for name, (zones, make, chain, tr) in SETS.items():
@@ -101,9 +102,9 @@ def main():
         total += len(x)
     (CC0 / "CREDITS.txt").write_text(CREDITS, encoding="utf-8")
     keep = [ln for ln in (CC0 / "ATTRIBUTION.txt").read_text(encoding="utf-8").splitlines()
-            if ln.startswith(("FLUTE/", "KIT/"))] if (CC0 / "ATTRIBUTION.txt").exists() else []
+            if ln.startswith(("FLUTE/", "KIT/", "PIANO/"))] if (CC0 / "ATTRIBUTION.txt").exists() else []
     (CC0 / "ATTRIBUTION.txt").write_text(ATT_HEAD + "\n".join(att + keep) + "\n", encoding="utf-8")
-    print(f"built-in sets: {total / g.RATE:.1f} s written (FLUTE and KIT kept)")
+    print(f"built-in sets: {total / g.RATE:.1f} s written (FLUTE, KIT and PIANO kept)")
 
 
 if __name__ == "__main__":

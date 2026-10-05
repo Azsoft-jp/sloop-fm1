@@ -12,7 +12,7 @@ void fm1_timer5_irq(void)
     fm1_timer5_ack();
     felucca_dbg.timer_irqs++;
     if (felucca_dbg.in_audio)
-        felucca_dbg.nested++;                      /* only possible if this IRQ outranks ALNK0 */
+        felucca_dbg.nested++;                      /* a tick inside the audio render (it outranks ALNK0) */
     fm1_input_tick();
     if (sub % 5u == 0u)
         usb_poll();                             /* 2 kHz: all USB SIE traffic lives here */
@@ -37,7 +37,11 @@ extern void isr_timer5(void);
 
 static void timer5_start(void)                 /* OSC /4 = 6 MHz, PRD 600 -> 10 kHz */
 {
-    fm1_timer5_start(isr_timer5, 1);   /* below ALNK0 (3): no nesting into audio */
+    /* above ALNK0 (3): the tick may nest into the audio render (a few us; plain registers, the
+     * MIDI rings are single-producer / single-consumer). Below it, a tick waited for the render
+     * and the column it had lit stayed on longer: the LEDs shimmered, beating against the audio
+     * blocks (1378 / s against the 909 / s scan) */
+    fm1_timer5_start(isr_timer5, 4);
 }
 
 static void hexs(char *b, uint32_t v)
@@ -161,11 +165,12 @@ static void fm1_main(void)
                 song.master_q12 = (k10 * k10) >> 8;            /* 0 .. ~4096 */
             }
         }
-        {   /* OCT- + OCT+ held 5 s: enter UBOOT with RAM intact (debug / update); a countdown
-             * shows from 2 s, letting go cancels it */
+        {   /* OCT- + OCT+ held 5 s, stopped: enter UBOOT with RAM intact (debug / update); a countdown
+             * shows from 2 s, letting go cancels it. Not while playing: on the drum track these are the
+             * ghost / hard modifiers, held for a long time */
             static uint32_t t0, shown;
             uint32_t both = (1u << panel.btn[B_OCTDN]) | (1u << panel.btn[B_OCTUP]);
-            if ((fm1_in.buttons & both) != both) {
+            if ((fm1_in.buttons & both) != both || song.playing) {
                 if (shown)
                     ui_say("UPDATE MODE ", "CANCELLED");
                 shown = 0;
@@ -179,6 +184,9 @@ static void fm1_main(void)
                 }
             } else if (fm1_ms - t0 > 5000u) {
                 fm1_audio_stop();
+#if FELUCCA_ARRANGER
+                persist_flush_now();                    /* (live sections, song, project: RAM-only so far) */
+#endif
                 lcd_fill(0, 0, 240, 240, C_BLACK);
                 draw_text_box(0, 110, 240, &FONT_S, "UBOOT", RGB(80, 120, 255), 1);
                 usb_detach();
@@ -193,6 +201,9 @@ static void fm1_main(void)
         if (usb.ota_req) {                              /* M-UPGRADE upgrade command */
             usb.ota_req = 0;
             panic_req = (1u << NTRK) - 1u;               /* every track (bit per track) */
+#if FELUCCA_ARRANGER
+            persist_flush_now();                        /* an update ends in a reset: RAM-only work first */
+#endif
             if (flash_ok)
                 ota_session();                          /* returns only if nothing was committed */
             lcd_fill(0, 0, 240, 240, C_BLACK);
@@ -201,6 +212,9 @@ static void fm1_main(void)
 #endif
         if (usb.uboot_req) {                            /* SysEx F0 22 24 35 7D F7 from the host */
             fm1_audio_stop();
+#if FELUCCA_ARRANGER
+            persist_flush_now();                    /* (live sections, song, project: RAM-only so far) */
+#endif
             lcd_fill(0, 0, 240, 240, C_BLACK);
             draw_text_box(0, 110, 240, &FONT_S, "UBOOT (USB)", C_WHITE, 1);
             fm1_delay_ms(20);
