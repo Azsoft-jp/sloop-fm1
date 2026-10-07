@@ -7,13 +7,13 @@
  * OCT- closes (from ABOUT: back to the section). */
 /* ------------------------------------------------------------ menu --- */
 enum { MI_COLOR, MI_ZOOM, MI_LIGHTS, MI_KEYS, MI_NOTES, MI_LOWCUT, MI_USB, MI_SERIAL, MI_PANEL, MI_ABOUT, MI_COUNT };
-static const char *const MI_NAME[MI_COUNT] = {"COLOR", "ZOOM", "LIGHTS", "KEYS", "NOTES", "SPEAKER LOWCUT", "USB AUDIO",
-                                              "USB SERIAL", "HARDWARE CALIBRATION", "ABOUT"};
+static const ui_string_id_t MI_NAME[MI_COUNT] = {UI_COLOR, UI_ZOOM, UI_LIGHTS, UI_KEYS, UI_NOTES, UI_SPEAKER_LOWCUT,
+                                                UI_USB_AUDIO, UI_USB_SERIAL, UI_PANEL, UI_ABOUT};
 enum { MS_SCREEN, MS_LIGHTS, MS_AUDIO, MS_SYSTEM, MS_COUNT };
-static const char *const MS_NAME[MS_COUNT] = {"SCREEN", "LIGHTS", "AUDIO", "SYSTEM"};   /* (AUDIO: and USB) */
+static const ui_string_id_t MS_NAME[MS_COUNT] = {UI_SCREEN, UI_LIGHTS, UI_AUDIO, UI_MENU_SYSTEM};
 static const uint8_t MS_FIRST[MS_COUNT + 1] = {MI_COLOR, MI_LIGHTS, MI_LOWCUT, MI_PANEL, MI_COUNT};   /* rows of each */
-static const char *const LIGHTS_NAME[LIGHTS_N] = {"OFF", "LOW", "MID", "HIGH"};   /* every button lit, the labels readable */
-static const char *const KEYS_NAME[KEYS_N] = {"OFF", "C KEYS", "WHITE KEYS", "ALL KEYS"};      /* keys lit too, at the LIGHTS level */
+static const ui_string_id_t LIGHTS_NAME[LIGHTS_N] = {UI_OFF, UI_LOW, UI_MID, UI_HIGH};
+static const ui_string_id_t KEYS_NAME[KEYS_N] = {UI_OFF, UI_C_KEYS, UI_WHITE_KEYS, UI_ALL_KEYS};
 #define MI_Y0 26                                   /* the first row, under the section tabs */
 #define MI_DY 50                                   /* a row: the label, the value in large type */
 
@@ -31,16 +31,16 @@ static const char *mi_value(uint32_t i, uint16_t *c)
 {
     *c = C_HI;
     switch (i) {
-    case MI_COLOR: return PALETTES[settings.palette].name;
-    case MI_ZOOM: return settings.zoom ? "ON" : "OFF";
-    case MI_LIGHTS: return LIGHTS_NAME[lights_lvl % LIGHTS_N];
+    case MI_COLOR: return ui_display_name(PALETTES[settings.palette].name);
+    case MI_ZOOM: return ui_text(settings.zoom ? UI_ON : UI_OFF);
+    case MI_LIGHTS: return ui_text(LIGHTS_NAME[lights_lvl % LIGHTS_N]);
     case MI_KEYS:
         *c = lights_lvl ? C_HI : C_DIM;               /* (needs LIGHTS) */
-        return KEYS_NAME[lights_keys % KEYS_N];
-    case MI_NOTES: return lights_notes ? "ON" : "OFF";
-    case MI_LOWCUT: return settings.lowcut ? "ON" : "OFF";
-    case MI_USB: return usb_full ? "FULL" : "MASTER";
-    case MI_SERIAL: return usb_serial ? "ON" : "OFF";
+        return ui_text(KEYS_NAME[lights_keys % KEYS_N]);
+    case MI_NOTES: return ui_text(lights_notes ? UI_ON : UI_OFF);
+    case MI_LOWCUT: return ui_text(settings.lowcut ? UI_ON : UI_OFF);
+    case MI_USB: return ui_text(usb_full ? UI_FULL : UI_MASTER);
+    case MI_SERIAL: return ui_text(usb_serial ? UI_ON : UI_OFF);
     default:
         *c = C_DIM;
         return "";                                    /* (an action: OCT+ opens it) */
@@ -59,10 +59,10 @@ static void draw_menu(void)
     if (ui.force)                                   /* head + rule + two bands cover rows 0..229 */
         lcd_fill(0, H_HEAD + 1 + 124 + 95, 240, 240 - (H_HEAD + 1 + 124 + 95), C_BLACK);
     cv_begin(240, H_HEAD, C_BLACK);
-    cv_text(4, 1, &FONT_S, ui.menu == 2 ? "ABOUT" : "MENU", C_HI);
+    cv_text(4, 1, &FONT_S, ui_text(ui.menu == 2 ? UI_ABOUT : UI_MENU), C_HI);
     if (ui.menu != 2) {                             /* the section and its number, as a page's "ENV DEST 2/2" */
-        char t[16];
-        str_cpy(t, MS_NAME[sec], sizeof t);
+        char t[32];
+        str_cpy(t, ui_text(MS_NAME[sec]), sizeof t);
         str_cpy(t + str_len(t), " ", 2);
         fmt_int(t + str_len(t), (int32_t)sec + 1);
         str_cpy(t + str_len(t), "/", 2);
@@ -78,7 +78,7 @@ static void draw_menu(void)
             cv_text(4, 4, &FONT_L, "SLOOP", C_WHITE);
             cv_rect(96, 10, 8, 4, TE_COL[0]), cv_rect(96, 16, 12, 4, TE_COL[1]);   /* the sail */
             cv_rect(96, 22, 16, 4, TE_COL[2]), cv_rect(96, 28, 20, 4, TE_COL[3]);
-            cv_text(4, 36, &FONT_S, "BASED ON FELUCCA", C_AMB);
+            cv_text(4, 36, &FONT_S, ui_text(UI_BASED_ON), C_AMB);
             cv_text(4, 54, &FONT_S, FELUCCA_VERSION, C_HI);
             cv_text(236 - text_w(&FONT_S, __DATE__), 54, &FONT_S, __DATE__, C_GRAY);   /* build date */
             cv_text(cv_text(4, 72, &FONT_S, "LEO KUROSHITA", C_HI) + 8, 72, &FONT_S, "@KUROGEDELIC", C_AMB);
@@ -86,7 +86,7 @@ static void draw_menu(void)
             cv_text(4, 104, &FONT_S, "HUGELTON.COM", C_AMB);
             cv_text(4, 119, &FONT_S, "GPL-3.0, NO WARRANTY", C_HI);
             cv_text(4, 132, &FONT_S, "GITHUB.COM/ISOD89/SLOOP-FM1", C_AMB);   /* (the source of this firmware) */
-            cv_text(4, 146, &FONT_S, "FONT: TERMINUS (OFL)", C_DIM);
+            cv_text(4, 146, &FONT_S, "FONT: TERMINUS + NOTO JP", C_DIM);
             cv_text(4, 159, &FONT_S, "SAMPLES: VERSILIAN (CC0)", C_DIM);
             cv_text(4, 172, &FONT_S, "+ SONIC PI (CC0)", C_DIM);
             cv_text(4, 185, &FONT_S, "PHASE: CRISPYZEBRA (GPL)", C_DIM);
@@ -94,10 +94,11 @@ static void draw_menu(void)
         } else {
             int32_t x = 4;
             for (i = 0; i < MS_COUNT; i++) {        /* the sections as tabs: this one lit */
-                int32_t w = text_w(&FONT_S, MS_NAME[i]);
+                const char *name = ui_text(MS_NAME[i]);
+                int32_t w = text_w(&FONT_S, name);
                 if (i == sec)
                     cv_rect(x - 2, 3, w + 4, 18, C_LINE);
-                cv_text(x, 4, &FONT_S, MS_NAME[i], i == sec ? C_WHITE : C_DIM);
+                cv_text(x, 4, &FONT_S, name, i == sec ? C_WHITE : C_DIM);
                 x += w + 10;
             }
             for (i = MS_FIRST[sec]; i < MS_FIRST[sec + 1u]; i++) {
@@ -109,13 +110,13 @@ static void draw_menu(void)
                 char k[4] = {'K', (char)('1' + r), 0, 0};
                 cv_rect(4, y + 2, 4, MI_DY - 8, cur ? C_WHITE : TE_COL[r & 3u]);   /* the knob's colour */
                 xv = cv_text(14, y, &FONT_S, k, TE_COL[r & 3u]);
-                cv_text(xv + 6, y, &FONT_S, MI_NAME[i], cur ? C_WHITE : C_GRAY);
+                cv_text(xv + 6, y, &FONT_S, ui_text(MI_NAME[i]), cur ? C_WHITE : C_GRAY);
                 if (v[0] && text_w(&FONT_L, v) <= 222) {
                     xv = cv_text(14, y + 16, &FONT_L, v, cur && vc == C_HI ? C_WHITE : vc);
                 } else if (v[0]) {                      /* (too wide for the large type: WHITE KEYS) */
                     xv = cv_text(14, y + 24, &FONT_S, v, cur && vc == C_HI ? C_WHITE : vc);
                 } else {
-                    xv = cv_text(14, y + 24, &FONT_S, "OCT+ OPENS", cur ? C_WHITE : C_DIM);
+                    xv = cv_text(14, y + 24, &FONT_S, ui_text(UI_OCT_OPENS), cur ? C_WHITE : C_DIM);
                 }
                 if (i == MI_COLOR) {                    /* the palette's colours */
                     uint32_t q;
@@ -123,10 +124,10 @@ static void draw_menu(void)
                         cv_rect(xv + 10 + (int32_t)q * 14, y + 28, 10, 10, pal[q]);
                 }
                 if (i == MI_SERIAL && usb_serial != usb_cdc_now())
-                    cv_text(xv + 8, y + 30, &FONT_S, "RESTART", C_AMB);   /* (usb.c: at the next start) */
+                    cv_text(xv + 8, y + 30, &FONT_S, ui_text(UI_RESTART), C_AMB);   /* (usb.c: at the next start) */
             }
-            cv_text(4, MI_Y0 + 3 * MI_DY + 6, &FONT_S, "SELECT SECTION  KNOB SETS", C_DIM);
-            cv_text(4, MI_Y0 + 3 * MI_DY + 22, &FONT_S, "OCT+ OK   OCT- CLOSE", C_DIM);   /* (rows .. 218) */
+            cv_text(4, MI_Y0 + 3 * MI_DY + 6, &FONT_S, ui_text(UI_SELECT_SECTION_HINT), C_DIM);
+            cv_text(4, MI_Y0 + 3 * MI_DY + 22, &FONT_S, ui_text(UI_OCT_CLOSE_HINT), C_DIM);   /* (rows .. 218) */
         }
         cv_oy = 0;
         cv_blit(0, H_HEAD + 1 + pass * 124u);

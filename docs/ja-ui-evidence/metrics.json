@@ -1,0 +1,27 @@
+{
+  "baseline_ref": "v2.4",
+  "baseline_commit": "8d3823f",
+  "localized_ref": "codex/ja-localization-sloop-2.4",
+  "firmware": {
+    "baseline_bytes": 563120,
+    "localized_bytes": 575712,
+    "baseline_ram": 82916,
+    "localized_ram": 83188,
+    "ram_budget": 98304,
+    "baseline_pool": 334560,
+    "localized_pool": 334560,
+    "pool_budget": 344064,
+    "baseline_ramtext_sha256": "0d0540c3071b9230d6275623cb0874c4f61bbe18a1d02ba9f1aadc27d3582f36",
+    "localized_ramtext_sha256": "0d0540c3071b9230d6275623cb0874c4f61bbe18a1d02ba9f1aadc27d3582f36",
+    "app_slot_bytes": 581564,
+    "localized_slot_free_bytes": 5852
+  },
+  "web": {
+    "baseline_editor_bytes": 460974,
+    "localized_editor_bytes": 464301,
+    "baseline_installer_bytes": 19308,
+    "localized_installer_bytes": 20659
+  },
+  "glyphs": 75,
+  "string_ids": 238
+}

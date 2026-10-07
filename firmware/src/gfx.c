@@ -14,6 +14,7 @@ typedef struct {               /* proportional, see tools/gen_font.py */
     const uint8_t *data;
 } felucca_font_t;
 #include "felucca_font.h"
+#include "ui_strings.h"
 
 #define CV_MAX (240u * 124u)      /* the graph strip is 240 x 124 */
 static uint16_t cv_px[CV_MAX] __attribute__((section(".pool")));
@@ -132,6 +133,78 @@ static uint32_t glyph(const felucca_font_t *f, uint32_t ch)
     return ch - f->first;
 }
 
+/* Small, bounded UTF-8 decoder: malformed sequences consume one byte and
+ * become '?'. U+00DC remains available for the About screen's Latin-1 font. */
+static uint32_t utf8_next(const char **s)
+{
+    const uint8_t *p = (const uint8_t *)*s;
+    uint32_t a = p[0], b, c, d, cp;
+    if (!a) return 0;
+    *s += 1;
+    if (a < 0x80u) return a;
+    b = p[1];
+    if (a >= 0xC2u && a <= 0xDFu && (b & 0xC0u) == 0x80u) {
+        *s += 1;
+        return ((a & 31u) << 6) | (b & 63u);
+    }
+    if (a >= 0xE0u && a <= 0xEFu && b && (b & 0xC0u) == 0x80u) {
+        c = p[2];
+        if (c && (c & 0xC0u) == 0x80u && !(a == 0xE0u && b < 0xA0u) &&
+            !(a == 0xEDu && b >= 0xA0u)) {
+            *s += 2;
+            return ((a & 15u) << 12) | ((b & 63u) << 6) | (c & 63u);
+        }
+    }
+    if (a >= 0xF0u && a <= 0xF4u && b && (b & 0xC0u) == 0x80u) {
+        c = p[2];
+        if (c && (c & 0xC0u) == 0x80u) {
+            d = p[3];
+            if (d && (d & 0xC0u) == 0x80u && !(a == 0xF0u && b < 0x90u) &&
+                !(a == 0xF4u && b >= 0x90u)) {
+                cp = ((a & 7u) << 18) | ((b & 63u) << 12) | ((c & 63u) << 6) | (d & 63u);
+                *s += 3;
+                return cp;
+            }
+        }
+    }
+    return '?';
+}
+
+static int32_t jp_glyph(uint32_t cp)
+{
+    int32_t lo = 0, hi = FONT_J_COUNT - 1;
+    while (lo <= hi) {
+        int32_t mid = (lo + hi) / 2;
+        if (FONT_J_CODE[mid] == cp) return mid;
+        if (FONT_J_CODE[mid] < cp) lo = mid + 1;
+        else hi = mid - 1;
+    }
+    return -1;
+}
+
+/* Copy without splitting a UTF-8 character at a fixed UI buffer boundary. */
+static void text_copy(char *dst, uint32_t cap, const char *src)
+{
+    uint32_t used = 0;
+    if (!cap) return;
+    while (*src) {
+        const char *start = src;
+        uint32_t cp = utf8_next(&src), n = (uint32_t)(src - start), k;
+        if (used + n >= cap) break;
+        if (cp == '?' && (uint8_t)start[0] >= 0x80u) dst[used++] = '?';
+        else for (k = 0; k < n; k++) dst[used++] = start[k];
+    }
+    dst[used] = 0;
+}
+
+static void text_pop(char *s)
+{
+    uint32_t n = str_len(s);
+    if (!n) return;
+    do { n--; } while (n && ((uint8_t)s[n] & 0xC0u) == 0x80u);
+    s[n] = 0;
+}
+
 /* text, alpha-blended onto black with colour c; returns the end x */
 static int32_t cv_text(int32_t x, int32_t y, const felucca_font_t *f, const char *s, uint16_t c)
 {
@@ -139,20 +212,36 @@ static int32_t cv_text(int32_t x, int32_t y, const felucca_font_t *f, const char
     uint32_t r = c >> 11, g = (c >> 5) & 63u, b = c & 31u, a;
     for (a = 0; a < 16u; a++)
         ramp[a] = (uint16_t)(((r * a / 15u) << 11) | ((g * a / 15u) << 5) | (b * a / 15u));
-    for (; *s; s++) {
-        uint32_t gi = glyph(f, (uint8_t)*s), gx, gy, w, bpr;
+    while (*s) {
+        uint32_t cp = utf8_next(&s), gi, gx, gy, w, bpr, scale = f == &FONT_L ? 2u : 1u;
+        int32_t ji = cp > 255u ? jp_glyph(cp) : -1;
         const uint8_t *gd;
-        w = f->bw[gi];
-        bpr = ((w >> f->sh) + 1u) / 2u;
-        gd = f->data + f->off[gi];
-        for (gy = 0; gy < f->h; gy++)
-            for (gx = 0; gx < w; gx++) {
-                uint32_t sx = gx >> f->sh, v = gd[(gy >> f->sh) * bpr + sx / 2u];
-                v = (sx & 1u) ? (v & 15u) : (v >> 4);
-                if (v)
-                    cv_pset(x - f->pad + (int32_t)gx, y + (int32_t)gy, ramp[v]);
-            }
-        x += f->adv[gi];
+        if (ji >= 0) {
+            /* Keep the anti-aliased edge visible at the dim label palette. */
+            static const uint8_t ja_opacity[4] = {0, 8, 12, 15};
+            w = 20u * scale;
+            gd = FONT_J_DATA + FONT_J_OFF[ji];
+            for (gy = 0; gy < f->h; gy++)
+                for (gx = 0; gx < w; gx++) {
+                    uint32_t pixel = (gy / scale) * 20u + gx / scale;
+                    uint32_t alpha = (gd[pixel >> 2] >> (6u - 2u * (pixel & 3u))) & 3u;
+                    if (alpha)
+                        cv_pset(x - f->pad + (int32_t)gx, y + (int32_t)gy, ramp[ja_opacity[alpha]]);
+                }
+        } else {
+            gi = glyph(f, cp);
+            w = f->bw[gi];
+            bpr = ((w >> f->sh) + 1u) / 2u;
+            gd = f->data + f->off[gi];
+            for (gy = 0; gy < f->h; gy++)
+                for (gx = 0; gx < w; gx++) {
+                    uint32_t sx = gx >> f->sh, v = gd[(gy >> f->sh) * bpr + sx / 2u];
+                    v = (sx & 1u) ? (v & 15u) : (v >> 4);
+                    if (v)
+                        cv_pset(x - f->pad + (int32_t)gx, y + (int32_t)gy, ramp[v]);
+                }
+        }
+        x += ji >= 0 ? 16 * (int32_t)scale : f->adv[gi];
     }
     return x;
 }
@@ -160,8 +249,10 @@ static int32_t cv_text(int32_t x, int32_t y, const felucca_font_t *f, const char
 static int32_t text_w(const felucca_font_t *f, const char *s)
 {
     int32_t w = 0;
-    for (; *s; s++)
-        w += f->adv[glyph(f, (uint8_t)*s)];
+    while (*s) {
+        uint32_t cp = utf8_next(&s);
+        w += cp > 255u && jp_glyph(cp) >= 0 ? (f == &FONT_L ? 32 : 16) : f->adv[glyph(f, cp)];
+    }
     return w;
 }
 

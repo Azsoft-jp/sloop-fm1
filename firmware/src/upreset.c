@@ -296,29 +296,29 @@ static void up_ui(uint32_t op, uint32_t k)     /* 0 load, 1 erase, 2 save */
     int rc;
     up_slot_label(l, k);
     if (op != 1u && is_drum(TSEL)) {
-        ui_message("DRUM TRACK: NO SOUND");
+        ui_message(ui_text(UI_NO_DRUM_SOUND));
         return;
     }
     if (op < 2u && !up_used(k)) {
-        ui_message("EMPTY SLOT");
+        ui_message(ui_text(UI_EMPTY_SLOT));
         return;
     }
     if (op == 0u) {
         up_load(k);
-        ui_say("LOADED ", l);
+        ui_say(ui_text(UI_LOADED_PREFIX), l);
         return;
     }
     if (song.playing || transport_req) {               /* a flash erase stops the audio ~50 ms */
-        ui_message("STOP BEFORE SAVE");
+        ui_message(ui_text(UI_STOP_SAVE));
         return;
     }
     rc = op == 1u ? up_put(k, 0) : up_store(k, 0);
     if (rc == 3)
-        ui_message(op == 1u ? "ERASED (RAM)" : "SAVED (RAM)");
+        ui_message(ui_text(op == 1u ? UI_ERASED_RAM : UI_SAVED_RAM));
     else if (rc)
-        ui_message(op == 1u ? "ERASE ERROR" : "SAVE ERROR");
+        ui_message(ui_text(op == 1u ? UI_ERASE_ERROR : UI_SAVE_ERROR));
     else
-        ui_say(op == 1u ? "ERASED " : "SAVED ", l);
+        ui_say(ui_text(op == 1u ? UI_ERASED_PREFIX : UI_SAVED_PREFIX), l);
     ui.force = 1;
 }
 #endif

@@ -76,12 +76,12 @@ static struct {
     uint8_t hold_trk;
     uint32_t tap_ms[4];          /* tap tempo: the last taps */
     uint8_t tap_n;
-    char msg[24];
+    char msg[48];
     uint32_t enc_t[NE];
     /* drawn-state cache */
-    char col[4][32];
-    char focus_l[8], focus_v[8], focus_u[8];   /* the touched column, shown large */
-    char big_l[4][8], big_v[4][10], big_u[4][8];   /* the four columns, for the big values (2.4: pages without a graph) */
+    char col[4][64];
+    char focus_l[16], focus_v[16], focus_u[16]; /* the touched column, shown large */
+    char big_l[4][16], big_v[4][20], big_u[4][16]; /* 2.4 large columns; UTF-8 labels need byte room */
     uint16_t big_c[4];
     uint32_t graph_sig, head_sig, foot_sig, frame;
     uint8_t graph_top;           /* the graph strip's top G_OY rows hold something */
@@ -106,9 +106,11 @@ static uint32_t page_first(uint32_t fam)
 static void ui_say(const char *a, const char *b)
 {
     uint32_t n;
-    str_cpy(ui.msg, a, sizeof ui.msg);
+    text_copy(ui.msg, sizeof ui.msg, a);
     n = str_len(ui.msg);
-    str_cpy(ui.msg + n, b, sizeof ui.msg - n);
+    text_copy(ui.msg + n, sizeof ui.msg - n, b);
+    while (text_w(&FONT_S, ui.msg) > 236)
+        text_pop(ui.msg);
     ui.msg_t = 40;
 }
 
@@ -338,7 +340,7 @@ static void select_engine(uint32_t e)
     if (is_drum(TSEL))
         return;
     set_engine(e);
-    ui_say("ENGINE ", ENGINES[TSEL->eng_req]->name);
+    ui_say(ui_text(UI_ENGINE_PREFIX), ENGINES[TSEL->eng_req]->name);
     ui.force = 1;
 }
 

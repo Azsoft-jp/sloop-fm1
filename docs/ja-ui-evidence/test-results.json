@@ -1,0 +1,20 @@
+{
+  "basis": "upstream v2.4 8d3823f vs codex/ja-localization-sloop-2.4",
+  "target_build": "passed; app 575712 B; RAM 83188 B; pool 334560 B",
+  "japanese_resources": "238 EN/JA IDs; 75 sparse glyphs; no direct Japanese C literals",
+  "host_ui": "passed; 20000-frame fuzz, UTF-8, glyphs, menu widths, visualizer labels, key operations",
+  "stress": "passed; 5000 frames and 3000 frames under ASan/UBSan; all voices released after stop",
+  "soak": "passed; 1 minute random live use; bounded output and no hanging voices",
+  "audio_golden": "105 renders, zero changed, zero missing; zero health/voice/routing failures",
+  "ramtext": "925 instructions, no calls; SHA-256 identical to upstream v2.4",
+  "web_protocol": "passed; editor, samples, drum kits, projects, backup, firmware update",
+  "browser_layout": "passed; 17 views at 375 and 1280 px; no horizontal overflow/clipped parameter labels; dialog, tooltip, EN switch",
+  "html_report": "passed; 84 images, including 66 native LCD elements and 9 GIFs; 375 and 1280 px",
+  "full_suite": "exit 1 only for baseline budget gates; the unmodified upstream v2.4 reproduces the same failures",
+  "upstream_budget_failures": [
+    "PHASE CZ_BASS CPU +30% vs +25% limit",
+    "PHASE RESO_PLUCK CPU +42% vs +25% limit",
+    "fm1_alnk0_irq target cost 268 vs budget 174 (+54% vs +10% limit)"
+  ],
+  "hardware": "not tested"
+}

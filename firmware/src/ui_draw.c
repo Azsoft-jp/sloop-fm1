@@ -16,11 +16,11 @@ static int is_eng_name(const char *s)                 /* one of the ENGINES[]->n
 }
 
 /* at most 5 characters, and no wider than maxw */
-static void fit(char *d, const char *src, const felucca_font_t *f, int32_t maxw)
+static void fit(char *d, uint32_t cap, const char *src, const felucca_font_t *f, int32_t maxw)
 {
-    str_cpy(d, src, is_eng_name(src) ? 8 : 6);           /* engine names are kept whole */
+    text_copy(d, cap, src);
     while (d[0] && text_w(f, d) > maxw)
-        d[str_len(d) - 1u] = 0;
+        text_pop(d);
 }
 
 static int32_t batt_level(void)                         /* ADC ch3 thresholds */
@@ -122,17 +122,29 @@ static void draw_frame(void)
 /* one column: [icon] LABEL / value unit / gauge, redrawn only when it changed.
  * ratio: 0..1000 for the gauge, -1 = no gauge. icon: ICON_* (icons.c), ICON_AUTO = by label */
 #define LABEL_X (FELUCCA_ICONS ? ICON_CELL + ICON_GAP : 0)
+/* A narrow knob column must show a complete word. Keep its ASCII identifier
+ * when the Japanese display resource is wider than the column. */
+static const char *column_text(const char *raw, int32_t max_w)
+{
+    const char *shown = ui_display_name(raw);
+    return text_w(&FONT_S, shown) <= max_w ? shown : raw;
+}
 static void draw_column(uint32_t c, const char *label, const char *val, const char *unit, uint16_t vc,
                         int32_t ratio, uint32_t icon)
 {
-    char l[8], v[8], u[8], key[32];
-    int32_t x, gw = 52, fx;
+    char l[16], v[16], u[16], key[64];
+    int32_t x, gw = 52, fx, value_room = is_eng_name(val) ? 56 : 40;
+    const char *shown_label = column_text(label, 54);
+    const char *shown_val = column_text(val, value_room);
+    /* A three-kana label fits the column if the decorative icon yields. */
     if (icon == ICON_AUTO)
         icon = icon_for_label(label);
-    fit(l, label, &FONT_S, 54 - LABEL_X);
-    fit(v, val, &FONT_S, is_eng_name(val) ? 56 : 40);   /* engine names whole */
-    fit(u, unit, &FONT_S, 54 - text_w(&FONT_S, v) - 3);
-    str_cpy(key, l, 8);                                 /* cache key: texts + colour + gauge */
+    if (text_w(&FONT_S, shown_label) > 54 - LABEL_X && text_w(&FONT_S, shown_label) <= 54)
+        icon = ICON_NONE;
+    fit(l, sizeof l, shown_label, &FONT_S, icon == ICON_NONE ? 54 : 54 - LABEL_X);
+    fit(v, sizeof v, shown_val, &FONT_S, value_room);
+    fit(u, sizeof u, unit, &FONT_S, 54 - text_w(&FONT_S, v) - 3);
+    str_cpy(key, l, sizeof key);                        /* cache key: texts + colour + gauge */
     str_cpy(key + str_len(key), "|", 2);
     str_cpy(key + str_len(key), v, 8);
     str_cpy(key + str_len(key), "|", 2);
@@ -145,15 +157,15 @@ static void draw_column(uint32_t c, const char *label, const char *val, const ch
         key[n + 3] = 0;
     }
     if (c < 4u) {                                       /* (the big values: their own fit) */
-        str_cpy(ui.big_l[c], l, 8);
-        fit(ui.big_v[c], val, &FONT_L, 112 - (unit[0] ? 4 : 0));
-        str_cpy(ui.big_u[c], unit, 8);
+        str_cpy(ui.big_l[c], l, sizeof ui.big_l[c]);
+        fit(ui.big_v[c], sizeof ui.big_v[c], ui_display_name(val), &FONT_L, 112 - (unit[0] ? 4 : 0));
+        str_cpy(ui.big_u[c], unit, sizeof ui.big_u[c]);
         ui.big_c[c] = vc;
     }
     if (c == ui.hot_col) {
-        str_cpy(ui.focus_l, l, 8);
-        str_cpy(ui.focus_v, v, 8);
-        str_cpy(ui.focus_u, u, 8);
+        str_cpy(ui.focus_l, l, sizeof ui.focus_l);
+        str_cpy(ui.focus_v, v, sizeof ui.focus_v);
+        str_cpy(ui.focus_u, u, sizeof ui.focus_u);
     }
     if (!ui.force && str_eq(key, ui.col[c]))
         return;
@@ -161,7 +173,7 @@ static void draw_column(uint32_t c, const char *label, const char *val, const ch
     cv_begin(55, Y_SEP_END - Y_LABEL, C_BLACK);         /* x 4..58: the rule at 59 stays */
     if (FELUCCA_ICONS && icon != ICON_NONE && l[0])
         cv_icon(0, 1, icon, TE_COL[c & 3u]);            /* icon rows 1..10 = the label's cap height */
-    cv_text(l[0] ? LABEL_X : 0, 0, &FONT_S, l, C_GRAY);
+    cv_text(l[0] && icon != ICON_NONE ? LABEL_X : 0, 0, &FONT_S, l, C_GRAY);
     x = cv_text(0, Y_VALUE - Y_LABEL, &FONT_S, v, vc);
     cv_text(x + 3, Y_VALUE - Y_LABEL, &FONT_S, u, C_DIM);
     if (ratio >= 0) {                                   /* gauge: track, fill, 1 px end line */
@@ -427,7 +439,7 @@ static void graph_user(void)
         if (used)
             up_name(k, nm);
         else
-            str_cpy(nm, "EMPTY", sizeof nm);
+            text_copy(nm, sizeof nm, ui_text(UI_EMPTY));
         if (sel)
             cv_rect(4, y + 6, 3, 3, C_WHITE);
         cv_text(14, y, &FONT_S, tag, sel ? C_WHITE : C_GRAY);
@@ -448,7 +460,7 @@ static void graph_slots(void)
         if (sel)
             cv_rect(4, y + 6, 3, 3, C_WHITE);
         cv_text(14, y, &FONT_S, b, sel ? C_WHITE : C_GRAY);
-        cv_text(40, y, &FONT_S, project_used(i) ? "USED" : "EMPTY", project_used(i) ? (sel ? C_WHITE : C_HI) : C_DIM);
+        cv_text(40, y, &FONT_S, ui_text(project_used(i) ? UI_USED : UI_EMPTY), project_used(i) ? (sel ? C_WHITE : C_HI) : C_DIM);
     }
 }
 
@@ -685,9 +697,9 @@ static void draw_graph(void)
     if (ui.home) {
         graph_scope(c);
     } else if (drum_note) {                          /* a page the drum track has no use for */
-        static const char *const L[2] = {"DRUM TRACK", "SEQ  TRACKS  GLO DRUMS"};
-        cv_text((240 - text_w(&FONT_S, L[0])) / 2, 26, &FONT_S, L[0], C_HI);
-        cv_text((240 - text_w(&FONT_S, L[1])) / 2, 52, &FONT_S, L[1], C_DIM);
+        const char *a = ui_text(UI_DRUM_TRACK), *b = ui_text(UI_DRUM_HELP);
+        cv_text((240 - text_w(&FONT_S, a)) / 2, 26, &FONT_S, a, C_HI);
+        cv_text((240 - text_w(&FONT_S, b)) / 2, 52, &FONT_S, b, C_DIM);
     } else {
         switch (pg->graph) {
         case GR_ADSR:
@@ -749,7 +761,7 @@ static void draw_graph(void)
 
 static void draw_foot(void)
 {
-    char s[48], pn[16], en[10], ti[20];
+    char s[72], pn[16], en[16], ti[32];
     const track_t *t = TSEL;
     uint32_t sig;
     const page_t *pg = cur_page();
@@ -764,7 +776,7 @@ static void draw_foot(void)
     else if (e->npresets)
         str_cpy(pn, e->presets[TSEL->preset % e->npresets].name, sizeof pn);
     if (ui.home) {
-        str_cpy(ti, "HOME", sizeof ti);
+        text_copy(ti, sizeof ti, ui_text(UI_HOME));
     } else {                                           /* page title + number in its family: "ENV DEST 2/2" */
         uint32_t i, n = 0, k = 0;
         const char *pt = pg->scope == SC_ENGINE ? e->page_title[pg->id[0] != P_E0] : 0;   /* EDIT: the engine's */
@@ -774,7 +786,7 @@ static void draw_foot(void)
                 if (i == ui.page)
                     k = n;
             }
-        str_cpy(ti, pt ? pt : pg->title, 10);
+        text_copy(ti, sizeof ti - 5u, ui_display_name(pt ? pt : pg->title));
         if (n > 1) {
             str_cpy(ti + str_len(ti), " ", 4);
             fmt_int(ti + str_len(ti), (int32_t)k);
@@ -817,7 +829,7 @@ static void draw_foot(void)
         cv_icon(x, 21, engine_icon(ename), C_GRAY);
         x += 14;
     }
-    fit(en, ename, &FONT_S, 90 - (x - 4));
+    fit(en, sizeof en, ui_display_name(ename), &FONT_S, 90 - (x - 4));
     x = cv_text(x, 20, &FONT_S, en, C_HI);
     {
         char pf[16];
@@ -969,14 +981,14 @@ static void ui_draw(void)
     pads_tick();
     if (rec_go) {                                       /* the take started: say so */
         rec_go = 0;
-        ui_message("RECORDING");
+        ui_message(ui_text(UI_RECORDING));
     }
     if (ft_bars) {                                      /* a free take closed: the loop it made */
         char m[24];
         uint32_t n = ft_bars;
         ft_bars = 0;
         if (n == 0xFFu) {
-            ui_message("TAKE DROPPED");
+            ui_message(ui_text(UI_TAKE_DROPPED));
         } else {
             str_cpy(m, n == 1u ? "LOOP 1 BAR " : n == 2u ? "LOOP 2 BARS " : "LOOP 4 BARS ", sizeof m);
             fmt_int(m + str_len(m), song.g[G_BPM]);
@@ -987,7 +999,7 @@ static void ui_draw(void)
     if (er_flash) {                                     /* EDIT + key took something out */
         er_flash = 0;
         if (!ui.msg_t)
-            ui_message("ERASED");
+            ui_message(ui_text(UI_ERASED));
     }
     if (!ui.menu && (ui.layer != LY_PLAY || ui.hold_kind)) {   /* a layer held / a hold to confirm */
         if (ui.hold_kind)

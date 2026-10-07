@@ -2768,6 +2768,8 @@ function setLabel(e, txt) { e.replaceChildren(...(e.dataset.ic ? [icon(e.dataset
 
 const TEXT = {
   ja: {
+    pageTitle: "SLOOP エディタ",
+    pageUnit: "ページ",
     other: "English", connect: "接続", disconnect: "切断", mock: "モック（実機なし）",
     sound: "音色", engine: "エンジン", presets: "プリセット", initSound: "音色を初期化",
     track: "トラック", drum: "ドラム",
@@ -2915,6 +2917,8 @@ const TEXT = {
     chopSendBelow: "送信は下の 3 で。",
   },
   en: {
+    pageTitle: "SLOOP Editor",
+    pageUnit: "pages",
     other: "日本語", connect: "Connect", disconnect: "Disconnect", mock: "Mock device (no hardware)",
     sound: "Sound", engine: "Engine", presets: "Presets", initSound: "Init sound",
     track: "Track", drum: "Drums",
@@ -3062,6 +3066,40 @@ const TEXT = {
     chopSendBelow: "Sending: step 3 below.",
   },
 };
+/* Device DESC labels are protocol identifiers and stay in English on the wire.
+ * These are display resources; unknown labels fall back to the firmware's text. */
+const LABEL_JA = {
+  ENV: "エンベロープ", "ENV DEST": "エンベロープ先", LFO: "LFO", "LFO DEST": "LFO先",
+  EDIT: "音色編集", "EDIT 1": "音色編集1", "EDIT 2": "音色編集2", VOICE: "発音", "VOICE 2": "発音2",
+  FX: "FX", SLICER: "スライサー", DLY: "ディレイ", "REV/CHO": "リバーブ／コーラス",
+  SCL: "スケール", "SCL 2": "スケール2", ARP: "アルペジオ", "ARP 2": "アルペジオ2",
+  "SEQ PATTERN": "シーケンサー", PATTERN: "パターン", GLOBAL: "全体", MASTER: "マスター",
+  DRUMS: "ドラム", INSTRUMENT: "楽器", LEVEL: "レベル", OSC: "オシレーター",
+  ATK: "アタック", DEC: "ディケイ", SUS: "サステイン", REL: "リリース",
+  LVL: "レベル", AMP: "音量", FLT: "フィルター", FILT: "フィルター", PIT: "ピッチ",
+  SHP: "波形", TRIM: "微調整", RATE: "速度", WAVE: "波形", WAVE2: "波形2", PHS: "位相",
+  FADE: "フェード", MODE: "モード", OCT: "オクターブ", GATE: "ゲート", SWG: "スイング",
+  PROB: "確率", HOLD: "保持", ORD: "順序", ROOT: "ルート", QNT: "量子化",
+  TRN: "移調", LEN: "長さ", DIV: "分割", DST: "歪み", CHO: "コーラス",
+  REV: "リバーブ", CHORD: "コード", VCE: "発音方式", GLD: "グライド", GLMOD: "滑音方式",
+  PRIO: "優先順位", ALLOC: "割当", DTUNE: "デチューン", PAN: "パン", MUTE: "ミュート",
+  SLCR: "スライサー", PAT: "パターン", DEPTH: "深さ", BPM: "BPM", SWING: "スイング",
+  CLICK: "クリック", TUNE: "調律", TIME: "時間", FDBK: "返し量", COLR: "音色",
+  MIX: "ミックス", SIZE: "サイズ", DAMP: "減衰", CRT: "速度", CDP: "深さ",
+  CH: "チャンネル", DUST: "ダスト", DUCK: "ダック", ROLL: "ロール",
+  KIT: "キット", SLOT: "スロット", NAME: "名前", LOAD: "読み込み", SAVE: "保存",
+  SET: "設定", INIT: "初期化", NEW: "新規", SYNC: "同期", ROUT: "出力先",
+  CPU: "CPU", MIDI: "MIDI", ENG: "エンジン", CLRSQ: "全消去",
+  OFF: "オフ", ON: "オン", POLY: "ポリ", MONO: "モノ", LEG: "レガート", UNI: "ユニゾン",
+  SNAP: "スナップ", WHITE: "白鍵", LAST: "後着優先", LOW: "低", HIGH: "高",
+  SIN: "サイン", TRI: "三角", SAW: "ノコギリ", SQR: "矩形", NOIS: "ノイズ",
+  CUT: "カットオフ", RES: "共鳴", DRV: "歪み", TRK: "追従", DTN: "デチューン",
+  NOTE: "音符", TIE: "連結", REST: "休符", FILTER: "フィルター",
+  ALG: "アルゴリズム", FB: "フィードバック", FBK: "フィードバック", FREQ: "周波数",
+  OP: "オペレーター", PTCH: "パッチ", MICRO: "微調整", FILL: "フィル",
+};
+const DISPLAY_LABELS = { en: Object.fromEntries(Object.keys(LABEL_JA).map((k) => [k, k])), ja: LABEL_JA };
+const displayLabel = (raw) => DISPLAY_LABELS[lang][raw] ?? raw;
 let lang = (navigator.language || "en").toLowerCase().startsWith("ja") ? "ja" : "en";
 const t = (k) => TEXT[lang][k] ?? k;
 let lastKey = null, lastArg = "";
@@ -3073,11 +3111,13 @@ function sayK(k, arg = "") {
 }
 function applyLang() {
   document.documentElement.lang = lang;
+  document.title = t("pageTitle");
   document.querySelectorAll("[data-t]").forEach((e) => setLabel(e, t(e.dataset.t)));
   $("lang").textContent = t("other");
   setLabel($("connect"), t(dev ? "disconnect" : "connect"));
   if (lastKey) $("status").textContent = t(lastKey) + lastArg;
   $("libq").placeholder = t("libSearch");
+  if (dev && dev.dump) buildGroups();
   renderLive();
   renderLib();
   renderBank();
@@ -3476,22 +3516,22 @@ function buildGroups() {
     for (const g of LAYOUT(info.pe0)) {
       /* a card per button of the device (ENV, LFO, EDIT ...), its pages as rows of four knobs, one colour per knob */
       const div = el("div", { class: "group" }, el("h2", { ic: HEAD_IC[g.t] },
-        g.engine ? `EDIT ${info.engines[dev.dump.engine] || ""}` : g.t));
+        g.engine ? `${displayLabel("EDIT")} ${info.engines[dev.dump.engine] || ""}` : displayLabel(g.t)));
       let pages = 0;
       for (const [title, s, ids] of g.pages) {
         const rows = ids.map((id) => paramRow(s, id)).filter(Boolean);
         if (!rows.length) continue;
         const tt = g.engine && (dev.titles[dev.dump.engine] || [])[g.pages.findIndex((x) => x[0] === title)];
-        if (g.pages.length > 1) div.append(el("h3", { ic: PAGE_IC[tt || title], text: tt || title }));
+        if (g.pages.length > 1) div.append(el("h3", { ic: PAGE_IC[tt || title], text: displayLabel(tt || title) }));
         div.append(el("div", { class: "knobs" }, ...rows));
         pages++;
       }
-      if (pages > 1) div.firstChild.append(el("span", { class: "sub", text: `${pages} ${lang === "ja" ? "ページ" : "pages"}` }));
+      if (pages > 1) div.firstChild.append(el("span", { class: "sub", text: `${pages} ${t("pageUnit")}` }));
       if (pages) groups[g.tab || "groups"].push(div);
     }
   } else {
     /* unknown firmware layout: everything in id order, four knobs a row */
-    const box = (ic, title, ...pre) => el("div", { class: "group" }, el("h2", { ic: HEAD_IC[ic], text: title }), ...pre);
+    const box = (ic, title, ...pre) => el("div", { class: "group" }, el("h2", { ic: HEAD_IC[ic], text: displayLabel(title) }), ...pre);
     const a = box("INSTRUMENT", "INSTRUMENT", el("p", { class: "dim", text: t("layout") }));
     const b = box("EDIT", "EDIT"), c = box("GLOBAL", "GLOBAL");
     const ka = el("div", { class: "knobs" }), kb = el("div", { class: "knobs" }), kc = el("div", { class: "knobs" });
@@ -3517,7 +3557,7 @@ function paramRow(s, id) {
     for (let v = d.min; v <= d.max; v++) {
       const [txt] = fmtValue(d, v);
       const name = d.fmt === F.ENUM && d.names[v - d.min] == null ? String(v) : txt;
-      input.append(el("option", { value: v, ic: wave && WAVE_IC[name] }, name));
+      input.append(el("option", { value: v, ic: wave && WAVE_IC[name] }, displayLabel(name)));
     }
     input.addEventListener("change", () => userSet(s, id, +input.value, true));
   } else {
@@ -3546,10 +3586,10 @@ function paramRow(s, id) {
       nudge(dir * 10);
     });
   }
-  input.title = d.label;
-  const out = el("span", { class: "v", title: d.label });
+  input.title = displayLabel(d.label);
+  const out = el("span", { class: "v", title: displayLabel(d.label) });
   const isSel = input.tagName === "SELECT";
-  const row = el("div", { class: "knob" + (isSel ? " enum" : "") }, el("span", { class: "kl", text: d.label }), out, input);
+  const row = el("div", { class: "knob" + (isSel ? " enum" : "") }, el("span", { class: "kl", text: displayLabel(d.label) }), out, input);
   ctl.set(k, { input, out, desc: d, scope: s, id, row });
   if (!isSel) valueDrag(k, out, input, d);
   showValue(k, s ? dev.dump.g[id] : dev.dump.p[id], true);
@@ -3581,7 +3621,7 @@ function showValue(k, v, force) {
   const c = ctl.get(k);
   if (!c || v == null) return;
   const [txt, unit] = fmtValue(c.desc, v);
-  c.out.replaceChildren(String(txt), ...(unit ? [el("small", { text: unit })] : []));
+  c.out.replaceChildren(displayLabel(String(txt)), ...(unit ? [el("small", { text: unit })] : []));
   c.out.classList.toggle("long", String(txt).length + (unit ? Math.ceil(unit.length / 2) : 0) > 6);
   if (force || !touched(k)) c.input.value = String(v);
   if (c.input.type === "range") {                    /* the bar: from the left, or from 0 for a value either side of it */
@@ -3867,7 +3907,7 @@ function lockableIds() {
   for (let id = 0; id < dev.info.pcount; id++) if (lockable(id) && dev.pdesc[id] && dev.pdesc[id].max > dev.pdesc[id].min) ids.push(id);
   return ids;
 }
-const lockName = (id) => { const d = dev.pdesc[id]; return d ? `${d.label}${id >= dev.info.pe0 ? " (E" + (id - dev.info.pe0 + 1) + ")" : ""}` : String(id); };
+const lockName = (id) => { const d = dev.pdesc[id]; return d ? `${displayLabel(d.label)}${id >= dev.info.pe0 ? " (E" + (id - dev.info.pe0 + 1) + ")" : ""}` : String(id); };
 function lockRow(i, l) {
   const sel = el("select", {}, ...lockableIds().map((id) => el("option", { value: id, text: lockName(id) })));
   sel.value = String(l.param);

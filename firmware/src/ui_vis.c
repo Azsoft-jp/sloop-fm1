@@ -626,7 +626,7 @@ static void vis_draw(void)
         }
         if (!pass && (vis_name_t || ui.msg_t)) {    /* the style's name a second (or a message) */
             char n[8];
-            const char *s = ui.msg_t ? ui.msg : VIS_NAME[vis_style % VIS_N];
+            const char *s = ui.msg_t ? ui.msg : ui_display_name(VIS_NAME[vis_style % VIS_N]);
             cv_rect(0, 0, 240, 20, C_BLACK);
             cv_text(120 - text_w(&FONT_S, s) / 2, 2, &FONT_S, s, C_WHITE);
             if (!ui.msg_t) {

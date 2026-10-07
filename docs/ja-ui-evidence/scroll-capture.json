@@ -1,0 +1,62 @@
+{
+  "viewport": {
+    "width": 375,
+    "height": 820
+  },
+  "results": [
+    {
+      "label": "sound",
+      "height": 5669,
+      "frames": 18,
+      "gif": "scroll-sound.gif"
+    },
+    {
+      "label": "sequencer",
+      "height": 1688,
+      "frames": 11,
+      "gif": "scroll-sequencer.gif"
+    },
+    {
+      "label": "tracks",
+      "height": 2047,
+      "frames": 14,
+      "gif": "scroll-tracks.gif"
+    },
+    {
+      "label": "library",
+      "height": 1957,
+      "frames": 13,
+      "gif": "scroll-library.gif"
+    },
+    {
+      "label": "samples",
+      "height": 1960,
+      "frames": 13,
+      "gif": "scroll-samples.gif"
+    },
+    {
+      "label": "kits",
+      "height": 3280,
+      "frames": 18,
+      "gif": "scroll-kits.gif"
+    },
+    {
+      "label": "projects",
+      "height": 1541,
+      "frames": 10,
+      "gif": "scroll-projects.gif"
+    },
+    {
+      "label": "settings",
+      "height": 1800,
+      "frames": 12,
+      "gif": "scroll-settings.gif"
+    },
+    {
+      "label": "installer",
+      "height": 1449,
+      "frames": 10,
+      "gif": "scroll-installer.gif"
+    }
+  ]
+}

@@ -55,13 +55,13 @@
   <div class="strip"><i></i><i></i><i></i><i></i></div>
   <!--STUDIO_GUIDE-->
   <!--BANNER-->
-  <h1>Firmware for the M-VAVE FM-1</h1>
-  <p class="lead">A groovebox you play live: four tracks — three synths and a drum machine — 10 synth engines (with six-operator FM and DX7 patches), 76 sounds, 37 drum kits from 808 to techno, amapiano and ambient, your own samples and drum kits, 16 punch-in effects. House, techno, hip-hop, drum &amp; bass, synthwave, lo-fi, ambient: make what you want. No factory patterns, nothing to load: everything you hear, you play.</p>
+  <h1 data-t="heroTitle"></h1>
+  <p class="lead" data-t="heroLead"></p>
   <div class="tiles">
-    <div class="tile" style="--c: var(--blue)"><b>76</b><span>sounds, 10 engines, your samples</span></div>
-    <div class="tile" style="--c: var(--green)"><b>37</b><span>drum kits, 909 to afro, + your own</span></div>
-    <div class="tile" style="--c: var(--yellow)"><b>16</b><span>punch-in fx: hold fx + key</span></div>
-    <div class="tile" style="--c: var(--orange)"><b>rec</b><span>no click: the loop follows you</span></div>
+    <div class="tile" style="--c: var(--blue)"><b>76</b><span data-t="tileSounds"></span></div>
+    <div class="tile" style="--c: var(--green)"><b>37</b><span data-t="tileKits"></span></div>
+    <div class="tile" style="--c: var(--yellow)"><b>16</b><span data-t="tileFx"></span></div>
+    <div class="tile" style="--c: var(--orange)"><b>rec</b><span data-t="tileRec"></span></div>
   </div>
   <p data-t="intro"></p>
   <p data-t="warn"></p>
@@ -86,10 +86,10 @@
     <p><button id="stock-go" disabled data-t="stockGo"></button></p>
     <p class="small" data-t="back"></p>
   </details>
-  <p class="small">SLOOP is based on Felucca by Leo Kuroshita (@kurogedelic), <a href="https://hugelton.com" target="_blank" rel="noopener">Hügelton Instruments</a>.
-    Hold OCT− alone while switching on for USB rescue.<br>
-    Font: Terminus (Dimitar Toshkov Zhekov, SIL OFL 1.1). Samples: Versilian Studios VSCO-2 Community Edition and VCSL (CC0 1.0), and the Hügelton Sample Pack (© Hügelton Instruments, not CC0).<br>
-    M-VAVE and FM-1 are trademarks of their respective owners; SLOOP is not affiliated with them.<br>
+  <p class="small"><span data-t="credit"></span> <a href="https://hugelton.com" target="_blank" rel="noopener">Hügelton Instruments</a>.<br>
+    <span data-t="rescue"></span><br>
+    <span data-t="assets"></span><br>
+    <span data-t="trademarks"></span><br>
     <span data-t="license"></span> <a href="https://github.com/hugelton/Felucca" target="_blank" rel="noopener">github.com/hugelton/Felucca</a></p>
 </main>
 <script type="module">
@@ -97,6 +97,17 @@
 const $ = (id) => document.getElementById(id);
 const TEXT = {
   ja: {
+    pageTitle: "SLOOP インストーラー",
+    heroTitle: "M-VAVE FM-1 用ファームウェア",
+    heroLead: "ライブで演奏するグルーヴボックス。4トラック（シンセ3＋ドラム）、FM6やDX7パッチを含む10種類のシンセエンジン、76音色、37ドラムキット、ユーザーサンプルとドラムキット、16種類のパンチインFXを搭載。パターンは自分で演奏して作ります。",
+    tileSounds: "音色・10エンジン・自分のサンプル",
+    tileKits: "ドラムキット・自作キットにも対応",
+    tileFx: "パンチインFX：FXとキーを押す",
+    tileRec: "クリックなしでも演奏に合わせてループ",
+    credit: "SLOOP は Leo Kuroshita（@kurogedelic）による Felucca を基にしています。",
+    rescue: "起動時に OCT− だけを押し続けると USB 復旧モードに入ります。",
+    assets: "フォント：Terminus（SIL OFL 1.1）、Noto Sans JP（SIL OFL 1.1）。サンプル：Versilian Studios VSCO-2 Community Edition／VCSL（CC0 1.0）、Hügelton Sample Pack（© Hügelton Instruments、CC0 対象外）。",
+    trademarks: "M-VAVE と FM-1 は各権利者の商標です。SLOOP は両者と提携していません。",
     intro: "FM-1 を USB で接続してください。（Chrome か Edge で使えます）",
     warn: "書き込み中は USB を抜かないでください。",
     install: "インストール", other: "English",
@@ -104,7 +115,6 @@ const TEXT = {
     direct: "USB ケーブルはパソコンに直接つないでください。Probe や Transporter などの機材は不要です。",
     brick: "万一インストールに失敗して起動しなくなった場合は、復旧に Transporter が必要です:",
     beta: "これはベータ版で、不安定な場合があります。このカスタムファームウェアを使ったことで FM-1 が壊れたり不具合が起きたりしても、作者は一切の責任を負いません。自己責任でお使いください。",
-    back: "公式ファームウェアに戻すには、M-VAVE 公式のアップデーター M-UPGRADE（Downloads → PC Software → M-UPGRADE）と公式ファームウェア（PC Firmware → FM-1 V15）が必要です。",
     nomidi: "このブラウザでは使えません。Chrome か Edge で開いてください。", loadfail: "読み込めませんでした: ",
     start: "開始します", verify: "確認中", loader: "書き込みモードに切り替え中", write: "書き込み中",
     reboot: "再起動中", done: "完了しました", stopped: "途中で止まりました。USB を挿し直してもう一度押してください。",
@@ -131,6 +141,17 @@ const TEXT = {
     back: "M-VAVE のアップデーター M-UPGRADE（Downloads → PC Software）でも戻せます。FM-1 が見つからない場合は、MIDI を使う他のアプリとブラウザのタブを閉じてください。",
   },
   en: {
+    pageTitle: "SLOOP installer",
+    heroTitle: "Firmware for the M-VAVE FM-1",
+    heroLead: "A groovebox you play live: four tracks — three synths and a drum machine — 10 synth engines (with six-operator FM and DX7 patches), 76 sounds, 37 drum kits from 808 to techno, amapiano and ambient, your own samples and drum kits, 16 punch-in effects. House, techno, hip-hop, drum & bass, synthwave, lo-fi, ambient: make what you want. No factory patterns, nothing to load: everything you hear, you play.",
+    tileSounds: "sounds, 10 engines, your samples",
+    tileKits: "drum kits, 909 to afro, + your own",
+    tileFx: "punch-in fx: hold fx + key",
+    tileRec: "no click: the loop follows you",
+    credit: "SLOOP is based on Felucca by Leo Kuroshita (@kurogedelic),",
+    rescue: "Hold OCT− alone while switching on for USB rescue.",
+    assets: "Fonts: Terminus (Dimitar Toshkov Zhekov, SIL OFL 1.1) and Noto Sans JP (SIL OFL 1.1). Samples: Versilian Studios VSCO-2 Community Edition and VCSL (CC0 1.0), and the Hügelton Sample Pack (© Hügelton Instruments, not CC0).",
+    trademarks: "M-VAVE and FM-1 are trademarks of their respective owners; SLOOP is not affiliated with them.",
     intro: "Connect the FM-1 by USB. (Works in Chrome or Edge.)",
     warn: "Do not unplug the USB cable while writing.",
     install: "Install", other: "日本語",
@@ -138,7 +159,6 @@ const TEXT = {
     direct: "Connect the USB cable directly to the computer. No probe or Transporter is needed.",
     brick: "If an install fails and the FM-1 no longer starts, recovering it needs a Transporter:",
     beta: "This is a beta and may be unstable. The author accepts no responsibility if your FM-1 is damaged or misbehaves because of this custom firmware. Use it at your own risk.",
-    back: "To go back to the official firmware you need M-VAVE's official updater, M-UPGRADE (Downloads → PC Software → M-UPGRADE), and the official firmware (PC Firmware → FM-1 V15).",
     nomidi: "This browser cannot do it. Open the page in Chrome or Edge.", loadfail: "Could not load: ",
     start: "Starting", verify: "Verifying", loader: "Switching to update mode", write: "Writing",
     reboot: "Restarting", done: "Done", stopped: "Stopped. Replug the USB cable and press Install again.",
@@ -170,6 +190,7 @@ const t = (k) => TEXT[lang][k];
 let lastKey = null, lastArg = "";
 function applyLang() {
   document.documentElement.lang = lang;
+  document.title = t("pageTitle");
   document.querySelectorAll("[data-t]").forEach((e) => { e.textContent = t(e.dataset.t); });
   $("lang").textContent = t("other");
   if (lastKey) $("status").textContent = t(lastKey) + lastArg;

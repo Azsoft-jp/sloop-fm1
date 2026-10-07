@@ -7,12 +7,13 @@
 Terminus 8x16 (BDF, SIL OFL 1.1). TTF fonts also work through render()
 (anti-aliased, tabular figures via the OpenType `tnum` feature).
 
-Glyph format: per glyph an advance width, a bitmap width and an offset; the
-bitmap starts FONT_PAD pixels left of the pen position (room for side
-bearings); rows top to bottom, 2 pixels per byte (high nibble first),
-alpha 0..15.
+Latin glyph format: per glyph an advance width, a bitmap width and an
+offset; the bitmap starts FONT_PAD pixels left of the pen position (room for
+side bearings); rows top to bottom, 2 pixels per byte (high nibble first),
+alpha 0..15. The sparse Japanese bitmaps use 2-bit alpha, 4 pixels per byte.
 """
 import sys
+import re
 from pathlib import Path
 
 from PIL import Image, ImageDraw, ImageFont
@@ -23,6 +24,13 @@ FONTS = Path(__file__).resolve().parents[1] / "assets" / "fonts"
 SIZES = [("S", "ter-u16n.bdf", 16, 1, True, 32, 255),   # Latin-1 (Hügelton needs the umlaut)
          ("L", "ter-u16n.bdf", 16, 2, True, 32, 95)]   # values / titles: digits, signs, capitals
 PAD = 2
+
+
+def ui_kana():
+    """Only glyphs present in the firmware display resources enter the image."""
+    src = (FONTS.parent.parent / "firmware/src/ui_strings.def").read_text()
+    ja = re.findall(r'UI_STRING\([^,]+,\s*"[^"]*",\s*"([^"]*)"\)', src)
+    return sorted({c for s in ja for c in s if ord(c) > 255})
 
 
 def upscale(px_, w, h, scale):
@@ -163,6 +171,37 @@ def main(out):
         if scale == 1:
             base = (name, first, h, glyphs)
         print(f"font {name}: {ttf} {px}px h {h}, digit adv {glyphs[ord('0') - first][0]}, {len(data)} B")
+
+    kana = ui_kana()
+    jp_font = ImageFont.truetype(str(FONTS / "NotoSansJP-ui.ttf"), 16)
+    # The Japanese source is a licensed subset; only actually used glyphs are
+    # serialized. Two-bit alpha keeps small kana legible at 240x240 while
+    # using half the storage of 4-bit alpha (20x16 = 80 B per glyph).
+    # FONT_L reuses these bitmaps at 2x in the renderer.
+    jp_data, jp_off = [], []
+    for ch in kana:
+        jp_off.append(len(jp_data))
+        # Render with a guard band so even anti-aliased edge pixels cannot be
+        # silently cut by the 16px cell. -5 centers the font and keeps ヘ's
+        # bottom stroke, which was cropped at -4.
+        guarded = Image.new("L", (20, 48), 0)
+        ImageDraw.Draw(guarded).text((PAD, 16 - 5), ch, font=jp_font, fill=255)
+        assert guarded.crop((0, 0, 20, 16)).getbbox() is None, f"{ch}: clipped above cell"
+        assert guarded.crop((0, 32, 20, 48)).getbbox() is None, f"{ch}: clipped below cell"
+        px = [min(3, (v + 42) // 85) for v in guarded.crop((0, 16, 20, 32)).tobytes()]
+        for start in range(0, 20 * 16, 4):
+            jp_data.append(sum(px[start + bit] << (6 - 2 * bit) for bit in range(4)))
+    assert len(jp_data) < 65536
+    lines.append(f"static const uint16_t FONT_J_CODE[{len(kana)}] = {{" +
+                 ", ".join(f"0x{ord(c):04x}" for c in kana) + "};")
+    lines.append(f"static const uint16_t FONT_J_OFF[{len(kana)}] = {{" +
+                 ", ".join(map(str, jp_off)) + "};")
+    lines.append(f"static const uint8_t FONT_J_DATA[{len(jp_data)}] = {{")
+    for i in range(0, len(jp_data), 24):
+        lines.append("    " + ", ".join(f"0x{b:02x}" for b in jp_data[i:i + 24]) + ",")
+    lines.append("};")
+    lines.append(f"#define FONT_J_COUNT {len(kana)}")
+    print(f"font J: {len(kana)} used glyphs, {len(jp_data)} B (shared at 1x/2x)")
     Path(out).write_text("\n".join(lines))
 
 

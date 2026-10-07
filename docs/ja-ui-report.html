@@ -1,0 +1,114 @@
+<!doctype html>
+<html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>SLOOP 2.4 日本語UI 検証レポート</title>
+<style>
+:root{--bg:#10141b;--card:#1b2532;--line:#334456;--fg:#eaf1fa;--dim:#abb9c9;--accent:#80d4ff}
+*{box-sizing:border-box} body{margin:0;background:var(--bg);color:var(--fg);font:15px/1.65 system-ui,-apple-system,sans-serif}
+header{padding:44px max(20px,calc((100vw - 1100px)/2));background:#192737;border-bottom:1px solid var(--line)}
+main{max-width:1100px;margin:auto;padding:30px 20px 90px} h1{font-size:clamp(26px,4vw,42px);line-height:1.2;margin:0 0 12px} h2{margin:42px 0 14px;font-size:23px}
+p{max-width:78ch} .dim{color:var(--dim)} .badges{display:flex;flex-wrap:wrap;gap:10px;margin:24px 0}
+.badges span{padding:6px 12px;border:1px solid var(--line);border-radius:99px;background:var(--card)}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:18px;align-items:start}
+figure{margin:0;padding:12px;background:var(--card);border:1px solid var(--line);border-radius:12px;min-width:0}
+figure img{display:block;width:100%;height:auto;max-height:600px;object-fit:contain;object-position:top;background:#000}
+figure.lcd img{width:240px;height:240px;max-width:100%;image-rendering:pixelated;object-fit:contain;margin:auto}
+figcaption{margin-top:9px;color:var(--dim);font-size:13px;overflow-wrap:anywhere}
+a{color:var(--accent)} details{margin:22px 0} summary{cursor:pointer;color:var(--accent)}
+.metrics{padding:18px;background:var(--card);border-left:4px solid var(--accent)}
+@media(max-width:560px){header{padding:28px 20px} .grid{grid-template-columns:1fr} figure img{max-height:none}}
+</style></head><body>
+<header><h1>SLOOP 2.4 日本語UI</h1><p>FM-1本体とWeb Editorの画面・レイアウト・回帰確認</p>
+<div class="badges"><span>60 本体画面</span><span>8 Web画面＋インストーラー</span>
+<span>9 スクロールGIF</span><span>17 レイアウト計測</span></div></header>
+<main><p class="dim">このページは君のフォークのSLOOP 2.4日本語化作業用。FM-1画像は本体描画コードをホスト上で実行した実ピクセルの240×240 PNG。
+実機LCDの写真ではありません。Web画面はChromeのモック接続で撮影。機器への書き込み・実機の音声遅延は未確認です。</p>
+<section class="metrics"><strong>容量</strong><br>上流2.4: 563,120 B → 日本語版: 575,712 B (+12,592 B)<br>RAM .data+.bss: 82,916 B → 83,188 B<br>アプリ領域残量: 5,852 B / 581,564 B<br>
+<strong>確認済み</strong>：本体描画テスト、2.4操作ストレス、Webプロトコルテスト、375/1280pxブラウザー画面。
+詳細は<a href="JA_LOCALIZATION.md">検証記録</a>へ。</section>
+<h2>本体の主要画面（実ドット）</h2><div class="grid"><figure class="lcd"><a href="ja-ui-evidence/lcd/menu-screen.png"><img src="ja-ui-evidence/lcd/menu-screen.png" alt="menu-screen" loading="lazy"></a><figcaption>menu-screen</figcaption></figure>
+<figure class="lcd"><a href="ja-ui-evidence/lcd/menu-audio.png"><img src="ja-ui-evidence/lcd/menu-audio.png" alt="menu-audio" loading="lazy"></a><figcaption>menu-audio</figcaption></figure>
+<figure class="lcd"><a href="ja-ui-evidence/lcd/layer-song-chain.png"><img src="ja-ui-evidence/lcd/layer-song-chain.png" alt="layer-song-chain" loading="lazy"></a><figcaption>layer-song-chain</figcaption></figure>
+<figure class="lcd"><a href="ja-ui-evidence/lcd/layer-mix-fill.png"><img src="ja-ui-evidence/lcd/layer-mix-fill.png" alt="layer-mix-fill" loading="lazy"></a><figcaption>layer-mix-fill</figcaption></figure>
+<figure class="lcd"><a href="ja-ui-evidence/lcd/page-step.png"><img src="ja-ui-evidence/lcd/page-step.png" alt="page-step" loading="lazy"></a><figcaption>page-step</figcaption></figure>
+<figure class="lcd"><a href="ja-ui-evidence/lcd/page-song.png"><img src="ja-ui-evidence/lcd/page-song.png" alt="page-song" loading="lazy"></a><figcaption>page-song</figcaption></figure></div>
+<details><summary>全60画面を見る</summary><div class="grid"><figure class="lcd"><a href="ja-ui-evidence/lcd/hold-clear.png"><img src="ja-ui-evidence/lcd/hold-clear.png" alt="hold-clear" loading="lazy"></a><figcaption>hold-clear</figcaption></figure>
+<figure class="lcd"><a href="ja-ui-evidence/lcd/layer-erase.png"><img src="ja-ui-evidence/lcd/layer-erase.png" alt="layer-erase" loading="lazy"></a><figcaption>layer-erase</figcaption></figure>
+<figure class="lcd"><a href="ja-ui-evidence/lcd/layer-key.png"><img src="ja-ui-evidence/lcd/layer-key.png" alt="layer-key" loading="lazy"></a><figcaption>layer-key</figcaption></figure>
+<figure class="lcd"><a href="ja-ui-evidence/lcd/layer-locked.png"><img src="ja-ui-evidence/lcd/layer-locked.png" alt="layer-locked" loading="lazy"></a><figcaption>layer-locked</figcaption></figure>
+<figure class="lcd"><a href="ja-ui-evidence/lcd/layer-mix-fill.png"><img src="ja-ui-evidence/lcd/layer-mix-fill.png" alt="layer-mix-fill" loading="lazy"></a><figcaption>layer-mix-fill</figcaption></figure>
+<figure class="lcd"><a href="ja-ui-evidence/lcd/layer-mix.png"><img src="ja-ui-evidence/lcd/layer-mix.png" alt="layer-mix" loading="lazy"></a><figcaption>layer-mix</figcaption></figure>
+<figure class="lcd"><a href="ja-ui-evidence/lcd/layer-punch-on.png"><img src="ja-ui-evidence/lcd/layer-punch-on.png" alt="layer-punch-on" loading="lazy"></a><figcaption>layer-punch-on</figcaption></figure>
+<figure class="lcd"><a href="ja-ui-evidence/lcd/layer-punch-trkflt.png"><img src="ja-ui-evidence/lcd/layer-punch-trkflt.png" alt="layer-punch-trkflt" loading="lazy"></a><figcaption>layer-punch-trkflt</figcaption></figure>
+<figure class="lcd"><a href="ja-ui-evidence/lcd/layer-punch.png"><img src="ja-ui-evidence/lcd/layer-punch.png" alt="layer-punch" loading="lazy"></a><figcaption>layer-punch</figcaption></figure>
+<figure class="lcd"><a href="ja-ui-evidence/lcd/layer-roll.png"><img src="ja-ui-evidence/lcd/layer-roll.png" alt="layer-roll" loading="lazy"></a><figcaption>layer-roll</figcaption></figure>
+<figure class="lcd"><a href="ja-ui-evidence/lcd/layer-song-chain.png"><img src="ja-ui-evidence/lcd/layer-song-chain.png" alt="layer-song-chain" loading="lazy"></a><figcaption>layer-song-chain</figcaption></figure>
+<figure class="lcd"><a href="ja-ui-evidence/lcd/layer-song.png"><img src="ja-ui-evidence/lcd/layer-song.png" alt="layer-song" loading="lazy"></a><figcaption>layer-song</figcaption></figure>
+<figure class="lcd"><a href="ja-ui-evidence/lcd/layer-steps-fill.png"><img src="ja-ui-evidence/lcd/layer-steps-fill.png" alt="layer-steps-fill" loading="lazy"></a><figcaption>layer-steps-fill</figcaption></figure>
+<figure class="lcd"><a href="ja-ui-evidence/lcd/layer-steps-lock.png"><img src="ja-ui-evidence/lcd/layer-steps-lock.png" alt="layer-steps-lock" loading="lazy"></a><figcaption>layer-steps-lock</figcaption></figure>
+<figure class="lcd"><a href="ja-ui-evidence/lcd/layer-steps-nofill.png"><img src="ja-ui-evidence/lcd/layer-steps-nofill.png" alt="layer-steps-nofill" loading="lazy"></a><figcaption>layer-steps-nofill</figcaption></figure>
+<figure class="lcd"><a href="ja-ui-evidence/lcd/layer-steps.png"><img src="ja-ui-evidence/lcd/layer-steps.png" alt="layer-steps" loading="lazy"></a><figcaption>layer-steps</figcaption></figure>
+<figure class="lcd"><a href="ja-ui-evidence/lcd/live-free-take.png"><img src="ja-ui-evidence/lcd/live-free-take.png" alt="live-free-take" loading="lazy"></a><figcaption>live-free-take</figcaption></figure>
+<figure class="lcd"><a href="ja-ui-evidence/lcd/live-grid.png"><img src="ja-ui-evidence/lcd/live-grid.png" alt="live-grid" loading="lazy"></a><figcaption>live-grid</figcaption></figure>
+<figure class="lcd"><a href="ja-ui-evidence/lcd/live-kit.png"><img src="ja-ui-evidence/lcd/live-kit.png" alt="live-kit" loading="lazy"></a><figcaption>live-kit</figcaption></figure>
+<figure class="lcd"><a href="ja-ui-evidence/lcd/live-rec-count.png"><img src="ja-ui-evidence/lcd/live-rec-count.png" alt="live-rec-count" loading="lazy"></a><figcaption>live-rec-count</figcaption></figure>
+<figure class="lcd"><a href="ja-ui-evidence/lcd/live-rec-countin.png"><img src="ja-ui-evidence/lcd/live-rec-countin.png" alt="live-rec-countin" loading="lazy"></a><figcaption>live-rec-countin</figcaption></figure>
+<figure class="lcd"><a href="ja-ui-evidence/lcd/live-rec-free.png"><img src="ja-ui-evidence/lcd/live-rec-free.png" alt="live-rec-free" loading="lazy"></a><figcaption>live-rec-free</figcaption></figure>
+<figure class="lcd"><a href="ja-ui-evidence/lcd/live-rec-notes.png"><img src="ja-ui-evidence/lcd/live-rec-notes.png" alt="live-rec-notes" loading="lazy"></a><figcaption>live-rec-notes</figcaption></figure>
+<figure class="lcd"><a href="ja-ui-evidence/lcd/live-rec-ready.png"><img src="ja-ui-evidence/lcd/live-rec-ready.png" alt="live-rec-ready" loading="lazy"></a><figcaption>live-rec-ready</figcaption></figure>
+<figure class="lcd"><a href="ja-ui-evidence/lcd/live-rec-tempo.png"><img src="ja-ui-evidence/lcd/live-rec-tempo.png" alt="live-rec-tempo" loading="lazy"></a><figcaption>live-rec-tempo</figcaption></figure>
+<figure class="lcd"><a href="ja-ui-evidence/lcd/live-tracks.png"><img src="ja-ui-evidence/lcd/live-tracks.png" alt="live-tracks" loading="lazy"></a><figcaption>live-tracks</figcaption></figure>
+<figure class="lcd"><a href="ja-ui-evidence/lcd/menu-audio.png"><img src="ja-ui-evidence/lcd/menu-audio.png" alt="menu-audio" loading="lazy"></a><figcaption>menu-audio</figcaption></figure>
+<figure class="lcd"><a href="ja-ui-evidence/lcd/menu-lights.png"><img src="ja-ui-evidence/lcd/menu-lights.png" alt="menu-lights" loading="lazy"></a><figcaption>menu-lights</figcaption></figure>
+<figure class="lcd"><a href="ja-ui-evidence/lcd/menu-screen.png"><img src="ja-ui-evidence/lcd/menu-screen.png" alt="menu-screen" loading="lazy"></a><figcaption>menu-screen</figcaption></figure>
+<figure class="lcd"><a href="ja-ui-evidence/lcd/menu-serial.png"><img src="ja-ui-evidence/lcd/menu-serial.png" alt="menu-serial" loading="lazy"></a><figcaption>menu-serial</figcaption></figure>
+<figure class="lcd"><a href="ja-ui-evidence/lcd/menu-usb.png"><img src="ja-ui-evidence/lcd/menu-usb.png" alt="menu-usb" loading="lazy"></a><figcaption>menu-usb</figcaption></figure>
+<figure class="lcd"><a href="ja-ui-evidence/lcd/page-about.png"><img src="ja-ui-evidence/lcd/page-about.png" alt="page-about" loading="lazy"></a><figcaption>page-about</figcaption></figure>
+<figure class="lcd"><a href="ja-ui-evidence/lcd/page-edit.png"><img src="ja-ui-evidence/lcd/page-edit.png" alt="page-edit" loading="lazy"></a><figcaption>page-edit</figcaption></figure>
+<figure class="lcd"><a href="ja-ui-evidence/lcd/page-env.png"><img src="ja-ui-evidence/lcd/page-env.png" alt="page-env" loading="lazy"></a><figcaption>page-env</figcaption></figure>
+<figure class="lcd"><a href="ja-ui-evidence/lcd/page-filter.png"><img src="ja-ui-evidence/lcd/page-filter.png" alt="page-filter" loading="lazy"></a><figcaption>page-filter</figcaption></figure>
+<figure class="lcd"><a href="ja-ui-evidence/lcd/page-fx.png"><img src="ja-ui-evidence/lcd/page-fx.png" alt="page-fx" loading="lazy"></a><figcaption>page-fx</figcaption></figure>
+<figure class="lcd"><a href="ja-ui-evidence/lcd/page-global.png"><img src="ja-ui-evidence/lcd/page-global.png" alt="page-global" loading="lazy"></a><figcaption>page-global</figcaption></figure>
+<figure class="lcd"><a href="ja-ui-evidence/lcd/page-master.png"><img src="ja-ui-evidence/lcd/page-master.png" alt="page-master" loading="lazy"></a><figcaption>page-master</figcaption></figure>
+<figure class="lcd"><a href="ja-ui-evidence/lcd/page-menu-keys-all.png"><img src="ja-ui-evidence/lcd/page-menu-keys-all.png" alt="page-menu-keys-all" loading="lazy"></a><figcaption>page-menu-keys-all</figcaption></figure>
+<figure class="lcd"><a href="ja-ui-evidence/lcd/page-menu-lights.png"><img src="ja-ui-evidence/lcd/page-menu-lights.png" alt="page-menu-lights" loading="lazy"></a><figcaption>page-menu-lights</figcaption></figure>
+<figure class="lcd"><a href="ja-ui-evidence/lcd/page-menu-notes.png"><img src="ja-ui-evidence/lcd/page-menu-notes.png" alt="page-menu-notes" loading="lazy"></a><figcaption>page-menu-notes</figcaption></figure>
+<figure class="lcd"><a href="ja-ui-evidence/lcd/page-scale.png"><img src="ja-ui-evidence/lcd/page-scale.png" alt="page-scale" loading="lazy"></a><figcaption>page-scale</figcaption></figure>
+<figure class="lcd"><a href="ja-ui-evidence/lcd/page-song.png"><img src="ja-ui-evidence/lcd/page-song.png" alt="page-song" loading="lazy"></a><figcaption>page-song</figcaption></figure>
+<figure class="lcd"><a href="ja-ui-evidence/lcd/page-splash.png"><img src="ja-ui-evidence/lcd/page-splash.png" alt="page-splash" loading="lazy"></a><figcaption>page-splash</figcaption></figure>
+<figure class="lcd"><a href="ja-ui-evidence/lcd/page-step.png"><img src="ja-ui-evidence/lcd/page-step.png" alt="page-step" loading="lazy"></a><figcaption>page-step</figcaption></figure>
+<figure class="lcd"><a href="ja-ui-evidence/lcd/page-system.png"><img src="ja-ui-evidence/lcd/page-system.png" alt="page-system" loading="lazy"></a><figcaption>page-system</figcaption></figure>
+<figure class="lcd"><a href="ja-ui-evidence/lcd/page-tracks.png"><img src="ja-ui-evidence/lcd/page-tracks.png" alt="page-tracks" loading="lazy"></a><figcaption>page-tracks</figcaption></figure>
+<figure class="lcd"><a href="ja-ui-evidence/lcd/song-screen.png"><img src="ja-ui-evidence/lcd/song-screen.png" alt="song-screen" loading="lazy"></a><figcaption>song-screen</figcaption></figure>
+<figure class="lcd"><a href="ja-ui-evidence/lcd/vis-01-OSCILLOSCOPE.png"><img src="ja-ui-evidence/lcd/vis-01-OSCILLOSCOPE.png" alt="vis-01-OSCILLOSCOPE" loading="lazy"></a><figcaption>vis-01-OSCILLOSCOPE</figcaption></figure>
+<figure class="lcd"><a href="ja-ui-evidence/lcd/vis-02-SPECTRUM.png"><img src="ja-ui-evidence/lcd/vis-02-SPECTRUM.png" alt="vis-02-SPECTRUM" loading="lazy"></a><figcaption>vis-02-SPECTRUM</figcaption></figure>
+<figure class="lcd"><a href="ja-ui-evidence/lcd/vis-03-SPECTROGRAM.png"><img src="ja-ui-evidence/lcd/vis-03-SPECTROGRAM.png" alt="vis-03-SPECTROGRAM" loading="lazy"></a><figcaption>vis-03-SPECTROGRAM</figcaption></figure>
+<figure class="lcd"><a href="ja-ui-evidence/lcd/vis-04-LISSAJOUS.png"><img src="ja-ui-evidence/lcd/vis-04-LISSAJOUS.png" alt="vis-04-LISSAJOUS" loading="lazy"></a><figcaption>vis-04-LISSAJOUS</figcaption></figure>
+<figure class="lcd"><a href="ja-ui-evidence/lcd/vis-05-VU-METERS.png"><img src="ja-ui-evidence/lcd/vis-05-VU-METERS.png" alt="vis-05-VU-METERS" loading="lazy"></a><figcaption>vis-05-VU-METERS</figcaption></figure>
+<figure class="lcd"><a href="ja-ui-evidence/lcd/vis-06-CIRCLE.png"><img src="ja-ui-evidence/lcd/vis-06-CIRCLE.png" alt="vis-06-CIRCLE" loading="lazy"></a><figcaption>vis-06-CIRCLE</figcaption></figure>
+<figure class="lcd"><a href="ja-ui-evidence/lcd/vis-07-TAPE.png"><img src="ja-ui-evidence/lcd/vis-07-TAPE.png" alt="vis-07-TAPE" loading="lazy"></a><figcaption>vis-07-TAPE</figcaption></figure>
+<figure class="lcd"><a href="ja-ui-evidence/lcd/vis-08-LCD.png"><img src="ja-ui-evidence/lcd/vis-08-LCD.png" alt="vis-08-LCD" loading="lazy"></a><figcaption>vis-08-LCD</figcaption></figure>
+<figure class="lcd"><a href="ja-ui-evidence/lcd/vis-09-BOUNCE.png"><img src="ja-ui-evidence/lcd/vis-09-BOUNCE.png" alt="vis-09-BOUNCE" loading="lazy"></a><figcaption>vis-09-BOUNCE</figcaption></figure>
+<figure class="lcd"><a href="ja-ui-evidence/lcd/vis-10-ORBIT.png"><img src="ja-ui-evidence/lcd/vis-10-ORBIT.png" alt="vis-10-ORBIT" loading="lazy"></a><figcaption>vis-10-ORBIT</figcaption></figure>
+<figure class="lcd"><a href="ja-ui-evidence/lcd/vis-11-WIRES.png"><img src="ja-ui-evidence/lcd/vis-11-WIRES.png" alt="vis-11-WIRES" loading="lazy"></a><figcaption>vis-11-WIRES</figcaption></figure>
+<figure class="lcd"><a href="ja-ui-evidence/lcd/vis-12-SLOOP.png"><img src="ja-ui-evidence/lcd/vis-12-SLOOP.png" alt="vis-12-SLOOP" loading="lazy"></a><figcaption>vis-12-SLOOP</figcaption></figure></div></details>
+<h2>Web Editor・インストーラー</h2><div class="grid"><figure class=""><a href="ja-ui-evidence/editor-375-sound.png"><img src="ja-ui-evidence/editor-375-sound.png" alt="音色" loading="lazy"></a><figcaption>音色</figcaption></figure>
+<figure class=""><a href="ja-ui-evidence/editor-375-sequencer.png"><img src="ja-ui-evidence/editor-375-sequencer.png" alt="シーケンサー" loading="lazy"></a><figcaption>シーケンサー</figcaption></figure>
+<figure class=""><a href="ja-ui-evidence/editor-375-tracks.png"><img src="ja-ui-evidence/editor-375-tracks.png" alt="トラック" loading="lazy"></a><figcaption>トラック</figcaption></figure>
+<figure class=""><a href="ja-ui-evidence/editor-375-library.png"><img src="ja-ui-evidence/editor-375-library.png" alt="ライブラリ" loading="lazy"></a><figcaption>ライブラリ</figcaption></figure>
+<figure class=""><a href="ja-ui-evidence/editor-375-samples.png"><img src="ja-ui-evidence/editor-375-samples.png" alt="サンプル" loading="lazy"></a><figcaption>サンプル</figcaption></figure>
+<figure class=""><a href="ja-ui-evidence/editor-375-kits.png"><img src="ja-ui-evidence/editor-375-kits.png" alt="ドラムキット" loading="lazy"></a><figcaption>ドラムキット</figcaption></figure>
+<figure class=""><a href="ja-ui-evidence/editor-375-projects.png"><img src="ja-ui-evidence/editor-375-projects.png" alt="プロジェクト" loading="lazy"></a><figcaption>プロジェクト</figcaption></figure>
+<figure class=""><a href="ja-ui-evidence/editor-375-settings.png"><img src="ja-ui-evidence/editor-375-settings.png" alt="設定" loading="lazy"></a><figcaption>設定</figcaption></figure><figure class=""><a href="ja-ui-evidence/installer-375.png"><img src="ja-ui-evidence/installer-375.png" alt="インストーラー" loading="lazy"></a><figcaption>インストーラー</figcaption></figure></div>
+<h2>モバイル縦スクロール</h2><p class="dim">375×820pxのブラウザー画面を実際にスクロールして録画。GIFをクリックすると元サイズで開きます。</p>
+<div class="grid"><figure class=""><a href="ja-ui-evidence/scroll-sound.gif"><img src="ja-ui-evidence/scroll-sound.gif" alt="sound - 18 frames / 5669px" loading="lazy"></a><figcaption>sound - 18 frames / 5669px</figcaption></figure>
+<figure class=""><a href="ja-ui-evidence/scroll-sequencer.gif"><img src="ja-ui-evidence/scroll-sequencer.gif" alt="sequencer - 11 frames / 1688px" loading="lazy"></a><figcaption>sequencer - 11 frames / 1688px</figcaption></figure>
+<figure class=""><a href="ja-ui-evidence/scroll-tracks.gif"><img src="ja-ui-evidence/scroll-tracks.gif" alt="tracks - 14 frames / 2047px" loading="lazy"></a><figcaption>tracks - 14 frames / 2047px</figcaption></figure>
+<figure class=""><a href="ja-ui-evidence/scroll-library.gif"><img src="ja-ui-evidence/scroll-library.gif" alt="library - 13 frames / 1957px" loading="lazy"></a><figcaption>library - 13 frames / 1957px</figcaption></figure>
+<figure class=""><a href="ja-ui-evidence/scroll-samples.gif"><img src="ja-ui-evidence/scroll-samples.gif" alt="samples - 13 frames / 1960px" loading="lazy"></a><figcaption>samples - 13 frames / 1960px</figcaption></figure>
+<figure class=""><a href="ja-ui-evidence/scroll-kits.gif"><img src="ja-ui-evidence/scroll-kits.gif" alt="kits - 18 frames / 3280px" loading="lazy"></a><figcaption>kits - 18 frames / 3280px</figcaption></figure>
+<figure class=""><a href="ja-ui-evidence/scroll-projects.gif"><img src="ja-ui-evidence/scroll-projects.gif" alt="projects - 10 frames / 1541px" loading="lazy"></a><figcaption>projects - 10 frames / 1541px</figcaption></figure>
+<figure class=""><a href="ja-ui-evidence/scroll-settings.gif"><img src="ja-ui-evidence/scroll-settings.gif" alt="settings - 12 frames / 1800px" loading="lazy"></a><figcaption>settings - 12 frames / 1800px</figcaption></figure>
+<figure class=""><a href="ja-ui-evidence/scroll-installer.gif"><img src="ja-ui-evidence/scroll-installer.gif" alt="installer - 10 frames / 1449px" loading="lazy"></a><figcaption>installer - 10 frames / 1449px</figcaption></figure></div>
+<p><a href="ja-ui-report.pdf">PDF版を開く</a>　<a href="ja-ui-evidence/lcd-manifest.json">画像一覧JSON</a>　
+<a href="ja-ui-evidence/browser-layout.json">ブラウザー計測JSON</a></p>
+</main></body></html>

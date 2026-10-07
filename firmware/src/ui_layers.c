@@ -21,7 +21,8 @@
  * GLO keys come to the UI through seq.c lk_q. HOLD: REC held clears the track, SAVE held saves the
  * project (a ring fills; let go before and nothing happens). */
 static const uint8_t LAYER_BTN[LY_COUNT] = {NB, B_FX, B_EDIT, B_ARP, B_SEQ, B_SCL, B_GLO, B_SAVE};
-static const char *const LAYER_NAME[LY_COUNT] = {"", "punch", "erase", "roll", "steps", "key", "mix", "song"};
+static const ui_string_id_t LAYER_NAME[LY_COUNT] = {UI_HOME, UI_PUNCH, UI_ERASE_LAYER, UI_ROLL_LAYER,
+                                                   UI_STEPS_LAYER, UI_KEY_LAYER, UI_MIX_LAYER, UI_SONG_LAYER};
 static void section_store(uint32_t s);                  /* project.c */
 static void section_load(uint32_t s);
 static uint8_t sec_armed;                               /* store over a used section: the key again within 3 s */
@@ -89,7 +90,7 @@ static void pattern_length(track_t *t, int32_t d)       /* x2 (the pattern again
     {
         char b[8];
         fmt_int(b, t->p[P_SLEN]);
-        ui_say("STEPS ", b);
+        ui_say(ui_text(UI_STEPS_PREFIX), b);
     }
 }
 static void pattern_transpose(track_t *t, int32_t d)    /* every note a semitone up / down (synth parts) */
@@ -121,7 +122,7 @@ static void step_down(uint32_t w)
     if (idx >= trk_len(t))
         return;
     if (song.playing && arrangement_enabled) {
-        ui_message("STOP THE SONG FIRST");
+        ui_message(ui_text(UI_STOP_SONG));
         return;
     }
     if (step_is_on(t, idx)) {
@@ -343,7 +344,7 @@ static void layer_key(uint32_t layer, uint32_t k, uint32_t down)
         uint32_t i, root = (53u + k) % 12u;
         for (i = 0; i < NPART; i++)
             trk[i].p[P_ROOT] = (int16_t)root;
-        ui_say("KEY ", N_NOTE[root]);
+        ui_say(ui_text(UI_KEY_PREFIX), N_NOTE[root]);
         return;
     }
     case LY_SONG: {                                     /* sections A..D: play, store; loop / song; SONG REC */
@@ -353,16 +354,16 @@ static void layer_key(uint32_t layer, uint32_t k, uint32_t down)
         b[0] = (char)('A' + (w & 3));
         if (w < 4) {
             if (arrangement_clock.running) {
-                ui_message("SONG PLAYS");
+                ui_message(ui_text(UI_SONG_PLAYS));
             } else if (!((arrangement_ready() >> w) & 1u)) {
-                ui_say("EMPTY ", b);
+                ui_say(ui_text(UI_EMPTY_PREFIX), b);
             } else if (song.playing) {
                 if (!chain_taps) {                          /* the first tap: as ever, and any chain stops */
                     fm1_irq_off();
                     chain_n = 0;
                     live_req = (int8_t)w;
                     fm1_irq_on();
-                    ui_say("NEXT: ", b);
+                    ui_say(ui_text(UI_NEXT_PREFIX), b);
                 } else {
                     ui.msg_t = 0;                           /* (the sub line shows the chain) */
                 }
@@ -370,25 +371,25 @@ static void layer_key(uint32_t layer, uint32_t k, uint32_t down)
                     chain_tap[chain_taps++] = (uint8_t)w;   /* (SAVE held: more taps make a chain) */
             } else {
                 section_load((uint32_t)w);
-                ui_say("LOADED ", b);
+                ui_say(ui_text(UI_LOADED_PREFIX), b);
             }
         } else if (w < 8) {
             uint32_t s = (uint32_t)w - 4u;
             if (((arrangement_ready() >> s) & 1u) && !(sec_armed == s + 1u && fm1_ms - sec_armed_ms < 3000u)) {
                 sec_armed = (uint8_t)(s + 1u);
                 sec_armed_ms = fm1_ms;
-                ui_say("AGAIN: ", b);
+                ui_say(ui_text(UI_AGAIN_PREFIX), b);
             } else {
                 sec_armed = 0;
                 section_store(s);
-                ui_say("SAVED ", b);
+                ui_say(ui_text(UI_SAVED_PREFIX), b);
             }
         } else if (w == 12) {
             if (srec) {
-                ui_message("REC IS ON");
+                ui_message(ui_text(UI_REC_ON));
             } else {
                 arrangement_enabled ^= 1u;
-                ui_message(arrangement_enabled ? "SONG MODE" : "LOOP MODE");
+                ui_message(ui_text(arrangement_enabled ? UI_SONG_MODE : UI_LOOP_MODE));
             }
         } else if (w == 13) {
             if (srec) {
@@ -396,11 +397,11 @@ static void layer_key(uint32_t layer, uint32_t k, uint32_t down)
                 srec_stop();                            /* (playing: the order so far is the song) */
                 fm1_irq_on();
             } else if (arrangement_clock.running) {
-                ui_message("STOP FIRST");
+                ui_message(ui_text(UI_STOP_FIRST));
             } else {
                 arrangement_enabled = 0;
                 srec = 1;
-                ui_message(live_sec < 0 ? "PICK A PART" : "REC: NEXT BAR");
+                ui_message(ui_text(live_sec < 0 ? UI_PICK_PART : UI_REC_NEXT_BAR));
             }
         } else if (w == 15) {
             studio_open(SC_SONG);
@@ -416,7 +417,7 @@ static void layer_key(uint32_t layer, uint32_t k, uint32_t down)
             fill_held = 1;                                  /* FILL while held */
         } else if (w == 9) {
             fill_arm = (uint8_t)!fill_arm;                  /* FILL NEXT BAR (again: cancelled) */
-            ui_message(fill_arm ? "FILL: NEXT BAR" : "FILL BAR OFF");
+            ui_message(ui_text(fill_arm ? UI_FILL_NEXT_BAR : UI_FILL_BAR_OFF));
         } else if (w == 15) {
             tap_tempo();
         }
@@ -445,8 +446,9 @@ static void chain_release(void)
 /* "chain A B B C": the chain being built (SAVE held) or playing */
 static void chain_sub(char *sub, uint32_t n)
 {
-    uint32_t i, m = chain_taps >= 2u ? chain_taps : chain_n, k = 5;
-    str_cpy(sub, "chain", n);
+    uint32_t i, m = chain_taps >= 2u ? chain_taps : chain_n, k;
+    str_cpy(sub, ui_text(UI_CHAIN_LAB), n);
+    k = str_len(sub);
     for (i = 0; i < m && i < CHAIN_MAX && k + 2u < n; i++) {
         sub[k++] = ' ';
         sub[k++] = (char)('A' + ((chain_taps >= 2u ? chain_tap[i] : chain_sec[i]) & 3u));
@@ -603,16 +605,27 @@ static void layer_title(const char *name, const char *sub, uint16_t col, uint32_
 {
     uint32_t locked = ly_lock != LY_PLAY;
     uint32_t sig = studio_hash(studio_hash(col, name), sub) + (ui.msg_t ? studio_hash(3u, ui.msg) : 0u) + locked * 7919u;
+    int32_t nx, badge, detail_end, message_wide;
+    const char *detail;
     if (!ui.force && sig == *cache)
         return;
     *cache = sig;
+    nx = 4 + text_w(&FONT_L, name) + 10;
+    badge = locked ? (int32_t)text_w(&FONT_S, ui_text(UI_LOCK)) + 8 : 0;
+    detail = ui.msg_t ? ui.msg : ui_display_name(sub);
+    detail_end = locked ? 236 - badge - 4 : 236;
+    message_wide = ui.msg_t && nx + text_w(&FONT_S, detail) > detail_end;
     cv_begin(240, 40, C_BLACK);
-    cv_text(4, 2, &FONT_L, name, col);
-    cv_text(4 + text_w(&FONT_L, name) + 10, 18, &FONT_S, ui.msg_t ? ui.msg : sub, ui.msg_t ? C_WHITE : TE_G3);
-    if (locked) {                                         /* locked open (HOME): any button lets it go */
-        int32_t w = (int32_t)text_w(&FONT_S, "LOCK") + 8;
-        cv_rect(236 - w, 4, w, 15, C_WHITE);
-        cv_text(240 - w, 4, &FONT_S, "LOCK", C_BLACK);
+    if (message_wide) {  /* a transient status gets the entire header, never overlaps the title */
+        cv_text(4, 12, &FONT_S, detail, C_WHITE);
+    } else {
+        cv_text(4, 2, &FONT_L, name, col);
+        if (nx + text_w(&FONT_S, detail) <= detail_end)
+            cv_text(nx, 18, &FONT_S, detail, ui.msg_t ? C_WHITE : TE_G3);
+    }
+    if (locked && !message_wide) {                       /* locked open (HOME): any button lets it go */
+        cv_rect(236 - badge, 4, badge, 15, C_WHITE);
+        cv_text(240 - badge, 4, &FONT_S, ui_text(UI_LOCK), C_BLACK);
     }
     cv_rect(0, 38, 240, 1, TE_G1);
     cv_blit(0, 0);
@@ -649,13 +662,13 @@ static void layer_screen_draw(void)
         tl[i].bg = TE_G1;
         tl[i].fg = TE_G3;
     }
-    str_cpy(sub, "track ", sizeof sub);
-    sub[6] = (char)('1' + sel);
-    sub[7] = 0;
+    text_copy(sub, sizeof sub, ui_text(UI_TRACK_PREFIX));
+    sub[str_len(sub) + 1u] = 0;
+    sub[str_len(sub)] = (char)('1' + sel);
     switch (layer) {
     case LY_FX:                                         /* the 16 punch-in effects */
         col = TE_DRUM;
-        str_cpy(sub, "hold + key", sizeof sub);
+        str_cpy(sub, ui_text(UI_HOLD_KEY), sizeof sub);
         for (i = 0; i < 16u; i++) {
             static const char *const PSHORT[16] = {"loop 4", "loop 8", "loop16", "loop32", "stutt", "rev", "stop", "half",
                                                    "low", "high", "phone", "crush", "alias", "gate", "echo", "wobble"};
@@ -684,7 +697,7 @@ static void layer_screen_draw(void)
     case LY_ROLL: {                                     /* the keys' sounds: lit = held */
         uint32_t held = fm1_in.notes;
         col = layer == LY_ERASE ? TE_RED : col;
-        str_cpy(sub, layer == LY_ERASE ? (song.playing ? "as it plays" : "every step") : "hold + key", sizeof sub);
+        str_cpy(sub, ui_text(layer == LY_ERASE ? (song.playing ? UI_AS_PLAYS : UI_EVERY_STEP) : UI_HOLD_KEY), sizeof sub);
         for (i = 0; i < 16u; i++) {
             uint32_t k = key_of_white(i), down = (held >> k) & 1u, present = 0, j;
             if (is_drum(t)) {
@@ -859,7 +872,7 @@ static void layer_screen_draw(void)
     }
     case LY_MIX: {                                      /* mute 1..4, solo 1..4, fill / fill bar, tap */
         col = C_WHITE;
-        str_cpy(sub, "mute  solo  fill  tap", sizeof sub);
+        str_cpy(sub, ui_text(UI_MIX_SUB), sizeof sub);
         for (i = 0; i < 4u; i++) {
             int m = trk[i].p[P_MUTE] != 0, so = (song.solo >> i) & 1u;
             str_cpy(tl[i].lab, "mute 1", 8);
@@ -907,7 +920,7 @@ static void layer_screen_draw(void)
         } else if (chain_taps >= 2u || chain_n) {
             chain_sub(sub, sizeof sub);                 /* "chain A B B C" */
         } else {
-            str_cpy(sub, arrangement_enabled ? "song mode" : srec ? "rec armed" : "play  store", sizeof sub);
+            str_cpy(sub, ui_text(arrangement_enabled ? UI_SONG_MODE : srec ? UI_REC_ARMED : UI_PLAY_STORE), sizeof sub);
         }
         for (i = 0; i < 4u; i++) {                      /* (the chain's next entry framed as the one asked for) */
             int used = (ready >> i) & 1u, playing = live_sec == (int8_t)i && !arrangement_clock.running;
@@ -939,7 +952,7 @@ static void layer_screen_draw(void)
         break;
     }
     layer_sub_shown = sub;
-    layer_title(LAYER_NAME[layer % LY_COUNT], sub, col, &head);
+    layer_title(ui_text(LAYER_NAME[layer % LY_COUNT]), sub, col, &head);
     tiles_draw(tl, &tiles);
     {   /* (a message shows in the title: the dials stay) */
         uint8_t m = ui.msg_t;
@@ -968,8 +981,8 @@ static void hold_screen_draw(void)
         return;
     cache = sig;
     cv_begin(240, 124, C_BLACK);
-    cv_text(120 - text_w(&FONT_L, ui.hold_kind == 1u ? "clear" : "save") / 2, 4, &FONT_L,
-            ui.hold_kind == 1u ? "clear" : "save", ui.hold_kind == 1u ? TE_RED : C_WHITE);
+    cv_text(120 - text_w(&FONT_L, ui_text(ui.hold_kind == 1u ? UI_CLEAR_HOLD : UI_SAVE_HOLD)) / 2, 4, &FONT_L,
+            ui_text(ui.hold_kind == 1u ? UI_CLEAR_HOLD : UI_SAVE_HOLD), ui.hold_kind == 1u ? TE_RED : C_WHITE);
     {   /* the ring: 36 px, 7 thick, filling clockwise from the top */
         int32_t a, rr, end = ratio * 1024 / 1000;
         for (a = 0; a < 1024; a += 2) {

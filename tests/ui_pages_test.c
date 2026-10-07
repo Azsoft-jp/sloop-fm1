@@ -120,6 +120,72 @@ int main(int argc, char **argv)
 {
     uint32_t i;
     outdir = argc > 1 ? argv[1] : "build/host";
+    {   /* UTF-8 is decoded once for both measurement and drawing. */
+        const char *p = "ガパーャュョッ", *bad = "\xe3\x82", *missing = "漢";
+        char clipped[5];
+        check(text_w(&FONT_S, "Aア") == 24 && text_w(&FONT_L, "Aア") == 48,
+              "ASCII and kana widths, including the 2x title font");
+        while (*p) check(jp_glyph(utf8_next(&p)) >= 0, "dakuten, handakuten, long vowel and small kana glyph");
+        check(utf8_next(&bad) == '?' && utf8_next(&bad) == '?' && !*bad,
+              "truncated UTF-8 consumes safely and uses the fallback");
+        check(jp_glyph(utf8_next(&missing)) < 0 && text_w(&FONT_S, "漢") == text_w(&FONT_S, "?"),
+              "unlisted Unicode falls back to a visible question mark");
+        text_copy(clipped, sizeof clipped, "アア");
+        check(text_w(&FONT_S, clipped) == 16, "copy stops at a character boundary");
+        text_pop(clipped);
+        check(!clipped[0], "trimming removes one complete UTF-8 character");
+        cv_begin(20, 16, C_BLACK);
+        cv_text(-16, 0, &FONT_S, "アガ", C_WHITE);
+        cv_text(19, 0, &FONT_S, "パ", C_WHITE);
+        check(1, "kana pixels are clipped at both screen edges");
+        check(str_eq(column_text("STEP", 54), "STEP") && str_eq(column_text("REST", 40), "REST") &&
+              str_eq(column_text("LOAD", 54), ui_text(UI_LOAD)),
+              "knob columns use complete Japanese words or intact ASCII identifiers");
+        {   /* 2.4 section tabs, row labels and footer must stay inside the 240px LCD. */
+            int32_t tabs = 4;
+            for (uint32_t k = 0; k < MS_COUNT; k++) tabs += text_w(&FONT_S, ui_text(MS_NAME[k])) + 10;
+            check(tabs <= 240, "2.4 Japanese menu section tabs fit the LCD");
+            for (uint32_t k = 0; k < MI_COUNT; k++)
+                check(text_w(&FONT_S, ui_text(MI_NAME[k])) <= 185, "2.4 menu row label fits");
+            check(text_w(&FONT_S, ui_text(UI_SELECT_SECTION_HINT)) <= 236 &&
+                  text_w(&FONT_S, ui_text(UI_OCT_CLOSE_HINT)) <= 236,
+                  "2.4 Japanese menu instructions fit");
+            for (uint32_t k = 0; k < KEYS_N; k++)
+                check(text_w(&FONT_L, ui_text(KEYS_NAME[k])) <= 222 ||
+                      text_w(&FONT_S, ui_text(KEYS_NAME[k])) <= 222,
+                      "2.4 menu keys value fits at its selected size");
+            for (uint32_t k = 0; k < VIS_N; k++)
+                check(text_w(&FONT_S, ui_display_name(VIS_NAME[k])) <= 236,
+                      "2.4 visualizer style name fits the header");
+        }
+        {   /* The REC header shares row 1 with the transport label at x=122.
+             * REC instructions begin at x=60 and must end before x=236. */
+            const ui_string_id_t headers[] = {UI_TRACKS_LIVE, UI_FREE_TAKE, UI_COUNT_IN, UI_REC_READY};
+            const ui_string_id_t lines[] = {UI_PLAY_FREELY, UI_PLAY_NOTE, UI_PRESS_PLAY,
+                UI_THEN_REC, UI_STARTS_LOOP, UI_FOUR_CLICKS, UI_TEMPO_FOLLOWS,
+                UI_PLAY_GO_REC_CANCEL, UI_REC_CANCEL};
+            for (uint32_t k = 0; k < sizeof headers / sizeof headers[0]; k++)
+                check(text_w(&FONT_S, ui_text(headers[k])) <= 64, "live header fits its 64px slot");
+            for (uint32_t k = 0; k < sizeof lines / sizeof lines[0]; k++)
+                check(text_w(&FONT_S, ui_text(lines[k])) <= 176, "REC instruction fits before the right edge");
+            {   const ui_string_id_t full[] = {UI_CALIBRATION, UI_CAL_TITLE, UI_UPDATE,
+                    UI_OTA_PACKAGE, UI_OTA_CHECK_HEAD, UI_OTA_LOADER, UI_OTA_CONFIRM,
+                    UI_OTA_RESTART, UI_OTA_DRY_OK, UI_UPDATE_CANCEL, UI_CRASH, UI_RESCUE,
+                    UI_CONNECT_USB, UI_OPEN_INSTALLER, UI_UNKNOWN_FLASH, UI_AUDIO_OFF};
+                for (uint32_t k = 0; k < sizeof full / sizeof full[0]; k++)
+                    check(text_w(&FONT_S, ui_text(full[k])) <= 236, "one-shot screen text fits the LCD");
+            }
+            {   const ui_string_id_t titles[] = {UI_PUNCH, UI_ERASE_LAYER, UI_STEPS_LAYER,
+                    UI_MIX_LAYER, UI_SONG_LAYER};
+                const ui_string_id_t details[] = {UI_HOLD_KEY, UI_EVERY_STEP, UI_TRACK_PREFIX,
+                    UI_MIX_SUB, UI_PLAY_STORE};
+                for (uint32_t k = 0; k < sizeof titles / sizeof titles[0]; k++)
+                    check(4 + text_w(&FONT_L, ui_text(titles[k])) + 10 +
+                          text_w(&FONT_S, ui_text(details[k])) <= 236,
+                          "layer title and detail fit without overlap");
+            }
+        }
+    }
     {   /* the preset list by kind (ui.c BANK): every factory preset of every engine once, every name found */
         uint32_t e, k, n, hits;
         bank_resolve();
@@ -448,15 +514,19 @@ int main(int argc, char **argv)
     key(key_of_white(0)); key(key_of_white(1));
     check(live_req == 0 && chain_taps == 2u && chain_n == 0u, "SAVE held, A then B tapped: A asked for, the chain building");
     ui.force = 1; frame();
-    check(str_eq(sub_line(), "chain A B"), "the sub line reads \"chain A B\"");
+    char chain_label[24];
+    str_cpy(chain_label, ui_text(UI_CHAIN_LAB), sizeof chain_label);
+    str_cpy(chain_label + str_len(chain_label), " A B", sizeof chain_label - str_len(chain_label));
+    check(str_eq(sub_line(), chain_label), "the sub line reads the localized chain A B");
     key(key_of_white(1));
     ui.force = 1; frame(); ppm("layer-song-chain");
-    check(chain_taps == 3u && str_eq(sub_line(), "chain A B B"), "B again: \"chain A B B\"");
+    str_cpy(chain_label + str_len(chain_label), " B", sizeof chain_label - str_len(chain_label));
+    check(chain_taps == 3u && str_eq(sub_line(), chain_label), "B again: localized chain A B B");
     release(B_SAVE); frames(2);
     check(chain_n == 3u && chain_i == 0u && chain_sec[0] == 0 && chain_sec[1] == 1 && chain_sec[2] == 1 && chain_bars == 1u && live_req == 0,
           "SAVE let go: the chain A B B plays (A asked for, 1 bar)");
     press(B_SAVE); frames(15);
-    check(str_eq(sub_line(), "chain A B B"), "SAVE held again: the chain shown");
+    check(str_eq(sub_line(), chain_label), "SAVE held again: the chain shown");
     key(key_of_white(1)); release(B_SAVE); frames(2);
     check(chain_n == 0u && live_req == 1, "a single tap of B: the chain ends, B asked for");
     press(B_SAVE); frames(15);
