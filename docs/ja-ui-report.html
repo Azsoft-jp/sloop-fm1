@@ -1,0 +1,168 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="dark">
+  <title>SLOOP 日本語UI｜画面・検証レポート</title>
+  <style>
+    :root { font-family: -apple-system, BlinkMacSystemFont, "Hiragino Kaku Gothic ProN", "Yu Gothic", Meiryo, sans-serif; color: #edf1fa; background: #10141d; }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body { margin: 0; line-height: 1.65; }
+    a { color: #8bc7ff; }
+    a:hover { color: #c4e6ff; }
+    .wrap { width: min(1160px, calc(100% - 32px)); margin-inline: auto; }
+    header { background: radial-gradient(circle at 88% 20%, #273e69 0, transparent 43%), linear-gradient(140deg, #1b2440, #111722 70%); border-bottom: 1px solid #344158; }
+    header .wrap { padding: 42px 0 38px; }
+    .eyebrow { color: #93bcff; font-size: .75rem; font-weight: 800; letter-spacing: .16em; text-transform: uppercase; }
+    h1 { font-size: clamp(2rem, 5vw, 3.5rem); line-height: 1.2; margin: .35rem 0 .8rem; }
+    h2 { font-size: clamp(1.45rem, 3vw, 2rem); margin: 0 0 .7rem; line-height: 1.3; }
+    h3 { margin: 0 0 .35rem; font-size: 1.07rem; }
+    p { margin: .4rem 0 1rem; }
+    .lead { color: #c7d3e7; max-width: 72ch; font-size: 1.07rem; }
+    .status { display: inline-block; border: 1px solid #ac833d; background: #47361c; color: #ffe3a5; border-radius: 999px; padding: .2rem .7rem; font-size: .8rem; font-weight: 700; }
+    .meta { display: flex; flex-wrap: wrap; gap: .6rem 1.2rem; align-items: center; margin-top: 1.3rem; color: #cbd7ea; font-size: .91rem; }
+    nav { position: sticky; top: 0; z-index: 10; overflow-x: auto; background: #151c29f2; border-bottom: 1px solid #344158; backdrop-filter: blur(12px); }
+    nav .wrap { display: flex; gap: 1.3rem; white-space: nowrap; padding: .65rem 0; }
+    nav a { color: #d5e2f3; text-decoration: none; font-size: .86rem; font-weight: 700; }
+    section { padding: 42px 0 18px; scroll-margin-top: 55px; }
+    .sub { color: #aebbd0; }
+    .metrics { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 10px; margin: 25px 0 4px; }
+    .metric { background: #202a3b; border: 1px solid #35445d; border-radius: 13px; padding: 14px; min-width: 0; }
+    .metric strong { display: block; font-size: 1.55rem; line-height: 1.25; color: #fff; font-variant-numeric: tabular-nums; }
+    .metric span { font-size: .78rem; color: #b9c8dd; }
+    .note { border-left: 4px solid #6da8e5; background: #1a2a3e; border-radius: 0 10px 10px 0; padding: 12px 16px; margin: 18px 0; }
+    .note.warn { border-color: #e6b86d; background: #372c1c; }
+    .gallery { display: grid; grid-template-columns: repeat(auto-fit, minmax(225px, 1fr)); gap: 14px; margin-top: 18px; }
+    .gallery.wide { grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); }
+    figure { margin: 0; background: #1b2330; border: 1px solid #344158; border-radius: 14px; overflow: hidden; }
+    figure > a { display: block; }
+    figure img { display: block; width: 100%; height: auto; }
+    .gallery .static img { height: 330px; object-fit: cover; object-position: top; background: #fff; }
+    .gallery .lcd img { height: 260px; object-fit: contain; background: #090b0f; padding: 10px; image-rendering: pixelated; }
+    .gallery .gif img { max-width: 375px; margin: auto; background: #fff; }
+    figcaption { padding: 11px 13px 13px; border-top: 1px solid #344158; font-size: .88rem; color: #cbd6e7; }
+    figcaption strong { display: block; color: #fff; }
+    .full { margin-top: 17px; }
+    .full img { max-height: 540px; object-fit: contain; background: #fff; }
+    .full.dark img { background: #090b0f; image-rendering: pixelated; }
+    .table-scroll { overflow-x: auto; border: 1px solid #344158; border-radius: 12px; margin: 18px 0; }
+    table { border-collapse: collapse; width: 100%; min-width: 650px; font-size: .9rem; }
+    th, td { padding: 10px 13px; border-bottom: 1px solid #344158; text-align: left; vertical-align: top; }
+    th { color: #c7d9f1; background: #1f2b3d; }
+    tr:last-child td { border-bottom: 0; }
+    td:nth-child(2), td:nth-child(3) { font-variant-numeric: tabular-nums; }
+    .tag { display: inline-block; background: #274635; color: #b8f0cc; border-radius: 5px; padding: 0 .4rem; font-size: .78rem; font-weight: 800; }
+    .tag.caution { background: #594025; color: #ffe0a7; }
+    ul, ol { padding-left: 1.35rem; }
+    li { margin: .4rem 0; }
+    code { color: #b3dcff; overflow-wrap: anywhere; }
+    footer { border-top: 1px solid #344158; color: #aebbd0; padding: 30px 0 45px; margin-top: 35px; font-size: .9rem; }
+    @media (max-width: 730px) { .metrics { grid-template-columns: repeat(2, minmax(0, 1fr)); } header .wrap { padding: 30px 0; } section { padding-top: 30px; } .gallery.wide { grid-template-columns: 1fr; } }
+    @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="wrap">
+      <div class="eyebrow">SLOOP for M-VAVE FM-1 / Phase 1 + Phase 2</div>
+      <h1>日本語UI<br>画面・検証レポート</h1>
+      <p class="lead">Web EditorとFM-1本体の日本語化を、画面画像、スクロールGIF、容量・回帰試験の実測値で確認するためのPR資料です。</p>
+      <div class="meta"><span class="status">ドラフトPR・実機検証待ち</span><span>基準コミット: <code title="d691ba7b2d922f1a1f41a3622cffe29ce41c5506">d691ba7b</code></span><a href="https://github.com/isod89/sloop-fm1/pull/39">Pull Request #39 ↗</a></div>
+      <div class="metrics">
+        <div class="metric"><strong>7 + 1</strong><span>Editor 7タブ＋導入画面</span></div>
+        <div class="metric"><strong>206</strong><span>本体UI文字列ID</span></div>
+        <div class="metric"><strong>74字</strong><span>必要文字だけの日本語glyph</span></div>
+        <div class="metric"><strong>+8,780 B</strong><span>FWアプリ増分（+1.6%）</span></div>
+        <div class="metric"><strong>97件</strong><span>音声ゴールデン差分なし</span></div>
+      </div>
+    </div>
+  </header>
+  <nav aria-label="レポート内ナビゲーション"><div class="wrap"><a href="#scope">概要</a><a href="#web">Web Editor</a><a href="#scroll">スクロールGIF</a><a href="#device">FM-1本体</a><a href="#measure">容量・試験</a><a href="#limits">未確認とPhase 3</a></div></nav>
+  <main class="wrap">
+    <section id="scope">
+      <h2>概要と証跡の範囲</h2>
+      <p>Web Editorは自然な日本語を既存の<code>TEXT.ja/en</code>へ集約。本体は短いカタカナを中心に<code>ui_text(ID)</code>で描画し、既存の保存形式・機器プロトコル上の英語識別子は表示時だけ変換しました。</p>
+      <div class="note"><strong>画面画像の出所</strong><br>Web画面はChromeとEditorのモック接続、本体画面はホスト側LCD描画テストの出力です。実機写真ではありません。実機の表示・音声割り込み時間は未確認です。</div>
+      <p><a href="JA_LOCALIZATION.md">実装・調査・試験の詳細記録</a> ／ <a href="ja-ui-evidence/browser-layout.json">ブラウザーレイアウト測定値（JSON）</a> ／ <a href="ja-ui-evidence/scroll-capture.json">GIF撮影条件（JSON）</a></p>
+    </section>
+
+    <section id="web">
+      <h2>Web Editor：日本語化した画面</h2>
+      <p class="sub">各画像をクリックすると全体を表示します。375px幅で7タブすべてとインストーラーを記録し、1280px幅でも7タブを検査しました。</p>
+      <figure class="full"><a href="ja-ui-evidence/editor-1280-sound.png"><img src="ja-ui-evidence/editor-1280-sound.png" alt="1280px幅の日本語Web Editor、音色タブ全体" loading="lazy"></a><figcaption><strong>デスクトップ／音色</strong>1280px幅の全画面。パラメーター名、操作、通知を日本語表示。</figcaption></figure>
+      <div class="gallery">
+        <figure class="static"><a href="ja-ui-evidence/editor-375-sound.png"><img src="ja-ui-evidence/editor-375-sound.png" alt="モバイル版の音色画面" loading="lazy"></a><figcaption><strong>音色</strong>音色編集、パラメーター、ツールチップ。</figcaption></figure>
+        <figure class="static"><a href="ja-ui-evidence/editor-375-sequencer.png"><img src="ja-ui-evidence/editor-375-sequencer.png" alt="モバイル版のシーケンサー画面" loading="lazy"></a><figcaption><strong>シーケンサー</strong>ステップ操作と各種設定。</figcaption></figure>
+        <figure class="static"><a href="ja-ui-evidence/editor-375-tracks.png"><img src="ja-ui-evidence/editor-375-tracks.png" alt="モバイル版のトラック画面" loading="lazy"></a><figcaption><strong>トラック</strong>トラック選択と操作。</figcaption></figure>
+        <figure class="static"><a href="ja-ui-evidence/editor-375-library.png"><img src="ja-ui-evidence/editor-375-library.png" alt="モバイル版のライブラリ画面" loading="lazy"></a><figcaption><strong>ライブラリ</strong>音色・キットの管理。</figcaption></figure>
+        <figure class="static"><a href="ja-ui-evidence/editor-375-samples.png"><img src="ja-ui-evidence/editor-375-samples.png" alt="モバイル版のサンプル画面" loading="lazy"></a><figcaption><strong>サンプル</strong>転送とサンプル管理。</figcaption></figure>
+        <figure class="static"><a href="ja-ui-evidence/editor-375-projects.png"><img src="ja-ui-evidence/editor-375-projects.png" alt="モバイル版のプロジェクト画面" loading="lazy"></a><figcaption><strong>プロジェクト</strong>保存、読み込み、バックアップ。</figcaption></figure>
+        <figure class="static"><a href="ja-ui-evidence/editor-375-settings.png"><img src="ja-ui-evidence/editor-375-settings.png" alt="モバイル版の設定画面" loading="lazy"></a><figcaption><strong>設定</strong>接続・更新・システム情報。</figcaption></figure>
+        <figure class="static"><a href="ja-ui-evidence/installer-375.png"><img src="ja-ui-evidence/installer-375.png" alt="モバイル版のSLOOPインストーラー" loading="lazy"></a><figcaption><strong>インストーラー</strong>ファームウェア更新と公式FW復帰。</figcaption></figure>
+      </div>
+    </section>
+
+    <section id="scroll">
+      <h2>縦スクロールの操作GIF</h2>
+      <p>375×820pxのブラウザー画面を上から下へ動かして記録しました。縦スクロールが必要な6タブとインストーラーを掲載します。プロジェクト画面は画面内に収まるため静止画のみです。</p>
+      <div class="gallery wide">
+        <figure class="gif"><img src="ja-ui-evidence/scroll-sound.gif" alt="音色画面を上から下へ縦スクロールするGIF" loading="lazy"><figcaption><strong>音色</strong>総高さ 2,635px／表示領域 820px。</figcaption></figure>
+        <figure class="gif"><img src="ja-ui-evidence/scroll-sequencer.gif" alt="シーケンサー画面を上から下へ縦スクロールするGIF" loading="lazy"><figcaption><strong>シーケンサー</strong>ステップ設定の続きまで確認。</figcaption></figure>
+        <figure class="gif"><img src="ja-ui-evidence/scroll-tracks.gif" alt="トラック画面を上から下へ縦スクロールするGIF" loading="lazy"><figcaption><strong>トラック</strong>短い縦スクロール。</figcaption></figure>
+        <figure class="gif"><img src="ja-ui-evidence/scroll-library.gif" alt="ライブラリ画面を上から下へ縦スクロールするGIF" loading="lazy"><figcaption><strong>ライブラリ</strong>管理操作の下部まで確認。</figcaption></figure>
+        <figure class="gif"><img src="ja-ui-evidence/scroll-samples.gif" alt="サンプル画面を上から下へ縦スクロールするGIF" loading="lazy"><figcaption><strong>サンプル</strong>転送エリアの下部まで確認。</figcaption></figure>
+        <figure class="gif"><img src="ja-ui-evidence/scroll-settings.gif" alt="設定画面を上から下へ縦スクロールするGIF" loading="lazy"><figcaption><strong>設定</strong>システム情報の末尾まで確認。</figcaption></figure>
+        <figure class="gif"><img src="ja-ui-evidence/scroll-installer.gif" alt="インストーラー画面を上から下へ縦スクロールするGIF" loading="lazy"><figcaption><strong>インストーラー</strong>更新・復帰案内の末尾まで確認。</figcaption></figure>
+      </div>
+      <div class="note">FM-1本体UIには文字送り・スクロール処理を追加していません。60px列に入らない見出しは幅を検査し、短い英字名に切り替えます。音声処理中の描画回数を増やさないためです。</div>
+    </section>
+
+    <section id="device">
+      <h2>FM-1本体：描画プレビュー</h2>
+      <p>240×240px、上部20px、4列各60pxの既存配置を保持。日本語の必要glyphは74字・2,960Bです。下の一覧はホスト側で描画した35画面のコンタクトシートです。</p>
+      <figure class="full dark"><a href="ja-ui-evidence/firmware-contact.png"><img src="ja-ui-evidence/firmware-contact.png" alt="FM-1本体UI、35画面の描画コンタクトシート" loading="lazy"></a><figcaption><strong>35画面のLCDシミュレーション</strong>クリックで拡大。実機LCDの撮影ではありません。</figcaption></figure>
+      <div class="gallery">
+        <figure class="lcd"><a href="ja-ui-evidence/page-step.png"><img src="ja-ui-evidence/page-step.png" alt="FM-1ステップ画面" loading="lazy"></a><figcaption><strong>ステップ</strong>4列ラベルの収まり。</figcaption></figure>
+        <figure class="lcd"><a href="ja-ui-evidence/page-song.png"><img src="ja-ui-evidence/page-song.png" alt="FM-1ソング画面" loading="lazy"></a><figcaption><strong>ソング</strong>編集・保存系の表示。</figcaption></figure>
+        <figure class="lcd"><a href="ja-ui-evidence/menu-usb.png"><img src="ja-ui-evidence/menu-usb.png" alt="FM-1 USBメニュー" loading="lazy"></a><figcaption><strong>USBメニュー</strong>短い技術語は英字を維持。</figcaption></figure>
+        <figure class="lcd"><a href="ja-ui-evidence/live-rec-free.png"><img src="ja-ui-evidence/live-rec-free.png" alt="FM-1ライブ録音画面" loading="lazy"></a><figcaption><strong>ライブ録音</strong>録音状態と列見出し。</figcaption></figure>
+        <figure class="lcd"><a href="ja-ui-evidence/layer-song.png"><img src="ja-ui-evidence/layer-song.png" alt="FM-1ソングレイヤー画面" loading="lazy"></a><figcaption><strong>ソングレイヤー</strong>レイヤー操作。</figcaption></figure>
+        <figure class="lcd"><a href="ja-ui-evidence/layer-punch.png"><img src="ja-ui-evidence/layer-punch.png" alt="FM-1パンチレイヤー画面" loading="lazy"></a><figcaption><strong>パンチレイヤー</strong>REC関連の視認性。</figcaption></figure>
+      </div>
+    </section>
+
+    <section id="measure">
+      <h2>容量・テスト結果</h2>
+      <div class="table-scroll"><table><thead><tr><th>項目</th><th>変更前</th><th>変更後・結果</th><th>証跡</th></tr></thead><tbody>
+        <tr><td>FWアプリ</td><td>550,256 B</td><td>559,036 B（+8,780 B）</td><td><a href="ja-ui-evidence/firmware-build-baseline.log">前</a> ／ <a href="ja-ui-evidence/firmware-build-ja.log">後</a></td></tr>
+        <tr><td>アプリ領域残量</td><td>31,308 B</td><td>22,528 B</td><td>同上</td></tr>
+        <tr><td>RAM .data＋.bss</td><td>72,720 B</td><td>72,892 B（+172 B）</td><td>同上</td></tr>
+        <tr><td>描画プール</td><td>322,272 B</td><td>322,272 B（変化なし）</td><td>同上</td></tr>
+        <tr><td>Web Editorの生HTML</td><td>242,617 B</td><td>245,961 B（+3,344 B）</td><td><a href="JA_LOCALIZATION.md">詳細記録</a></td></tr>
+        <tr><td>インストーラーの生HTML</td><td>19,241 B</td><td>20,847 B（+1,606 B）</td><td><a href="JA_LOCALIZATION.md">詳細記録</a></td></tr>
+      </tbody></table></div>
+      <ul>
+        <li><span class="tag">PASS</span> ターゲットFWビルド、RAM・Flash・描画プールの制限検査。<a href="ja-ui-evidence/firmware-build-ja.log">ビルドログ</a></li>
+        <li><span class="tag">PASS</span> ASCII、カタカナ、濁点・半濁点、長音、小文字、不正UTF-8、未登録glyph、画面外描画、主要操作、2万フレームのUI fuzz。<a href="ja-ui-evidence/firmware-ui-test.log">UIテストログ</a></li>
+        <li><span class="tag">PASS</span> Chromeモックの15画面で横はみ出し・パラメーター名のクリップなし。日本語ツールチップ、確認ダイアログ、英語切替を確認。<a href="ja-ui-evidence/browser-layout.json">レイアウト記録</a></li>
+        <li><span class="tag">PASS</span> 音声ゴールデン97件は元コミットとハッシュ差分なし。<a href="ja-ui-evidence/regress-baseline.log">前</a> ／ <a href="ja-ui-evidence/regress-ja.log">後</a></li>
+        <li><span class="tag caution">既存FAIL</span> ホスト試験総合のCPU命令予算は元コミットも今回版も同じ項目・値で超過。合格扱いにはしていません。<a href="ja-ui-evidence/full-tests-ja.log">総合ログ</a> ／ <a href="ja-ui-evidence/target-budget-baseline.log">基準値</a></li>
+      </ul>
+      <div class="note warn"><strong>音楽処理の遅延について</strong><br>音声DMA割り込み、DSP、MIDIタイミングのコードは変更していません。音声の出力一致はホストで検証済みです。ただし実機での最大割り込み時間と音切れは未測定のため、「絶対に遅延しない」とは断定できません。マージ前には再生負荷別に <code>felucca_dbg.max_us</code> と <code>late</code> を変更前後で比較します。</div>
+    </section>
+
+    <section id="limits">
+      <h2>未確認・既知の制限・次段階</h2>
+      <ul>
+        <li><strong>未確認：</strong>実機LCDの色と視認性、実機Flash書き込み・復帰、実機での音声割り込み最大時間と音切れ。</li>
+        <li><strong>既知の制限：</strong>任意Unicode・一般的な日本語入力は対象外。未収録glyphは<code>?</code>。固有名詞・機器名・短い技術語は英語のままの場合があります。</li>
+        <li><strong>Phase 3：</strong><code>firmware/src/ui_strings.h</code>に<code>Language</code>と<code>currentLanguage</code>を追加し、<code>ui_text()</code>の参照先を切替。<code>ui_menu.c</code>／<code>ui_input.c</code>へLANG項目と再描画、既存設定保存処理へ永続化・旧形式フォールバックを追加。Webの既存英語リソースと言語ボタンを維持。</li>
+        <li><strong>元FWへ戻す：</strong>先にEditorの「プロジェクト」からバックアップを保存し、公式FM-1 V15の<code>FM-1.fwsc</code>をインストーラーの「公式ファームウェアに戻す」で選択。実機復帰操作は今回未実施。<a href="JA_LOCALIZATION.md">詳しい手順</a></li>
+      </ul>
+    </section>
+  </main>
+  <footer><div class="wrap">SLOOP 日本語UI Phase 1・2 / PRレビュー用レポート。画像・GIF・ログは <a href="ja-ui-evidence/">docs/ja-ui-evidence/</a> に収録。詳細は <a href="JA_LOCALIZATION.md">JA_LOCALIZATION.md</a> を参照。</div></footer>
+</body>
+</html>

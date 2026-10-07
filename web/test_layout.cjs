@@ -33,7 +33,8 @@ function ensure(ok, reason) { if (!ok) throw new Error(reason); }
             .filter((e) => e.scrollWidth > e.clientWidth + 1).map((e) => e.textContent);
           return {
             tab, lang: document.documentElement.lang, pageWidth: document.documentElement.scrollWidth,
-            viewport: innerWidth, visible: !document.querySelector(`#p-${tab}`).hidden,
+            viewport: innerWidth, pageHeight: document.documentElement.scrollHeight,
+            viewportHeight: innerHeight, visible: !document.querySelector(`#p-${tab}`).hidden,
             clippedParameterLabels: rows,
           };
         }, tab);
@@ -41,7 +42,7 @@ function ensure(ok, reason) { if (!ok) throw new Error(reason); }
         ensure(report.pageWidth <= report.viewport, `${width}px ${tab}: horizontal overflow ${report.pageWidth}`);
         ensure(!report.clippedParameterLabels.length, `${width}px ${tab}: clipped ${report.clippedParameterLabels}`);
         results.push({ width, ...report });
-        if (width === 375 && ['sound', 'sequencer', 'settings'].includes(tab))
+        if (width === 375)
           await page.screenshot({ path: path.join(out, `editor-${width}-${tab}.png`), fullPage: true });
         if (width === 1280 && tab === 'sound')
           await page.screenshot({ path: path.join(out, 'editor-1280-sound.png'), fullPage: true });
@@ -73,7 +74,9 @@ function ensure(ok, reason) { if (!ok) throw new Error(reason); }
     await page.screenshot({ path: path.join(out, 'installer-375.png'), fullPage: true });
     await page.locator('#lang').click();
     ensure(await page.title() === 'SLOOP installer', 'English installer switching preserved');
-    results.push({ width: 375, tab: 'installer', visible: true, lang: 'ja', pageWidth: 375, viewport: 375 });
+    const installerHeight = await page.evaluate(() => document.documentElement.scrollHeight);
+    results.push({ width: 375, tab: 'installer', visible: true, lang: 'ja', pageWidth: 375,
+      viewport: 375, pageHeight: installerHeight, viewportHeight: 820 });
     fs.writeFileSync(path.join(out, 'browser-layout.json'), JSON.stringify(results, null, 2) + '\n');
     console.log(`Japanese browser layout: ${results.length} views, 375/1280px, no horizontal overflow or clipped parameter labels; tooltip, dialog and EN switch passed`);
   } finally { await browser.close(); }

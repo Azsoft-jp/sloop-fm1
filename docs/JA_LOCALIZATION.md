@@ -2,6 +2,8 @@
 
 対象コミット: `d691ba7b2d922f1a1f41a3622cffe29ce41c5506` を起点とした変更。PRレビュー時には、差分とともに [`ja-ui-evidence/`](ja-ui-evidence/) の画像・ログを確認する。
 
+画面付きのレビュー用資料は [`ja-ui-report.html`](ja-ui-report.html)。Web Editorの7タブとインストーラーの静止画、縦スクロールがある7画面のGIF、FM-1本体の35画面コンタクトシート、容量とテスト結果を一つにまとめた。GIFの再生成は `web/capture_ja_report.cjs`、HTML内の画像・レイアウト確認は `web/test_ja_report.cjs` を使用する。
+
 ## 変更前の調査
 
 ### 確認済み事実
