@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Build the PR's printable Japanese UI evidence report.
+"""Build the fork's printable Japanese UI evidence report.
 
 Requires ReportLab, Pillow, and a local Noto Sans JP TTF. The font is embedded
 as a subset in the PDF; its full source is deliberately not committed.
@@ -57,13 +57,13 @@ INK = colors.HexColor("#172236")
 MUTED = colors.HexColor("#52627A")
 LINE = colors.HexColor("#DAE1EA")
 BG = colors.HexColor("#F4F7FB")
-PR = "https://github.com/isod89/sloop-fm1/pull/39"
+WORK_BRANCH = "https://github.com/Azsoft-jp/sloop-fm1/tree/codex/ja-localization-phase1-2"
 BRANCH = "https://github.com/Azsoft-jp/sloop-fm1/blob/codex/ja-localization-phase1-2/docs/"
 RAW = "https://raw.githubusercontent.com/Azsoft-jp/sloop-fm1/codex/ja-localization-phase1-2/docs/"
 
 pdf = canvas.Canvas(str(OUTPUT), pagesize=A4, pageCompression=1)
 pdf.setTitle("SLOOP for M-VAVE FM-1 日本語UI 画面・検証レポート")
-pdf.setAuthor("SLOOP Japanese localization PR evidence")
+pdf.setAuthor("SLOOP Japanese localization fork review")
 pdf.setSubject("FM-1本体とWeb Editorの日本語化、画面、容量、回帰試験")
 page_number = 0
 
@@ -145,13 +145,13 @@ def start_page(section: str, title: str, subtitle: str = "") -> None:
 def finish_page() -> None:
     pdf.setStrokeColor(LINE)
     pdf.line(M, 33, W - M, 33)
-    txt(M, 20, "PR #39  |  ホスト描画・ブラウザーモックの証跡  |  実機確認待ち", 7, MUTED)
+    txt(M, 20, "フォーク内レビュー  |  ホスト描画・ブラウザーモックの証跡  |  実機確認待ち", 7, MUTED)
     txt(W - M - 15, 20, str(page_number), 8, MUTED)
     pdf.showPage()
 
 
 # Cover: the raw 240 × 240 screenshots are the focus, with no contact-sheet scaling.
-start_page("概要", "画面・検証レポート", "Phase 1 Web Editor / Phase 2 FM-1本体  ―  PRレビュー用PDF")
+start_page("概要", "画面・検証レポート", "Phase 1 Web Editor / Phase 2 FM-1本体  ―  フォーク内レビュー用PDF")
 txt(M, 697, "本体のドット画面を、描画コードから出力した240×240 PNGで確認", 11)
 para(M, 679, "実機LCDの写真ではありません。Web画面はChromeとEditorのモック接続で撮影しました。"
      "文字切れ修正後の2bit階調フォントを使用しています。", W - 2 * M, 8.7, 14, MUTED)
@@ -171,7 +171,7 @@ para(M, 245, "使用文字だけの2bit階調glyph（5,920 B）。「ヘ」の�
 txt(M, 189, "検証と制限", 11)
 para(M, 172, "ターゲットFWビルド、UI描画テスト2万フレーム、音声ゴールデン97件は通過。"
      "総合テストのCPU命令予算超過は元コミットから同値で残存。実機の表示品質と音声割り込み最大時間は未確認です。", W - 2 * M, 8.8, 14)
-link_label(M, 99, "PR #39 を開く ↗", PR)
+link_label(M, 99, "作業ブランチを開く ↗", WORK_BRANCH)
 link_label(M + 152, 99, "HTML・GIF版を開く ↗", BRANCH + "ja-ui-report.html")
 link_label(M + 329, 99, "詳細記録を開く ↗", BRANCH + "JA_LOCALIZATION.md")
 finish_page()
