@@ -25,12 +25,20 @@ const { chromium } = require(process.env.PLAYWRIGHT_CORE || 'playwright-core');
         images: document.images.length,
         broken: [...document.images].filter((img) => !img.complete || !img.naturalWidth).map((img) => img.src),
         gifs: [...document.images].filter((img) => img.src.endsWith('.gif')).length,
+        nativeLcd: [...document.images].filter((img) => img.src.includes('/lcd/')).length,
+        scaledFeatured: [...document.querySelectorAll('.device-feature img')].filter((img) =>
+          img.naturalWidth !== 240 || img.naturalHeight !== 240 ||
+          img.getBoundingClientRect().width !== 240 || img.getBoundingClientRect().height !== 240).map((img) => img.src),
+        wrongLcdSize: [...document.images].filter((img) => img.src.includes('/lcd/') &&
+          (img.naturalWidth !== 240 || img.naturalHeight !== 240)).map((img) => img.src),
         wrongGifSize: [...document.images].filter((img) => img.src.endsWith('.gif') &&
           (img.naturalWidth !== 375 || img.naturalHeight !== 820)).map((img) => img.src),
       }));
-      if (result.pageWidth > width || result.broken.length || result.gifs !== 7 || result.wrongGifSize.length)
+      if (result.pageWidth > width || result.broken.length || result.images !== 61 ||
+          result.gifs !== 7 || result.nativeLcd !== 35 || result.wrongLcdSize.length ||
+          result.wrongGifSize.length || result.scaledFeatured.length)
         throw new Error(`${width}px report layout: ${JSON.stringify(result)}`);
-      console.log(`${width}px: ${result.images} images (${result.gifs} GIFs), no broken images or horizontal overflow`);
+      console.log(`${width}px: ${result.images} images (${result.nativeLcd} native LCD, ${result.gifs} GIFs), no broken images or horizontal overflow`);
       await page.close();
     }
   } finally { await browser.close(); }

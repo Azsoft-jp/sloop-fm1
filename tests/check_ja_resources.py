@@ -15,6 +15,8 @@ match = re.search(r'FONT_J_CODE\[\d+\] = \{([^}]+)\}', generated)
 assert match, "run tools.build.generate() first"
 glyphs = {int(x, 16) for x in re.findall(r'0x[0-9a-f]+', match[1])}
 assert glyphs == used, f"glyph mismatch: missing {used-glyphs}, unused {glyphs-used}"
+data = re.search(r'FONT_J_DATA\[(\d+)\]', generated)
+assert data and int(data[1]) == len(glyphs) * 80, "Japanese font must be packed 2 bpp, 20x16 per glyph"
 for file in (root / "firmware/src").glob("*.[ch]"):
     assert not re.search(r'[\u3040-\u30ff\u3400-\u9fff]', file.read_text()), f"direct Japanese UI in {file}"
 print(f"resources: {len(entries)} EN/JA IDs, {len(glyphs)} sparse glyphs, all used, no direct Japanese in C")

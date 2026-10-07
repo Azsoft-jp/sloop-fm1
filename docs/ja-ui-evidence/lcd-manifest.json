@@ -1,0 +1,247 @@
+[
+  {
+    "screen": "hold-clear",
+    "source": "build/host/hold-clear.ppm",
+    "image": "docs/ja-ui-evidence/lcd/hold-clear.png",
+    "width": 240,
+    "height": 240
+  },
+  {
+    "screen": "layer-erase",
+    "source": "build/host/layer-erase.ppm",
+    "image": "docs/ja-ui-evidence/lcd/layer-erase.png",
+    "width": 240,
+    "height": 240
+  },
+  {
+    "screen": "layer-key",
+    "source": "build/host/layer-key.ppm",
+    "image": "docs/ja-ui-evidence/lcd/layer-key.png",
+    "width": 240,
+    "height": 240
+  },
+  {
+    "screen": "layer-locked",
+    "source": "build/host/layer-locked.ppm",
+    "image": "docs/ja-ui-evidence/lcd/layer-locked.png",
+    "width": 240,
+    "height": 240
+  },
+  {
+    "screen": "layer-mix",
+    "source": "build/host/layer-mix.ppm",
+    "image": "docs/ja-ui-evidence/lcd/layer-mix.png",
+    "width": 240,
+    "height": 240
+  },
+  {
+    "screen": "layer-punch-on",
+    "source": "build/host/layer-punch-on.ppm",
+    "image": "docs/ja-ui-evidence/lcd/layer-punch-on.png",
+    "width": 240,
+    "height": 240
+  },
+  {
+    "screen": "layer-punch",
+    "source": "build/host/layer-punch.ppm",
+    "image": "docs/ja-ui-evidence/lcd/layer-punch.png",
+    "width": 240,
+    "height": 240
+  },
+  {
+    "screen": "layer-roll",
+    "source": "build/host/layer-roll.ppm",
+    "image": "docs/ja-ui-evidence/lcd/layer-roll.png",
+    "width": 240,
+    "height": 240
+  },
+  {
+    "screen": "layer-song",
+    "source": "build/host/layer-song.ppm",
+    "image": "docs/ja-ui-evidence/lcd/layer-song.png",
+    "width": 240,
+    "height": 240
+  },
+  {
+    "screen": "layer-steps",
+    "source": "build/host/layer-steps.ppm",
+    "image": "docs/ja-ui-evidence/lcd/layer-steps.png",
+    "width": 240,
+    "height": 240
+  },
+  {
+    "screen": "live-free-take",
+    "source": "build/host/live-free-take.ppm",
+    "image": "docs/ja-ui-evidence/lcd/live-free-take.png",
+    "width": 240,
+    "height": 240
+  },
+  {
+    "screen": "live-grid",
+    "source": "build/host/live-grid.ppm",
+    "image": "docs/ja-ui-evidence/lcd/live-grid.png",
+    "width": 240,
+    "height": 240
+  },
+  {
+    "screen": "live-kit",
+    "source": "build/host/live-kit.ppm",
+    "image": "docs/ja-ui-evidence/lcd/live-kit.png",
+    "width": 240,
+    "height": 240
+  },
+  {
+    "screen": "live-rec-count",
+    "source": "build/host/live-rec-count.ppm",
+    "image": "docs/ja-ui-evidence/lcd/live-rec-count.png",
+    "width": 240,
+    "height": 240
+  },
+  {
+    "screen": "live-rec-countin",
+    "source": "build/host/live-rec-countin.ppm",
+    "image": "docs/ja-ui-evidence/lcd/live-rec-countin.png",
+    "width": 240,
+    "height": 240
+  },
+  {
+    "screen": "live-rec-free",
+    "source": "build/host/live-rec-free.ppm",
+    "image": "docs/ja-ui-evidence/lcd/live-rec-free.png",
+    "width": 240,
+    "height": 240
+  },
+  {
+    "screen": "live-rec-notes",
+    "source": "build/host/live-rec-notes.ppm",
+    "image": "docs/ja-ui-evidence/lcd/live-rec-notes.png",
+    "width": 240,
+    "height": 240
+  },
+  {
+    "screen": "live-rec-ready",
+    "source": "build/host/live-rec-ready.ppm",
+    "image": "docs/ja-ui-evidence/lcd/live-rec-ready.png",
+    "width": 240,
+    "height": 240
+  },
+  {
+    "screen": "live-rec-tempo",
+    "source": "build/host/live-rec-tempo.ppm",
+    "image": "docs/ja-ui-evidence/lcd/live-rec-tempo.png",
+    "width": 240,
+    "height": 240
+  },
+  {
+    "screen": "live-tracks",
+    "source": "build/host/live-tracks.ppm",
+    "image": "docs/ja-ui-evidence/lcd/live-tracks.png",
+    "width": 240,
+    "height": 240
+  },
+  {
+    "screen": "menu-usb",
+    "source": "build/host/menu-usb.ppm",
+    "image": "docs/ja-ui-evidence/lcd/menu-usb.png",
+    "width": 240,
+    "height": 240
+  },
+  {
+    "screen": "page-about",
+    "source": "build/host/page-about.ppm",
+    "image": "docs/ja-ui-evidence/lcd/page-about.png",
+    "width": 240,
+    "height": 240
+  },
+  {
+    "screen": "page-edit",
+    "source": "build/host/page-edit.ppm",
+    "image": "docs/ja-ui-evidence/lcd/page-edit.png",
+    "width": 240,
+    "height": 240
+  },
+  {
+    "screen": "page-env",
+    "source": "build/host/page-env.ppm",
+    "image": "docs/ja-ui-evidence/lcd/page-env.png",
+    "width": 240,
+    "height": 240
+  },
+  {
+    "screen": "page-fx",
+    "source": "build/host/page-fx.ppm",
+    "image": "docs/ja-ui-evidence/lcd/page-fx.png",
+    "width": 240,
+    "height": 240
+  },
+  {
+    "screen": "page-global",
+    "source": "build/host/page-global.ppm",
+    "image": "docs/ja-ui-evidence/lcd/page-global.png",
+    "width": 240,
+    "height": 240
+  },
+  {
+    "screen": "page-master",
+    "source": "build/host/page-master.ppm",
+    "image": "docs/ja-ui-evidence/lcd/page-master.png",
+    "width": 240,
+    "height": 240
+  },
+  {
+    "screen": "page-menu-lights",
+    "source": "build/host/page-menu-lights.ppm",
+    "image": "docs/ja-ui-evidence/lcd/page-menu-lights.png",
+    "width": 240,
+    "height": 240
+  },
+  {
+    "screen": "page-menu-notes",
+    "source": "build/host/page-menu-notes.ppm",
+    "image": "docs/ja-ui-evidence/lcd/page-menu-notes.png",
+    "width": 240,
+    "height": 240
+  },
+  {
+    "screen": "page-scale",
+    "source": "build/host/page-scale.ppm",
+    "image": "docs/ja-ui-evidence/lcd/page-scale.png",
+    "width": 240,
+    "height": 240
+  },
+  {
+    "screen": "page-song",
+    "source": "build/host/page-song.ppm",
+    "image": "docs/ja-ui-evidence/lcd/page-song.png",
+    "width": 240,
+    "height": 240
+  },
+  {
+    "screen": "page-splash",
+    "source": "build/host/page-splash.ppm",
+    "image": "docs/ja-ui-evidence/lcd/page-splash.png",
+    "width": 240,
+    "height": 240
+  },
+  {
+    "screen": "page-step",
+    "source": "build/host/page-step.ppm",
+    "image": "docs/ja-ui-evidence/lcd/page-step.png",
+    "width": 240,
+    "height": 240
+  },
+  {
+    "screen": "page-tracks",
+    "source": "build/host/page-tracks.ppm",
+    "image": "docs/ja-ui-evidence/lcd/page-tracks.png",
+    "width": 240,
+    "height": 240
+  },
+  {
+    "screen": "song-screen",
+    "source": "build/host/song-screen.ppm",
+    "image": "docs/ja-ui-evidence/lcd/song-screen.png",
+    "width": 240,
+    "height": 240
+  }
+]

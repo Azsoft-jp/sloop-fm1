@@ -1,0 +1,151 @@
+ui: ASCII and kana widths, including the 2x title font                         ok
+ui: dakuten, handakuten, long vowel and small kana glyph                       ok
+ui: dakuten, handakuten, long vowel and small kana glyph                       ok
+ui: dakuten, handakuten, long vowel and small kana glyph                       ok
+ui: dakuten, handakuten, long vowel and small kana glyph                       ok
+ui: dakuten, handakuten, long vowel and small kana glyph                       ok
+ui: dakuten, handakuten, long vowel and small kana glyph                       ok
+ui: dakuten, handakuten, long vowel and small kana glyph                       ok
+ui: truncated UTF-8 consumes safely and uses the fallback                      ok
+ui: unlisted Unicode falls back to a visible question mark                     ok
+ui: copy stops at a character boundary                                         ok
+ui: trimming removes one complete UTF-8 character                              ok
+ui: kana pixels are clipped at both screen edges                               ok
+ui: knob columns use complete Japanese words or intact ASCII identifiers       ok
+ui: live header fits its 64px slot                                             ok
+ui: live header fits its 64px slot                                             ok
+ui: live header fits its 64px slot                                             ok
+ui: live header fits its 64px slot                                             ok
+ui: REC instruction fits before the right edge                                 ok
+ui: REC instruction fits before the right edge                                 ok
+ui: REC instruction fits before the right edge                                 ok
+ui: REC instruction fits before the right edge                                 ok
+ui: REC instruction fits before the right edge                                 ok
+ui: REC instruction fits before the right edge                                 ok
+ui: REC instruction fits before the right edge                                 ok
+ui: REC instruction fits before the right edge                                 ok
+ui: REC instruction fits before the right edge                                 ok
+ui: one-shot screen text fits the LCD                                          ok
+ui: one-shot screen text fits the LCD                                          ok
+ui: one-shot screen text fits the LCD                                          ok
+ui: one-shot screen text fits the LCD                                          ok
+ui: one-shot screen text fits the LCD                                          ok
+ui: one-shot screen text fits the LCD                                          ok
+ui: one-shot screen text fits the LCD                                          ok
+ui: one-shot screen text fits the LCD                                          ok
+ui: one-shot screen text fits the LCD                                          ok
+ui: one-shot screen text fits the LCD                                          ok
+ui: one-shot screen text fits the LCD                                          ok
+ui: one-shot screen text fits the LCD                                          ok
+ui: one-shot screen text fits the LCD                                          ok
+ui: one-shot screen text fits the LCD                                          ok
+ui: one-shot screen text fits the LCD                                          ok
+ui: one-shot screen text fits the LCD                                          ok
+ui: layer title and detail fit without overlap                                 ok
+ui: layer title and detail fit without overlap                                 ok
+ui: layer title and detail fit without overlap                                 ok
+ui: layer title and detail fit without overlap                                 ok
+ui: layer title and detail fit without overlap                                 ok
+ui: synth track, no layer: no landmarks (a piano)                              ok
+ui: SEQ tapped: the SEQ pages                                                  ok
+ui: FX tapped: the FX pages                                                    ok
+ui: FX held: the punch layer shows                                             ok
+ui: FX held: keys 1, 5, 9, 13 lit dim (the rows of the grid)                   ok
+ui: FX + the 3rd white key: punch effect 3                                     ok
+ui: key up: the mix comes back                                                 ok
+ui: FX + KNOB 2: DUST                                                          ok
+ui: FX + KNOB 1: the filter (low-pass)                                         ok
+ui: FX used then let go: no FX page                                            ok
+ui: FX held + HOME: locked open, FX let go                                     ok
+ui: FX + HOME: no FX page, no HOME jump                                        ok
+ui: locked FX + the 3rd white key: punch effect 3 (no hands on FX)             ok
+ui: locked FX, key up: the mix comes back                                      ok
+ui: locked FX + KNOB 2: DUST                                                   ok
+ui: locked: PLAY plays and keeps the lock                                      ok
+ui: locked, ENV pressed: unlocked, and only that (no ENV page)                 ok
+ui: locked, HOME tapped: unlocked                                              ok
+ui: locked, FX tapped: unlocked, no FX page                                    ok
+ui: locked SEQ, FX held: unlocked, the FX layer                                ok
+ui: and FX let go: back to playing                                             ok
+ui: locked, HOME held: the menu, unlocked                                      ok
+ui: a drum key played: the SEQ layer's sound (snare)                           ok
+ui: SEQ + white keys 1, 5, 9: snare steps                                      ok
+ui: step 5 held + KNOB 2 / 3: hard, x3                                         ok
+ui: step 1 again: off                                                          ok
+ui: SEQ used then let go: no page change                                       ok
+ui: EDIT + OCT-: undo (the SEQ hold's steps gone)                              ok
+ui: EDIT + OCT+: redo (back, as left)                                          ok
+ui: EDIT + snare (stopped): every snare erased                                 ok
+ui: EDIT + KNOB 2: length x2                                                   ok
+ui: EDIT + OCT-: the length back to 16                                         ok
+ui: ARP + KNOB 1: the roll rate (1/32)                                         ok
+ui: ARP + a key: it rolls                                                      ok
+ui: key up: the roll ends                                                      ok
+ui: SCL + D: every part in D                                                   ok
+ui: SCL + KNOB 1: chords (7TH) on the track                                    ok
+ui: GLO + key 1: track 1 muted                                                 ok
+ui: GLO + key 6: track 2 soloed                                                ok
+ui: GLO + the last key, tapped at ~0.6 s: ~100 BPM                             ok
+ui: again: unmuted, no solo                                                    ok
+ui: REC tapped (stopped): armed                                                ok
+ui: REC again: cancelled                                                       ok
+ui: REC held: the press undone, the clear ring                                 ok
+ui: REC held to the end: track 1 cleared                                       ok
+ui: EDIT + OCT-: the cleared track back                                        ok
+ui: REC let go before the end: nothing cleared                                 ok
+ui: SAVE held: the song layer                                                  ok
+ui: store over a used A: asks again                                            ok
+ui: again: the loop stored in A                                                ok
+ui: an empty C: stored at once                                                 ok
+ui: stopped: B loaded as the loop                                              ok
+ui: an empty D: not played                                                     ok
+ui: playing: A asked for the next bar                                          ok
+ui: SONG REC armed (loop mode)                                                 ok
+ui: SONG REC again: off                                                        ok
+ui: loop / song: song mode                                                     ok
+ui: again: loop mode                                                           ok
+ui: SAVE held and let go: no song page, no save                                ok
+ui: SAVE tapped on TRACKS: the song page                                       ok
+ui: the drum screen                                                            ok
+ui: DRUMS: KNOB 3 adds the kick on step 1                                      ok
+ui: DRUMS: KNOB 4 softer                                                       ok
+ui: DRUMS: KNOB 1 / 2 bounded (16 sounds, 16 steps)                            ok
+ui: REC screen, empty project: KNOB 1 -> MODE tempo                            ok
+ui: REC screen: KNOB 2 -> LENGTH 1, 2, 4 bars                                  ok
+ui: REC screen: KNOB 2 back -> 2 bars                                          ok
+ui: REC screen: KNOB 3 -> START count                                          ok
+ui: REC screen: MODE and START saved with the settings                         ok
+ui: REC screen: the count-in running, the dials wait                           ok
+ui: REC screen, a project with notes: no MODE (always the tempo set)           ok
+ui: REC screen: KNOB 3 / 1 back -> note, free                                  ok
+ui: REC screen, MODE free: no START (the take starts on the first note)        ok
+ui: NOTES off: a sounding synth voice lights no key                            ok
+ui: menu NOTES: KNOB 1 right: ON                                               ok
+ui: NOTES on: a sounding synth voice lights key 7 (C4)                         ok
+ui: NOTES on, EDIT erase layer: the sounding C4 lit                            ok
+ui: NOTES on, ARP roll layer: the sounding C4 lit                              ok
+ui: NOTES on, SCL key layer: the sounding C4 lit                               ok
+ui: NOTES on, SAVE song layer: the sounding C4 lit                             ok
+ui: NOTES on, FX punch layer: the sounding C4 glows under the tiles            ok
+ui: NOTES on, SEQ steps layer: the sounding C4 glows under the tiles           ok
+ui: NOTES on, GLO mix layer: the sounding C4 glows under the tiles             ok
+ui: NOTES on, SCL: the scale glows                                             ok
+ui: NOTES off, EDIT erase: as before (no note lights)                          ok
+ui: NOTES off, SCL: as before                                                  ok
+ui: NOTES on: the octave moves the lit key                                     ok
+ui: NOTES on: the release turns the key off                                    ok
+ui: NOTES: saved with the light settings                                       ok
+ui: menu USB AUDIO: KNOB 1 -> FULL, saved with the settings                    ok
+ui: menu USB AUDIO: OCT+ toggles back to MASTER                                ok
+ui: menu NOTES: OCT+ toggles it off                                            ok
+ui: LIGHTS: off by default                                                     ok
+ui: LIGHTS: KNOB 1 right: LOW (a 0.5 us pulse a frame)                         ok
+ui: LIGHTS: MID (1 us)                                                         ok
+ui: LIGHTS: HIGH (2 us, under the 4 us glow), and it stops there               ok
+ui: LIGHTS: KNOB 1 left: dimmer                                                ok
+ui: LIGHTS: OCT+ steps round, the menu stays                                   ok
+ui: LIGHTS: ... back to OFF                                                    ok
+ui: KEYS: C KEYS (C4, C5), LIGHTS raised to LOW                                ok
+ui: KEYS: WHITE KEYS (16 of 27, F#3 dark), and it stops there                  ok
+ui: KEYS: nothing lit while LIGHTS is OFF                                      ok
+ui: pages, layers (punch, steps, erase, roll, key, mix), layer lock, song layer, REC hold, drums, REC, 20000-frame fuzz PASS

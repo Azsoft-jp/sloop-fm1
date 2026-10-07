@@ -216,13 +216,16 @@ static int32_t cv_text(int32_t x, int32_t y, const felucca_font_t *f, const char
         int32_t ji = cp > 255u ? jp_glyph(cp) : -1;
         const uint8_t *gd;
         if (ji >= 0) {
+            /* Keep the anti-aliased edge visible at the dim label palette. */
+            static const uint8_t ja_opacity[4] = {0, 8, 12, 15};
             w = 20u * scale;
             gd = FONT_J_DATA + FONT_J_OFF[ji];
             for (gy = 0; gy < f->h; gy++)
                 for (gx = 0; gx < w; gx++) {
-                    uint32_t bit = (gy / scale) * 20u + gx / scale;
-                    if ((gd[bit >> 3] >> (7u - (bit & 7u))) & 1u)
-                        cv_pset(x - f->pad + (int32_t)gx, y + (int32_t)gy, c);
+                    uint32_t pixel = (gy / scale) * 20u + gx / scale;
+                    uint32_t alpha = (gd[pixel >> 2] >> (6u - 2u * (pixel & 3u))) & 3u;
+                    if (alpha)
+                        cv_pset(x - f->pad + (int32_t)gx, y + (int32_t)gy, ramp[ja_opacity[alpha]]);
                 }
         } else {
             gi = glyph(f, cp);

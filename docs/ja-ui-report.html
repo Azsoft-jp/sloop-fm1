@@ -41,17 +41,20 @@
     figure > a { display: block; }
     figure img { display: block; width: 100%; height: auto; }
     .gallery .static img { height: 330px; object-fit: cover; object-position: top; background: #fff; }
-    .gallery .lcd img { height: 260px; object-fit: contain; background: #090b0f; padding: 10px; image-rendering: pixelated; }
+    .gallery .lcd img { width: 240px; height: 240px; max-width: 100%; margin: auto; object-fit: contain; background: #090b0f; }
     .device-feature { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; margin: 19px 0; }
     .device-feature figure { text-align: center; }
     .pixel-shell { display: flex; justify-content: center; align-items: center; min-height: 288px; padding: 18px; background: linear-gradient(#323943, #1a1e24); }
-    .pixel-shell img { display: block; width: 240px; height: 240px; max-width: 100%; object-fit: contain; image-rendering: pixelated; border: 5px solid #07090c; box-shadow: 0 0 0 2px #4b5562, 0 12px 25px #0008; }
+    .pixel-shell img { display: block; width: 240px; height: 240px; max-width: 100%; object-fit: contain; box-shadow: 0 0 0 5px #07090c, 0 0 0 7px #4b5562, 0 12px 25px #0008; }
     .gallery .gif img { max-width: 375px; margin: auto; background: #fff; }
     figcaption { padding: 11px 13px 13px; border-top: 1px solid #344158; font-size: .88rem; color: #cbd6e7; }
     figcaption strong { display: block; color: #fff; }
     .full { margin-top: 17px; }
     .full img { max-height: 540px; object-fit: contain; background: #fff; }
-    .full.dark img { background: #090b0f; image-rendering: pixelated; }
+    .full.dark img { background: #090b0f; }
+    .comparison img { display: block; width: 480px; max-width: 100%; height: auto; margin: auto; }
+    .screen-index { margin-top: 18px; border: 1px solid #344158; border-radius: 12px; padding: 11px 15px; background: #1b2330; }
+    .screen-index summary { cursor: pointer; color: #bcdfff; font-weight: 800; }
     .table-scroll { overflow-x: auto; border: 1px solid #344158; border-radius: 12px; margin: 18px 0; }
     table { border-collapse: collapse; width: 100%; min-width: 650px; font-size: .9rem; }
     th, td { padding: 10px 13px; border-bottom: 1px solid #344158; text-align: left; vertical-align: top; }
@@ -80,7 +83,7 @@
         <div class="metric"><strong>7 + 1</strong><span>Editor 7タブ＋導入画面</span></div>
         <div class="metric"><strong>206</strong><span>本体UI文字列ID</span></div>
         <div class="metric"><strong>74字</strong><span>必要文字だけの日本語glyph</span></div>
-        <div class="metric"><strong>+8,780 B</strong><span>FWアプリ増分（+1.6%）</span></div>
+        <div class="metric"><strong>+11,760 B</strong><span>FWアプリ増分（+2.1%）</span></div>
         <div class="metric"><strong>97件</strong><span>音声ゴールデン差分なし</span></div>
       </div>
     </div>
@@ -96,12 +99,13 @@
 
     <section id="device">
       <h2>FM-1本体のドット画面</h2>
-      <p>ここが本体のドット画像です。ホスト側で実際の描画コードを使って出力した240×240pxの画面を原寸で表示しています。画像をクリックすると元データを開けます。実機LCDの写真ではありません。</p>
+      <p>ここが本体のドット画像です。ホスト側で実際の描画コードを使って出力した240×240pxのPNGを、拡大せず表示しています。画像をクリックすると元データを開けます。実機LCDの写真ではありません。</p>
       <div class="device-feature">
         <figure><a class="pixel-shell" href="ja-ui-evidence/page-step.png"><img src="ja-ui-evidence/page-step.png" alt="FM-1の240×240ドット描画：ステップ画面" loading="lazy"></a><figcaption><strong>ステップ画面</strong>日本語glyphと4列の見出しを原寸で確認。</figcaption></figure>
         <figure><a class="pixel-shell" href="ja-ui-evidence/page-song.png"><img src="ja-ui-evidence/page-song.png" alt="FM-1の240×240ドット描画：ソング画面" loading="lazy"></a><figcaption><strong>ソング画面</strong>曲と保存操作の表示を原寸で確認。</figcaption></figure>
       </div>
-      <p>既存の上部20px、4列各60pxの配置を保持し、日本語の必要glyphは74字・2,960Bに収めました。下の一覧にはホスト側で描画した35画面をまとめています。</p>
+      <figure class="comparison"><a href="ja-ui-evidence/font-before-after.png"><img src="ja-ui-evidence/font-before-after.png" alt="修正前1ビットと修正後2ビットのステップ画面を240px原寸で比較" loading="lazy"></a><figcaption><strong>文字の縁：修正前／修正後</strong>左は1bitの白黒glyph、右は2bitの階調glyph。画像をクリックすると原寸の比較PNGを開けます。</figcaption></figure>
+      <p>既存の上部20px、4列各60pxの配置を保持し、日本語glyphは使用する74字だけを2bit階調で収録（5,920B）。フォントの「ヘ」で欠けていた最下段を直し、生成時に全glyphの上下端を検査します。下の一覧にはホスト側で描画した35画面をまとめています。</p>
       <figure class="full dark"><a href="ja-ui-evidence/firmware-contact.png"><img src="ja-ui-evidence/firmware-contact.png" alt="FM-1本体UI、35画面の描画コンタクトシート" loading="lazy"></a><figcaption><strong>35画面のLCDシミュレーション</strong>クリックで拡大。実機LCDの撮影ではありません。</figcaption></figure>
       <div class="gallery">
         <figure class="lcd"><a href="ja-ui-evidence/page-step.png"><img src="ja-ui-evidence/page-step.png" alt="FM-1ステップ画面" loading="lazy"></a><figcaption><strong>ステップ</strong>4列ラベルの収まり。</figcaption></figure>
@@ -111,6 +115,43 @@
         <figure class="lcd"><a href="ja-ui-evidence/layer-song.png"><img src="ja-ui-evidence/layer-song.png" alt="FM-1ソングレイヤー画面" loading="lazy"></a><figcaption><strong>ソングレイヤー</strong>レイヤー操作。</figcaption></figure>
         <figure class="lcd"><a href="ja-ui-evidence/layer-punch.png"><img src="ja-ui-evidence/layer-punch.png" alt="FM-1パンチレイヤー画面" loading="lazy"></a><figcaption><strong>パンチレイヤー</strong>REC関連の視認性。</figcaption></figure>
       </div>
+      <details class="screen-index"><summary>35画面を個別の240×240 PNGで見る</summary><div class="gallery">
+        <figure class="lcd"><a href="ja-ui-evidence/lcd/hold-clear.png"><img src="ja-ui-evidence/lcd/hold-clear.png" alt="FM-1本体のhold-clear画面" loading="lazy"></a><figcaption><strong>hold-clear</strong>240×240pxの描画出力。</figcaption></figure>
+        <figure class="lcd"><a href="ja-ui-evidence/lcd/layer-erase.png"><img src="ja-ui-evidence/lcd/layer-erase.png" alt="FM-1本体のlayer-erase画面" loading="lazy"></a><figcaption><strong>layer-erase</strong>240×240pxの描画出力。</figcaption></figure>
+        <figure class="lcd"><a href="ja-ui-evidence/lcd/layer-key.png"><img src="ja-ui-evidence/lcd/layer-key.png" alt="FM-1本体のlayer-key画面" loading="lazy"></a><figcaption><strong>layer-key</strong>240×240pxの描画出力。</figcaption></figure>
+        <figure class="lcd"><a href="ja-ui-evidence/lcd/layer-locked.png"><img src="ja-ui-evidence/lcd/layer-locked.png" alt="FM-1本体のlayer-locked画面" loading="lazy"></a><figcaption><strong>layer-locked</strong>240×240pxの描画出力。</figcaption></figure>
+        <figure class="lcd"><a href="ja-ui-evidence/lcd/layer-mix.png"><img src="ja-ui-evidence/lcd/layer-mix.png" alt="FM-1本体のlayer-mix画面" loading="lazy"></a><figcaption><strong>layer-mix</strong>240×240pxの描画出力。</figcaption></figure>
+        <figure class="lcd"><a href="ja-ui-evidence/lcd/layer-punch-on.png"><img src="ja-ui-evidence/lcd/layer-punch-on.png" alt="FM-1本体のlayer-punch-on画面" loading="lazy"></a><figcaption><strong>layer-punch-on</strong>240×240pxの描画出力。</figcaption></figure>
+        <figure class="lcd"><a href="ja-ui-evidence/lcd/layer-punch.png"><img src="ja-ui-evidence/lcd/layer-punch.png" alt="FM-1本体のlayer-punch画面" loading="lazy"></a><figcaption><strong>layer-punch</strong>240×240pxの描画出力。</figcaption></figure>
+        <figure class="lcd"><a href="ja-ui-evidence/lcd/layer-roll.png"><img src="ja-ui-evidence/lcd/layer-roll.png" alt="FM-1本体のlayer-roll画面" loading="lazy"></a><figcaption><strong>layer-roll</strong>240×240pxの描画出力。</figcaption></figure>
+        <figure class="lcd"><a href="ja-ui-evidence/lcd/layer-song.png"><img src="ja-ui-evidence/lcd/layer-song.png" alt="FM-1本体のlayer-song画面" loading="lazy"></a><figcaption><strong>layer-song</strong>240×240pxの描画出力。</figcaption></figure>
+        <figure class="lcd"><a href="ja-ui-evidence/lcd/layer-steps.png"><img src="ja-ui-evidence/lcd/layer-steps.png" alt="FM-1本体のlayer-steps画面" loading="lazy"></a><figcaption><strong>layer-steps</strong>240×240pxの描画出力。</figcaption></figure>
+        <figure class="lcd"><a href="ja-ui-evidence/lcd/live-free-take.png"><img src="ja-ui-evidence/lcd/live-free-take.png" alt="FM-1本体のlive-free-take画面" loading="lazy"></a><figcaption><strong>live-free-take</strong>240×240pxの描画出力。</figcaption></figure>
+        <figure class="lcd"><a href="ja-ui-evidence/lcd/live-grid.png"><img src="ja-ui-evidence/lcd/live-grid.png" alt="FM-1本体のlive-grid画面" loading="lazy"></a><figcaption><strong>live-grid</strong>240×240pxの描画出力。</figcaption></figure>
+        <figure class="lcd"><a href="ja-ui-evidence/lcd/live-kit.png"><img src="ja-ui-evidence/lcd/live-kit.png" alt="FM-1本体のlive-kit画面" loading="lazy"></a><figcaption><strong>live-kit</strong>240×240pxの描画出力。</figcaption></figure>
+        <figure class="lcd"><a href="ja-ui-evidence/lcd/live-rec-count.png"><img src="ja-ui-evidence/lcd/live-rec-count.png" alt="FM-1本体のlive-rec-count画面" loading="lazy"></a><figcaption><strong>live-rec-count</strong>240×240pxの描画出力。</figcaption></figure>
+        <figure class="lcd"><a href="ja-ui-evidence/lcd/live-rec-countin.png"><img src="ja-ui-evidence/lcd/live-rec-countin.png" alt="FM-1本体のlive-rec-countin画面" loading="lazy"></a><figcaption><strong>live-rec-countin</strong>240×240pxの描画出力。</figcaption></figure>
+        <figure class="lcd"><a href="ja-ui-evidence/lcd/live-rec-free.png"><img src="ja-ui-evidence/lcd/live-rec-free.png" alt="FM-1本体のlive-rec-free画面" loading="lazy"></a><figcaption><strong>live-rec-free</strong>240×240pxの描画出力。</figcaption></figure>
+        <figure class="lcd"><a href="ja-ui-evidence/lcd/live-rec-notes.png"><img src="ja-ui-evidence/lcd/live-rec-notes.png" alt="FM-1本体のlive-rec-notes画面" loading="lazy"></a><figcaption><strong>live-rec-notes</strong>240×240pxの描画出力。</figcaption></figure>
+        <figure class="lcd"><a href="ja-ui-evidence/lcd/live-rec-ready.png"><img src="ja-ui-evidence/lcd/live-rec-ready.png" alt="FM-1本体のlive-rec-ready画面" loading="lazy"></a><figcaption><strong>live-rec-ready</strong>240×240pxの描画出力。</figcaption></figure>
+        <figure class="lcd"><a href="ja-ui-evidence/lcd/live-rec-tempo.png"><img src="ja-ui-evidence/lcd/live-rec-tempo.png" alt="FM-1本体のlive-rec-tempo画面" loading="lazy"></a><figcaption><strong>live-rec-tempo</strong>240×240pxの描画出力。</figcaption></figure>
+        <figure class="lcd"><a href="ja-ui-evidence/lcd/live-tracks.png"><img src="ja-ui-evidence/lcd/live-tracks.png" alt="FM-1本体のlive-tracks画面" loading="lazy"></a><figcaption><strong>live-tracks</strong>240×240pxの描画出力。</figcaption></figure>
+        <figure class="lcd"><a href="ja-ui-evidence/lcd/menu-usb.png"><img src="ja-ui-evidence/lcd/menu-usb.png" alt="FM-1本体のmenu-usb画面" loading="lazy"></a><figcaption><strong>menu-usb</strong>240×240pxの描画出力。</figcaption></figure>
+        <figure class="lcd"><a href="ja-ui-evidence/lcd/page-about.png"><img src="ja-ui-evidence/lcd/page-about.png" alt="FM-1本体のpage-about画面" loading="lazy"></a><figcaption><strong>page-about</strong>240×240pxの描画出力。</figcaption></figure>
+        <figure class="lcd"><a href="ja-ui-evidence/lcd/page-edit.png"><img src="ja-ui-evidence/lcd/page-edit.png" alt="FM-1本体のpage-edit画面" loading="lazy"></a><figcaption><strong>page-edit</strong>240×240pxの描画出力。</figcaption></figure>
+        <figure class="lcd"><a href="ja-ui-evidence/lcd/page-env.png"><img src="ja-ui-evidence/lcd/page-env.png" alt="FM-1本体のpage-env画面" loading="lazy"></a><figcaption><strong>page-env</strong>240×240pxの描画出力。</figcaption></figure>
+        <figure class="lcd"><a href="ja-ui-evidence/lcd/page-fx.png"><img src="ja-ui-evidence/lcd/page-fx.png" alt="FM-1本体のpage-fx画面" loading="lazy"></a><figcaption><strong>page-fx</strong>240×240pxの描画出力。</figcaption></figure>
+        <figure class="lcd"><a href="ja-ui-evidence/lcd/page-global.png"><img src="ja-ui-evidence/lcd/page-global.png" alt="FM-1本体のpage-global画面" loading="lazy"></a><figcaption><strong>page-global</strong>240×240pxの描画出力。</figcaption></figure>
+        <figure class="lcd"><a href="ja-ui-evidence/lcd/page-master.png"><img src="ja-ui-evidence/lcd/page-master.png" alt="FM-1本体のpage-master画面" loading="lazy"></a><figcaption><strong>page-master</strong>240×240pxの描画出力。</figcaption></figure>
+        <figure class="lcd"><a href="ja-ui-evidence/lcd/page-menu-lights.png"><img src="ja-ui-evidence/lcd/page-menu-lights.png" alt="FM-1本体のpage-menu-lights画面" loading="lazy"></a><figcaption><strong>page-menu-lights</strong>240×240pxの描画出力。</figcaption></figure>
+        <figure class="lcd"><a href="ja-ui-evidence/lcd/page-menu-notes.png"><img src="ja-ui-evidence/lcd/page-menu-notes.png" alt="FM-1本体のpage-menu-notes画面" loading="lazy"></a><figcaption><strong>page-menu-notes</strong>240×240pxの描画出力。</figcaption></figure>
+        <figure class="lcd"><a href="ja-ui-evidence/lcd/page-scale.png"><img src="ja-ui-evidence/lcd/page-scale.png" alt="FM-1本体のpage-scale画面" loading="lazy"></a><figcaption><strong>page-scale</strong>240×240pxの描画出力。</figcaption></figure>
+        <figure class="lcd"><a href="ja-ui-evidence/lcd/page-song.png"><img src="ja-ui-evidence/lcd/page-song.png" alt="FM-1本体のpage-song画面" loading="lazy"></a><figcaption><strong>page-song</strong>240×240pxの描画出力。</figcaption></figure>
+        <figure class="lcd"><a href="ja-ui-evidence/lcd/page-splash.png"><img src="ja-ui-evidence/lcd/page-splash.png" alt="FM-1本体のpage-splash画面" loading="lazy"></a><figcaption><strong>page-splash</strong>240×240pxの描画出力。</figcaption></figure>
+        <figure class="lcd"><a href="ja-ui-evidence/lcd/page-step.png"><img src="ja-ui-evidence/lcd/page-step.png" alt="FM-1本体のpage-step画面" loading="lazy"></a><figcaption><strong>page-step</strong>240×240pxの描画出力。</figcaption></figure>
+        <figure class="lcd"><a href="ja-ui-evidence/lcd/page-tracks.png"><img src="ja-ui-evidence/lcd/page-tracks.png" alt="FM-1本体のpage-tracks画面" loading="lazy"></a><figcaption><strong>page-tracks</strong>240×240pxの描画出力。</figcaption></figure>
+        <figure class="lcd"><a href="ja-ui-evidence/lcd/song-screen.png"><img src="ja-ui-evidence/lcd/song-screen.png" alt="FM-1本体のsong-screen画面" loading="lazy"></a><figcaption><strong>song-screen</strong>240×240pxの描画出力。</figcaption></figure>
+      </div></details>
     </section>
 
     <section id="web">
@@ -147,21 +188,21 @@
     <section id="measure">
       <h2>容量・テスト結果</h2>
       <div class="table-scroll"><table><thead><tr><th>項目</th><th>変更前</th><th>変更後・結果</th><th>証跡</th></tr></thead><tbody>
-        <tr><td>FWアプリ</td><td>550,256 B</td><td>559,036 B（+8,780 B）</td><td><a href="ja-ui-evidence/firmware-build-baseline.log">前</a> ／ <a href="ja-ui-evidence/firmware-build-ja.log">後</a></td></tr>
-        <tr><td>アプリ領域残量</td><td>31,308 B</td><td>22,528 B</td><td>同上</td></tr>
+        <tr><td>FWアプリ</td><td>550,256 B</td><td>562,016 B（+11,760 B）</td><td><a href="ja-ui-evidence/firmware-build-baseline.log">前</a> ／ <a href="ja-ui-evidence/firmware-build-font-aa.log">後</a></td></tr>
+        <tr><td>アプリ領域残量</td><td>31,308 B</td><td>19,548 B</td><td>同上</td></tr>
         <tr><td>RAM .data＋.bss</td><td>72,720 B</td><td>72,892 B（+172 B）</td><td>同上</td></tr>
         <tr><td>描画プール</td><td>322,272 B</td><td>322,272 B（変化なし）</td><td>同上</td></tr>
         <tr><td>Web Editorの生HTML</td><td>242,617 B</td><td>245,961 B（+3,344 B）</td><td><a href="JA_LOCALIZATION.md">詳細記録</a></td></tr>
         <tr><td>インストーラーの生HTML</td><td>19,241 B</td><td>20,847 B（+1,606 B）</td><td><a href="JA_LOCALIZATION.md">詳細記録</a></td></tr>
       </tbody></table></div>
       <ul>
-        <li><span class="tag">PASS</span> ターゲットFWビルド、RAM・Flash・描画プールの制限検査。<a href="ja-ui-evidence/firmware-build-ja.log">ビルドログ</a></li>
-        <li><span class="tag">PASS</span> ASCII、カタカナ、濁点・半濁点、長音、小文字、不正UTF-8、未登録glyph、画面外描画、主要操作、2万フレームのUI fuzz。<a href="ja-ui-evidence/firmware-ui-test.log">UIテストログ</a></li>
+        <li><span class="tag">PASS</span> ターゲットFWビルド、RAM・Flash・描画プールの制限検査。<a href="ja-ui-evidence/firmware-build-font-aa.log">今回のビルドログ</a></li>
+        <li><span class="tag">PASS</span> ASCII、カタカナ、濁点・半濁点、長音、小文字、不正UTF-8、未登録glyph、画面外描画、主要操作、2万フレームのUI fuzz。<a href="ja-ui-evidence/firmware-ui-font-aa.log">今回のUIテストログ</a></li>
         <li><span class="tag">PASS</span> Chromeモックの15画面で横はみ出し・パラメーター名のクリップなし。日本語ツールチップ、確認ダイアログ、英語切替を確認。<a href="ja-ui-evidence/browser-layout.json">レイアウト記録</a></li>
-        <li><span class="tag">PASS</span> 音声ゴールデン97件は元コミットとハッシュ差分なし。<a href="ja-ui-evidence/regress-baseline.log">前</a> ／ <a href="ja-ui-evidence/regress-ja.log">後</a></li>
-        <li><span class="tag caution">既存FAIL</span> ホスト試験総合のCPU命令予算は元コミットも今回版も同じ項目・値で超過。合格扱いにはしていません。<a href="ja-ui-evidence/full-tests-ja.log">総合ログ</a> ／ <a href="ja-ui-evidence/target-budget-baseline.log">基準値</a></li>
+        <li><span class="tag">PASS</span> 音声ゴールデン97件は元コミットとハッシュ差分なし。<a href="ja-ui-evidence/regress-baseline.log">前</a> ／ <a href="ja-ui-evidence/regress-font-aa.log">後</a></li>
+        <li><span class="tag caution">既存FAIL</span> ホスト試験総合のCPU命令予算は元コミットも今回版も同じ項目・値で超過。合格扱いにはしていません。<a href="ja-ui-evidence/full-tests-font-aa.log">今回の総合ログ</a> ／ <a href="ja-ui-evidence/target-budget-baseline.log">基準値</a></li>
       </ul>
-      <div class="note warn"><strong>音楽処理の遅延について</strong><br>音声DMA割り込み、DSP、MIDIタイミングのコードは変更していません。音声の出力一致はホストで検証済みです。ただし実機での最大割り込み時間と音切れは未測定のため、「絶対に遅延しない」とは断定できません。マージ前には再生負荷別に <code>felucca_dbg.max_us</code> と <code>late</code> を変更前後で比較します。</div>
+      <div class="note warn"><strong>音楽処理の遅延について</strong><br>音声DMA割り込み、DSP、MIDIタイミングのコードは変更していません。2bit文字は既存のオフスクリーン描画で処理し、LCD転送サイズと更新回数は変えません。音声ゴールデン97件は一致し、ターゲット音声割り込みの静的予算値も元コミットと同じ255です。ただし実機での最大割り込み時間と音切れは未測定のため、「絶対に遅延しない」とは断定できません。マージ前には再生負荷別に <code>felucca_dbg.max_us</code> と <code>late</code> を変更前後で比較します。</div>
     </section>
 
     <section id="limits">

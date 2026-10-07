@@ -33,8 +33,9 @@
 
 - `firmware/src/ui_strings.def` に206個のIDと英語・日本語を一対で収録。`ui_strings.h` の `ui_text(ID)` が現在は日本語を返す。既存のページ・パラメーター記述子は `ui_display_name()` で描画時に変換し、通信や保存の識別子を維持する。
 - `gfx.c` は境界検査付きの小型UTF-8デコーダー、疎なUnicode glyph検索、未収録・不正文字の `?` 表示、UTF-8文字境界を守るコピーと削除を追加。既存英数字の描画経路はそのまま使う。
-- `tools/gen_font.py` は日本語リソースを走査し、実際に使う74文字だけを `FONT_J_CODE/OFF/DATA` に書く。16pxの白黒glyphを1ビット/画素（1字40B）で記録し、小フォントで使い、大フォントでは描画時に2倍表示する。全面的なUnicodeフォントは組み込まない。原字形はOFLの `assets/fonts/NotoSansJP-ui.ttf`（使用文字に絞ったサブセット）とそのライセンスファイル。
+- `tools/gen_font.py` は日本語リソースを走査し、実際に使う74文字だけを `FONT_J_CODE/OFF/DATA` に書く。16pxの2ビット階調glyphを1字80Bで記録し、小フォントで使い、大フォントでは描画時に2倍表示する。全面的なUnicodeフォントは組み込まない。原字形はOFLの `assets/fonts/NotoSansJP-ui.ttf`（使用文字に絞ったサブセット）とそのライセンスファイル。
 - 収録glyph（コードポイント昇順）: `アィイウェエオカガキギクグケコサザシジスズセゼソゾタダチッツヅテデトドナニネノハバパヒビフブプヘベペホボポマミムメモャヤュユョヨラリルレロワヲン・ー`。`tests/check_ja_resources.py` がリソース使用文字との完全一致を検査する。
+- 画面画像の再確認で、旧1bit fontの「ヘ」に最下段1行（13画素）の欠けを確認。描画位置を1px上げ、glyph生成時に上下のガード領域を検査するよう修正した。輪郭のギザつきを抑えるため2bit階調に変更し、使用文字数は増やしていない。これらはUI描画だけの変更で、音声割り込み・DSPは変更していない。
 - メニュー、ホーム、各編集ページ、ライブ演奏、REC、ソング、ホールド操作、保存／読込通知、キャリブレーション、更新／復旧、クラッシュ表示を日本語化した。FX、BPM、MIDI、USB、REC、機器名、音色名などの短い技術表記は必要に応じて保持した。
 - 狭い4列は `column_text()` で幅を確認し、日本語の語が丸ごと入らない場合は英字IDを使う。RECの右見出しは64px、説明行は176pxをテストで検査。メッセージは236pxまでにUTF-8文字単位で収める。自動スクロールは追加していない。
 
@@ -50,23 +51,25 @@
 | --- | ---: | ---: | --- |
 | 英数字S bitmap | 21,504 B | 21,504 B | `tools/gen_font.py` の生成出力 |
 | 英数字L bitmap | 24,576 B | 24,576 B | 同上 |
-| 日本語bitmap | 0 B | 2,960 B（74字） | 同上。コード表・オフセット各148 Bは別 |
-| FWアプリ `felucca.bin` | 550,256 B | 559,036 B（+8,780 B、+1.6%） | 同じツールチェーン・SDKで元コミットと今回版をビルド |
-| アプリ領域の残量 | 31,308 B | 22,528 B | 領域581,564 Bからアプリサイズを減算 |
+| 日本語bitmap | 0 B | 5,920 B（74字） | 同上。コード表・オフセット各148 Bは別 |
+| FWアプリ `felucca.bin` | 550,256 B | 562,016 B（+11,760 B、+2.1%） | 同じツールチェーン・SDKで元コミットと今回版をビルド |
+| アプリ領域の残量 | 31,308 B | 19,548 B | 領域581,564 Bからアプリサイズを減算 |
 | ターゲットRAM `.data+.bss` | 72,720 B | 72,892 B（+172 B） | `tools/build.py` のリンカシンボル計測 |
 | 描画プール使用量 | 322,272 B | 322,272 B | 同上。上限344,064 B |
 | インストール用 `.fwsc` | 610,019 B | 610,019 B | 固定容量のパッケージ |
 | `web/editor.html` 生HTML | 242,617 B | 245,961 B（+3,344 B） | `wc -c` と元コミット |
 | `web/index_pkg.html` 生HTML | 19,241 B | 20,847 B（+1,606 B） | 同上 |
 
-- [`firmware-build-baseline.log`](ja-ui-evidence/firmware-build-baseline.log)／[`firmware-build-ja.log`](ja-ui-evidence/firmware-build-ja.log): 両方のターゲットビルド、RAM・描画プール・アプリ領域検査はPASS。日本語glyphを4ビットから1ビットへ圧縮する前後の35画面は [`pixel-before-bitpack.sha256`](ja-ui-evidence/pixel-before-bitpack.sha256) と [`pixel-after-bitpack.sha256`](ja-ui-evidence/pixel-after-bitpack.sha256) でハッシュが全件一致。
-- [`firmware-ui-test.log`](ja-ui-evidence/firmware-ui-test.log): ASCII、濁点・半濁点、長音、小文字、不正UTF-8、未収録glyph、UTF-8境界、画面外クリップ、主要メニューと操作、2万フレームのUI fuzzがPASS。
-- [`song-ui-test.log`](ja-ui-evidence/song-ui-test.log): セクション保存・読込・上書き確認・描画境界がPASS。`ja-host.log` には音声、ドラム、シーケンサー、FX、プロジェクト、ユーザープリセットの6テストを収録。
+- [`firmware-build-baseline.log`](ja-ui-evidence/firmware-build-baseline.log)／[`firmware-build-ja.log`](ja-ui-evidence/firmware-build-ja.log): 両方のターゲットビルド、RAM・描画プール・アプリ領域検査はPASS。旧1bit版の圧縮検証ログは履歴として保存した。現在の2bit版は [`firmware-build-font-aa.log`](ja-ui-evidence/firmware-build-font-aa.log) でビルドと容量を再測定した。
+- [`firmware-ui-font-aa.log`](ja-ui-evidence/firmware-ui-font-aa.log): ASCII、濁点・半濁点、長音、小文字、不正UTF-8、未収録glyph、UTF-8境界、画面外クリップ、主要メニューと操作、2万フレームのUI fuzzがPASS。
+- [`song-ui-font-aa.log`](ja-ui-evidence/song-ui-font-aa.log): セクション保存・読込・上書き確認・描画境界がPASS。`ja-host.log` には音声、ドラム、シーケンサー、FX、プロジェクト、ユーザープリセットの6テストを収録。
 - [`web-test.log`](ja-ui-evidence/web-test.log): Editorプロトコル、Samples、Projects、Backup、更新／公式FW復帰の既存テストを実行。
 - [`browser-layout.json`](ja-ui-evidence/browser-layout.json) と画像: Chromeのモック機器で7タブ×375/1280px、インストーラー×375pxの15画面を検査。ページ全体の横はみ出しとパラメーター見出しのクリップなし。日本語ツールチップ・確認ダイアログ、英語切替も検査。画像はブラウザー描画およびホストLCDシミュレーターの出力で、実機写真ではない。
-- [`full-tests-ja.log`](ja-ui-evidence/full-tests-ja.log) は `SOAK_MIN=1`（ソーク1分）で全ホストテストを実行した記録。保存／読込、更新、音声、Web等の各機能テストは通り、総合結果はCPU予算の既存超過によりFAIL。元コミットのターゲット命令予算も [`target-budget-baseline.log`](ja-ui-evidence/target-budget-baseline.log) で比較した。
-- [`regress-ja.log`](ja-ui-evidence/regress-ja.log) と [`regress-baseline.log`](ja-ui-evidence/regress-baseline.log): 音声ゴールデン97件のハッシュは両方0件変更。両方で同じ3項目が既存CPU予算を超過し、最終測定の3項目は元コミットと同じ358／681／1,986命令/サンプル。ターゲット命令予算の `fm1_alnk0_irq` も両方255（既存予算174）。予算テスト全体を合格とは記録しない。
-- 音声割り込み、DSP、MIDIタイミング、DMAのコードは変更していない。実機での無遅延は未確認。PRを実機で検証する際は `felucca_dbg.max_us` と `felucca_dbg.late` を日本語化前後・再生負荷別に比較する。
+- [`font-before-after.png`](ja-ui-evidence/font-before-after.png) はコミット `1fe72d1` の旧1bitステップ画像を3分の1に戻した左側と、現2bit版の240px原寸画像を右側で比較。現在の[`lcd/`](ja-ui-evidence/lcd/)内の35枚は `tools/render_ui_evidence.py` でホストのPPMから240×240のPNGへ変換し、3倍拡大による見かけのジャギーを排除した。画像は実機写真ではない。
+- 上記画像の再生成: `git show 1fe72d1:docs/ja-ui-evidence/page-step.png > build/page-step-before.png`、UIホストテストでPPMを更新後、`.venv/bin/python tools/render_ui_evidence.py build/host docs/ja-ui-evidence build/page-step-before.png` を実行する。
+- [`full-tests-font-aa.log`](ja-ui-evidence/full-tests-font-aa.log) は `SOAK_MIN=1`（ソーク1分）で全ホストテストを実行した記録。保存／読込、更新、音声、Web等の各機能テストは通り、総合結果はCPU予算の既存超過によりFAIL。元コミットのターゲット命令予算も [`target-budget-baseline.log`](ja-ui-evidence/target-budget-baseline.log) で比較した。
+- [`regress-font-aa.log`](ja-ui-evidence/regress-font-aa.log) と [`regress-baseline.log`](ja-ui-evidence/regress-baseline.log): 音声ゴールデン97件のハッシュは両方0件変更。両方で同じ3項目が既存CPU予算を超過し、最終測定の3項目は元コミットと同じ358／681／1,986命令/サンプル。[`target-budget-font-aa.log`](ja-ui-evidence/target-budget-font-aa.log) の `fm1_alnk0_irq` も元コミットと同じ255（既存予算174）。予算テスト全体を合格とは記録しない。
+- 音声割り込み、DSP、MIDIタイミング、DMAのコードは変更していない。2bit化は既存のオフスクリーン描画だけに作用し、LCD転送サイズと更新回数は変えない。ターゲット音声割り込みの静的命令予算値は元コミットと同じ255。実機での無遅延は未確認。PRを実機で検証する際は `felucca_dbg.max_us` と `felucca_dbg.late` を日本語化前後・再生負荷別に比較する。
 - `JIELI_TOOLCHAIN=<取得したツールチェーン> AC79_SDK=<検証済みSDKファイルの配置先> PYTHON=.venv/bin/python sh build.sh` はPASS。OTAパッケージ検査を含むテストを実行した。`git diff --check` はPASS。
 - macOSのセクション属性だけを無効化した `cc -fsyntax-only -w '-D__attribute__(x)=' -Ibuild/gen -Ifirmware/hal -Ifirmware/src firmware/src/felucca.c` はPASS。これはターゲット用コンパイラ・リンカの代用ではない。
 
