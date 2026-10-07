@@ -23,6 +23,7 @@
     .lead { color: #c7d3e7; max-width: 72ch; font-size: 1.07rem; }
     .status { display: inline-block; border: 1px solid #ac833d; background: #47361c; color: #ffe3a5; border-radius: 999px; padding: .2rem .7rem; font-size: .8rem; font-weight: 700; }
     .meta { display: flex; flex-wrap: wrap; gap: .6rem 1.2rem; align-items: center; margin-top: 1.3rem; color: #cbd7ea; font-size: .91rem; }
+    .jump { display: inline-block; margin-top: 1rem; padding: .55rem .95rem; color: #101722; background: #a6d6ff; border-radius: 8px; font-weight: 800; text-decoration: none; }
     nav { position: sticky; top: 0; z-index: 10; overflow-x: auto; background: #151c29f2; border-bottom: 1px solid #344158; backdrop-filter: blur(12px); }
     nav .wrap { display: flex; gap: 1.3rem; white-space: nowrap; padding: .65rem 0; }
     nav a { color: #d5e2f3; text-decoration: none; font-size: .86rem; font-weight: 700; }
@@ -41,6 +42,10 @@
     figure img { display: block; width: 100%; height: auto; }
     .gallery .static img { height: 330px; object-fit: cover; object-position: top; background: #fff; }
     .gallery .lcd img { height: 260px; object-fit: contain; background: #090b0f; padding: 10px; image-rendering: pixelated; }
+    .device-feature { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; margin: 19px 0; }
+    .device-feature figure { text-align: center; }
+    .pixel-shell { display: flex; justify-content: center; align-items: center; min-height: 288px; padding: 18px; background: linear-gradient(#323943, #1a1e24); }
+    .pixel-shell img { display: block; width: 240px; height: 240px; max-width: 100%; object-fit: contain; image-rendering: pixelated; border: 5px solid #07090c; box-shadow: 0 0 0 2px #4b5562, 0 12px 25px #0008; }
     .gallery .gif img { max-width: 375px; margin: auto; background: #fff; }
     figcaption { padding: 11px 13px 13px; border-top: 1px solid #344158; font-size: .88rem; color: #cbd6e7; }
     figcaption strong { display: block; color: #fff; }
@@ -59,7 +64,7 @@
     li { margin: .4rem 0; }
     code { color: #b3dcff; overflow-wrap: anywhere; }
     footer { border-top: 1px solid #344158; color: #aebbd0; padding: 30px 0 45px; margin-top: 35px; font-size: .9rem; }
-    @media (max-width: 730px) { .metrics { grid-template-columns: repeat(2, minmax(0, 1fr)); } header .wrap { padding: 30px 0; } section { padding-top: 30px; } .gallery.wide { grid-template-columns: 1fr; } }
+    @media (max-width: 730px) { .metrics { grid-template-columns: repeat(2, minmax(0, 1fr)); } header .wrap { padding: 30px 0; } section { padding-top: 30px; } .gallery.wide, .device-feature { grid-template-columns: 1fr; } }
     @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
   </style>
 </head>
@@ -70,6 +75,7 @@
       <h1>日本語UI<br>画面・検証レポート</h1>
       <p class="lead">Web EditorとFM-1本体の日本語化を、画面画像、スクロールGIF、容量・回帰試験の実測値で確認するためのPR資料です。</p>
       <div class="meta"><span class="status">ドラフトPR・実機検証待ち</span><span>基準コミット: <code title="d691ba7b2d922f1a1f41a3622cffe29ce41c5506">d691ba7b</code></span><a href="https://github.com/isod89/sloop-fm1/pull/39">Pull Request #39 ↗</a></div>
+      <a class="jump" href="#device">FM-1のドット画面を見る ↓</a>
       <div class="metrics">
         <div class="metric"><strong>7 + 1</strong><span>Editor 7タブ＋導入画面</span></div>
         <div class="metric"><strong>206</strong><span>本体UI文字列ID</span></div>
@@ -79,13 +85,32 @@
       </div>
     </div>
   </header>
-  <nav aria-label="レポート内ナビゲーション"><div class="wrap"><a href="#scope">概要</a><a href="#web">Web Editor</a><a href="#scroll">スクロールGIF</a><a href="#device">FM-1本体</a><a href="#measure">容量・試験</a><a href="#limits">未確認とPhase 3</a></div></nav>
+  <nav aria-label="レポート内ナビゲーション"><div class="wrap"><a href="#scope">概要</a><a href="#device">FM-1本体</a><a href="#web">Web Editor</a><a href="#scroll">スクロールGIF</a><a href="#measure">容量・試験</a><a href="#limits">未確認とPhase 3</a></div></nav>
   <main class="wrap">
     <section id="scope">
       <h2>概要と証跡の範囲</h2>
       <p>Web Editorは自然な日本語を既存の<code>TEXT.ja/en</code>へ集約。本体は短いカタカナを中心に<code>ui_text(ID)</code>で描画し、既存の保存形式・機器プロトコル上の英語識別子は表示時だけ変換しました。</p>
       <div class="note"><strong>画面画像の出所</strong><br>Web画面はChromeとEditorのモック接続、本体画面はホスト側LCD描画テストの出力です。実機写真ではありません。実機の表示・音声割り込み時間は未確認です。</div>
       <p><a href="JA_LOCALIZATION.md">実装・調査・試験の詳細記録</a> ／ <a href="ja-ui-evidence/browser-layout.json">ブラウザーレイアウト測定値（JSON）</a> ／ <a href="ja-ui-evidence/scroll-capture.json">GIF撮影条件（JSON）</a></p>
+    </section>
+
+    <section id="device">
+      <h2>FM-1本体のドット画面</h2>
+      <p>ここが本体のドット画像です。ホスト側で実際の描画コードを使って出力した240×240pxの画面を原寸で表示しています。画像をクリックすると元データを開けます。実機LCDの写真ではありません。</p>
+      <div class="device-feature">
+        <figure><a class="pixel-shell" href="ja-ui-evidence/page-step.png"><img src="ja-ui-evidence/page-step.png" alt="FM-1の240×240ドット描画：ステップ画面" loading="lazy"></a><figcaption><strong>ステップ画面</strong>日本語glyphと4列の見出しを原寸で確認。</figcaption></figure>
+        <figure><a class="pixel-shell" href="ja-ui-evidence/page-song.png"><img src="ja-ui-evidence/page-song.png" alt="FM-1の240×240ドット描画：ソング画面" loading="lazy"></a><figcaption><strong>ソング画面</strong>曲と保存操作の表示を原寸で確認。</figcaption></figure>
+      </div>
+      <p>既存の上部20px、4列各60pxの配置を保持し、日本語の必要glyphは74字・2,960Bに収めました。下の一覧にはホスト側で描画した35画面をまとめています。</p>
+      <figure class="full dark"><a href="ja-ui-evidence/firmware-contact.png"><img src="ja-ui-evidence/firmware-contact.png" alt="FM-1本体UI、35画面の描画コンタクトシート" loading="lazy"></a><figcaption><strong>35画面のLCDシミュレーション</strong>クリックで拡大。実機LCDの撮影ではありません。</figcaption></figure>
+      <div class="gallery">
+        <figure class="lcd"><a href="ja-ui-evidence/page-step.png"><img src="ja-ui-evidence/page-step.png" alt="FM-1ステップ画面" loading="lazy"></a><figcaption><strong>ステップ</strong>4列ラベルの収まり。</figcaption></figure>
+        <figure class="lcd"><a href="ja-ui-evidence/page-song.png"><img src="ja-ui-evidence/page-song.png" alt="FM-1ソング画面" loading="lazy"></a><figcaption><strong>ソング</strong>編集・保存系の表示。</figcaption></figure>
+        <figure class="lcd"><a href="ja-ui-evidence/menu-usb.png"><img src="ja-ui-evidence/menu-usb.png" alt="FM-1 USBメニュー" loading="lazy"></a><figcaption><strong>USBメニュー</strong>短い技術語は英字を維持。</figcaption></figure>
+        <figure class="lcd"><a href="ja-ui-evidence/live-rec-free.png"><img src="ja-ui-evidence/live-rec-free.png" alt="FM-1ライブ録音画面" loading="lazy"></a><figcaption><strong>ライブ録音</strong>録音状態と列見出し。</figcaption></figure>
+        <figure class="lcd"><a href="ja-ui-evidence/layer-song.png"><img src="ja-ui-evidence/layer-song.png" alt="FM-1ソングレイヤー画面" loading="lazy"></a><figcaption><strong>ソングレイヤー</strong>レイヤー操作。</figcaption></figure>
+        <figure class="lcd"><a href="ja-ui-evidence/layer-punch.png"><img src="ja-ui-evidence/layer-punch.png" alt="FM-1パンチレイヤー画面" loading="lazy"></a><figcaption><strong>パンチレイヤー</strong>REC関連の視認性。</figcaption></figure>
+      </div>
     </section>
 
     <section id="web">
@@ -117,20 +142,6 @@
         <figure class="gif"><img src="ja-ui-evidence/scroll-installer.gif" alt="インストーラー画面を上から下へ縦スクロールするGIF" loading="lazy"><figcaption><strong>インストーラー</strong>更新・復帰案内の末尾まで確認。</figcaption></figure>
       </div>
       <div class="note">FM-1本体UIには文字送り・スクロール処理を追加していません。60px列に入らない見出しは幅を検査し、短い英字名に切り替えます。音声処理中の描画回数を増やさないためです。</div>
-    </section>
-
-    <section id="device">
-      <h2>FM-1本体：描画プレビュー</h2>
-      <p>240×240px、上部20px、4列各60pxの既存配置を保持。日本語の必要glyphは74字・2,960Bです。下の一覧はホスト側で描画した35画面のコンタクトシートです。</p>
-      <figure class="full dark"><a href="ja-ui-evidence/firmware-contact.png"><img src="ja-ui-evidence/firmware-contact.png" alt="FM-1本体UI、35画面の描画コンタクトシート" loading="lazy"></a><figcaption><strong>35画面のLCDシミュレーション</strong>クリックで拡大。実機LCDの撮影ではありません。</figcaption></figure>
-      <div class="gallery">
-        <figure class="lcd"><a href="ja-ui-evidence/page-step.png"><img src="ja-ui-evidence/page-step.png" alt="FM-1ステップ画面" loading="lazy"></a><figcaption><strong>ステップ</strong>4列ラベルの収まり。</figcaption></figure>
-        <figure class="lcd"><a href="ja-ui-evidence/page-song.png"><img src="ja-ui-evidence/page-song.png" alt="FM-1ソング画面" loading="lazy"></a><figcaption><strong>ソング</strong>編集・保存系の表示。</figcaption></figure>
-        <figure class="lcd"><a href="ja-ui-evidence/menu-usb.png"><img src="ja-ui-evidence/menu-usb.png" alt="FM-1 USBメニュー" loading="lazy"></a><figcaption><strong>USBメニュー</strong>短い技術語は英字を維持。</figcaption></figure>
-        <figure class="lcd"><a href="ja-ui-evidence/live-rec-free.png"><img src="ja-ui-evidence/live-rec-free.png" alt="FM-1ライブ録音画面" loading="lazy"></a><figcaption><strong>ライブ録音</strong>録音状態と列見出し。</figcaption></figure>
-        <figure class="lcd"><a href="ja-ui-evidence/layer-song.png"><img src="ja-ui-evidence/layer-song.png" alt="FM-1ソングレイヤー画面" loading="lazy"></a><figcaption><strong>ソングレイヤー</strong>レイヤー操作。</figcaption></figure>
-        <figure class="lcd"><a href="ja-ui-evidence/layer-punch.png"><img src="ja-ui-evidence/layer-punch.png" alt="FM-1パンチレイヤー画面" loading="lazy"></a><figcaption><strong>パンチレイヤー</strong>REC関連の視認性。</figcaption></figure>
-      </div>
     </section>
 
     <section id="measure">
