@@ -2,7 +2,9 @@
 
 対象コミット: `d691ba7b2d922f1a1f41a3622cffe29ce41c5506` を起点とした変更。PRレビュー時には、差分とともに [`ja-ui-evidence/`](ja-ui-evidence/) の画像・ログを確認する。
 
-画面付きのレビュー用資料は [`ja-ui-report.html`](ja-ui-report.html)。Web Editorの7タブとインストーラーの静止画、縦スクロールがある7画面のGIF、FM-1本体の35画面コンタクトシート、容量とテスト結果を一つにまとめた。GIFの再生成は `web/capture_ja_report.cjs`、HTML内の画像・レイアウト確認は `web/test_ja_report.cjs` を使用する。
+画面付きのレビュー用資料は [`ja-ui-report.html`](ja-ui-report.html) と印刷用の [`ja-ui-report.pdf`](ja-ui-report.pdf)。Web Editorの7タブとインストーラーの静止画、縦スクロールがある7画面のGIF、FM-1本体の35画面、容量とテスト結果をまとめた。PDFは9ページで、35画面を個別画像として掲載し、GIFは開始・終了フレームと元GIFへのリンクを載せた。GIFの再生成は `web/capture_ja_report.cjs`、HTML内の画像・レイアウト確認は `web/test_ja_report.cjs` を使用する。
+
+PDFの再生成は `tools/build_ja_ui_pdf.py` を使用する。Pythonの `reportlab`、`Pillow`、`fonttools` と、[SIL OFL 1.1のNoto Sans JP可変TTF](https://github.com/google/fonts/tree/main/ofl/notosansjp)を `build/deps/NotoSansJP-wght.ttf` に置き、`python tools/build_ja_ui_pdf.py` を実行する。スクリプトがウエイト500の静的TTFをローカル生成し、PDFには必要glyphのサブセットだけを埋め込む。PDFの9ページはPopplerでPNG化して目視確認し、[`pdf-validation.log`](ja-ui-evidence/pdf-validation.log)にページ数、文字抽出、35画面・8 Web画面・7 GIFへのリンク検査を記録した。
 
 ## 変更前の調査
 
