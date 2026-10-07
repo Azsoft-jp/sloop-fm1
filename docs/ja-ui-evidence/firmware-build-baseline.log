@@ -1,0 +1,16 @@
+font S: ter-u16n.bdf 16px h 16, digit adv 8, 21504 B
+font L: ter-u16n.bdf 16px h 32, digit adv 16, 24576 B
+icons: 86 of 86 (192x72 L), 3096 B
+tables: /Users/azsoft/Documents/Codex/2026-10-07/sloop-for-m-vave-fm-1/build/baseline/build/gen/felucca_tables.h
+generated waves into /Users/azsoft/Documents/Codex/2026-10-07/sloop-for-m-vave-fm-1/build/baseline/build/genwav
+samples: 8 sets, 51 zones, 315854 B ADPCM
+drum kits: 32 synthesised -> /Users/azsoft/Documents/Codex/2026-10-07/sloop-for-m-vave-fm-1/build/baseline/build/gen/felucca_drumkits.h
+logo: splash 240x188, 4729 B RLE -> /Users/azsoft/Documents/Codex/2026-10-07/sloop-for-m-vave-fm-1/build/baseline/build/gen/sloop_logo.h
+loader: image 8140 B at 0x1c0a800, bss end 0x1c0f3a0
+loader: ota.bin 6863 B
+  ok    .ram_text: 909 insns, no calls
+  ok    image 550256 B; RAM .data+.bss 72720 B of 98304; pool 322272 B of 344064
+  ok    register access: hal/ only (src/, loader/ clean)
+app      /Users/azsoft/Documents/Codex/2026-10-07/sloop-for-m-vave-fm-1/build/baseline/build/felucca.bin  550256 B
+loader   /Users/azsoft/Documents/Codex/2026-10-07/sloop-for-m-vave-fm-1/build/baseline/build/loader/ota.bin  6863 B
+package  /Users/azsoft/Documents/Codex/2026-10-07/sloop-for-m-vave-fm-1/build/baseline/build/felucca.fwsc  610019 B, identity FM-1_900

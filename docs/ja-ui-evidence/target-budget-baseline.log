@@ -1,0 +1,15 @@
+target: analog_render     626 instructions,  478 in loops, 20 divides,  0 calls there: cost   638 (budget 638) ok
+target: digital_render    482 instructions,  333 in loops, 0 divides,  0 calls there: cost   333 (budget 333) ok
+target: phase_render      189 instructions,   79 in loops, 0 divides,  2 calls there: cost    79 (budget 79) ok
+target: lofi_render       311 instructions,  128 in loops, 0 divides,  0 calls there: cost   128 (budget 128) ok
+target: sample_render     188 instructions,   90 in loops, 0 divides,  1 calls there: cost   126 (budget 126) ok
+target: formant_render    614 instructions,  298 in loops, 2 divides,  0 calls there: cost   314 (budget 314) ok
+target: trio_render       615 instructions,  301 in loops, 5 divides,  2 calls there: cost   341 (budget 341) ok
+target: trio_pass         257 instructions,  151 in loops, 3 divides,  0 calls there: cost   175 (budget 175) ok
+target: drawbar_render    287 instructions,  180 in loops, 0 divides,  0 calls there: cost   267 (budget 267) ok
+target: drawbar_block     202 instructions,  102 in loops, 0 divides,  0 calls there: cost   102 (budget 102) ok
+target: grain_render      825 instructions,  290 in loops, 2 divides,  1 calls there: cost  1734 (budget 1734) ok
+target: grain_block       332 instructions,  138 in loops, 0 divides,  1 calls there: cost   138 (budget 138) ok
+target: slicer_track      311 instructions,  266 in loops, 5 divides,  0 calls there: cost   825 (budget 825) ok
+target: drums_mix         973 instructions,  924 in loops, 2 divides,  1 calls there: cost  6634 (budget 6153) ok
+target: fm1_alnk0_irq     222 instructions,   87 in loops, 0 divides,  3 calls there: cost   255 (budget 174) OVER BUDGET (+47 %, limit +10 %)

@@ -1,0 +1,136 @@
+[
+  {
+    "width": 375,
+    "tab": "sound",
+    "lang": "ja",
+    "pageWidth": 375,
+    "viewport": 375,
+    "visible": true,
+    "clippedParameterLabels": []
+  },
+  {
+    "width": 375,
+    "tab": "sequencer",
+    "lang": "ja",
+    "pageWidth": 375,
+    "viewport": 375,
+    "visible": true,
+    "clippedParameterLabels": []
+  },
+  {
+    "width": 375,
+    "tab": "tracks",
+    "lang": "ja",
+    "pageWidth": 375,
+    "viewport": 375,
+    "visible": true,
+    "clippedParameterLabels": []
+  },
+  {
+    "width": 375,
+    "tab": "library",
+    "lang": "ja",
+    "pageWidth": 375,
+    "viewport": 375,
+    "visible": true,
+    "clippedParameterLabels": []
+  },
+  {
+    "width": 375,
+    "tab": "samples",
+    "lang": "ja",
+    "pageWidth": 375,
+    "viewport": 375,
+    "visible": true,
+    "clippedParameterLabels": []
+  },
+  {
+    "width": 375,
+    "tab": "projects",
+    "lang": "ja",
+    "pageWidth": 375,
+    "viewport": 375,
+    "visible": true,
+    "clippedParameterLabels": []
+  },
+  {
+    "width": 375,
+    "tab": "settings",
+    "lang": "ja",
+    "pageWidth": 375,
+    "viewport": 375,
+    "visible": true,
+    "clippedParameterLabels": []
+  },
+  {
+    "width": 1280,
+    "tab": "sound",
+    "lang": "ja",
+    "pageWidth": 1280,
+    "viewport": 1280,
+    "visible": true,
+    "clippedParameterLabels": []
+  },
+  {
+    "width": 1280,
+    "tab": "sequencer",
+    "lang": "ja",
+    "pageWidth": 1280,
+    "viewport": 1280,
+    "visible": true,
+    "clippedParameterLabels": []
+  },
+  {
+    "width": 1280,
+    "tab": "tracks",
+    "lang": "ja",
+    "pageWidth": 1280,
+    "viewport": 1280,
+    "visible": true,
+    "clippedParameterLabels": []
+  },
+  {
+    "width": 1280,
+    "tab": "library",
+    "lang": "ja",
+    "pageWidth": 1280,
+    "viewport": 1280,
+    "visible": true,
+    "clippedParameterLabels": []
+  },
+  {
+    "width": 1280,
+    "tab": "samples",
+    "lang": "ja",
+    "pageWidth": 1280,
+    "viewport": 1280,
+    "visible": true,
+    "clippedParameterLabels": []
+  },
+  {
+    "width": 1280,
+    "tab": "projects",
+    "lang": "ja",
+    "pageWidth": 1280,
+    "viewport": 1280,
+    "visible": true,
+    "clippedParameterLabels": []
+  },
+  {
+    "width": 1280,
+    "tab": "settings",
+    "lang": "ja",
+    "pageWidth": 1280,
+    "viewport": 1280,
+    "visible": true,
+    "clippedParameterLabels": []
+  },
+  {
+    "width": 375,
+    "tab": "installer",
+    "visible": true,
+    "lang": "ja",
+    "pageWidth": 375,
+    "viewport": 375
+  }
+]

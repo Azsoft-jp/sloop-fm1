@@ -7,7 +7,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>SLOOP Editor</title>
+<title>SLOOP エディタ</title>
 <style>
   /* Fukiai: Hügelton Instruments' icon font (MIT, FUKIAI-LICENSE.txt). Icons are text in .ic spans;
      they stay hidden until the face has loaded (html.fk), so a missing font never shows boxes. */
@@ -40,7 +40,7 @@
   section { margin: 12px 0; }
   .groups { columns: 250px; column-gap: 20px; }
   .group { break-inside: avoid; margin: 0 0 12px; }
-  .row { display: grid; grid-template-columns: 46px 1fr 70px; gap: 6px; align-items: center; min-height: 22px; }
+  .row { display: grid; grid-template-columns: 74px minmax(0, 1fr) 70px; gap: 6px; align-items: center; min-height: 22px; }
   .row .v { text-align: right; white-space: nowrap; }
   .row select { width: 100%; }
   .browser { display: flex; flex-wrap: wrap; gap: 12px; align-items: flex-start; }
@@ -173,14 +173,14 @@
   .strip.muted .fader, .strip.muted .lv { opacity: .35; }
   .strip button { width: 100%; padding: 1px 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   .strip button.selb:disabled { opacity: 1; background: none; color: var(--dim); }
-  #sysinfo th { padding-right: 16px; }
+  #sysinfo th { min-width: 6em; white-space: nowrap; padding-right: 12px; }
   [hidden] { display: none !important; }
 </style>
 </head>
 <body>
 <main>
   <button class="lang" id="lang"></button>
-  <h1>SLOOP Editor</h1>
+  <h1 data-t="editorTitle"></h1>
   <p class="dim"><a href="../installer/" style="color:inherit" data-t="installer"></a></p>
   <!-- always visible: connection, version, sync mode, the tabs and (Sound / Sequencer / Tracks) the track selector -->
   <header class="top">
@@ -320,8 +320,8 @@
     </div>
   </section>
 
-  <footer>SLOOP, based on Felucca by Leo Kuroshita (@kurogedelic), <a href="https://hugelton.com" target="_blank" rel="noopener">Hügelton Instruments</a>. GPL-3.0.<br>
-    <span data-t="foot"></span> M-VAVE and FM-1 are trademarks of their respective owners.<br>
+  <footer><span data-t="creditLead"></span> <a href="https://hugelton.com" target="_blank" rel="noopener">Hügelton Instruments</a>. GPL-3.0.<br>
+    <span data-t="foot"></span> <span data-t="trademarks"></span><br>
     <a href="FUKIAI-LICENSE.txt" data-t="iconsCredit"></a></footer>
 </main>
 <script>
@@ -2044,6 +2044,8 @@ function setLabel(e, txt) { e.replaceChildren(...(e.dataset.ic ? [icon(e.dataset
 
 const TEXT = {
   ja: {
+    editorTitle: "SLOOP エディタ", creditLead: "SLOOP は Leo Kuroshita（@kurogedelic）による Felucca を基にしています。",
+    trademarks: "M-VAVE と FM-1 は各権利者の商標です。",
     other: "English", connect: "接続", disconnect: "切断", mock: "モック（実機なし）",
     sound: "音色", engine: "エンジン", presets: "プリセット", initSound: "音色を初期化",
     track: "トラック", drum: "ドラム",
@@ -2051,7 +2053,7 @@ const TEXT = {
     load: "読込", save: "保存", used: "使用中", empty: "空", unknown: "—",
     steps: "ステップ", reload: "再読み込み", clearSeq: "シーケンスを消去",
     notesHelp: "ノートは C4 E4 G4 のように入力（最大 4 音、C4 = 60）。",
-    notes: "ノート", time: "タイム", acc: "アクセント", slide: "スライド", vel: "ベロシティ",
+    notes: "ノート", time: "種別", acc: "強調", slide: "滑音", vel: "強さ",
     foot: "Chrome か Edge で使えます。", iconsCredit: "アイコン: Fukiai（MIT）Hügelton Instruments",
     nomidi: "このブラウザでは使えません。Chrome か Edge で開いてください。",
     denied: "MIDI（SysEx）の使用が許可されませんでした。",
@@ -2120,10 +2122,12 @@ const TEXT = {
     bkRestoring: "復元中 ", bkRestored: "復元しました", bkConfirm: "FM-1 の今の内容をすべてこのバックアップで置き換えます。続けますか？",
     bkBad: "SLOOP のバックアップファイルではないか、壊れています: ", bkStop: "FM-1 の再生を止めてから、もう一度復元してください。",
     bkStale: "本体の内容が途中で変わりました。もう一度バックアップしてください: ", bkRead: "読み取りエラー: ", bkWrite: "書き込みエラー: ", bkRc4: "フラッシュがありません",
-    system: "システム", firmware: "ファームウェア", sync: "同期", tracksN: "トラック", stepsN: "ステップ数", enginesL: "エンジン",
-    smpSlots: "サンプルスロット", userBank: "ユーザープリセット", none: "なし",
+    system: "システム", firmware: "FW版", sync: "同期", tracksN: "トラック", stepsN: "ステップ数", enginesL: "エンジン",
+    smpSlots: "サンプル枠", userBank: "ユーザー音色", none: "なし",
   },
   en: {
+    editorTitle: "SLOOP Editor", creditLead: "SLOOP is based on Felucca by Leo Kuroshita (@kurogedelic),",
+    trademarks: "M-VAVE and FM-1 are trademarks of their respective owners.",
     other: "日本語", connect: "Connect", disconnect: "Disconnect", mock: "Mock device (no hardware)",
     sound: "Sound", engine: "Engine", presets: "Presets", initSound: "Init sound",
     track: "Track", drum: "Drums",
@@ -2204,12 +2208,45 @@ const TEXT = {
     smpSlots: "Sample slots", userBank: "User presets", none: "none",
   },
 };
-let lang = (navigator.language || "en").toLowerCase().startsWith("ja") ? "ja" : "en";
+/* Device DESC labels are protocol identifiers and stay in English on the wire.
+ * These are display resources; unknown labels fall back to the firmware's text. */
+const LABEL_JA = {
+  ENV: "エンベロープ", "ENV DEST": "エンベロープ先", LFO: "LFO", "LFO DEST": "LFO先",
+  EDIT: "音色編集", "EDIT 1": "音色編集1", "EDIT 2": "音色編集2", VOICE: "発音", "VOICE 2": "発音2",
+  FX: "FX", SLICER: "スライサー", DLY: "ディレイ", "REV/CHO": "リバーブ／コーラス",
+  SCL: "スケール", "SCL 2": "スケール2", ARP: "アルペジオ", "ARP 2": "アルペジオ2",
+  "SEQ PATTERN": "シーケンサー", PATTERN: "パターン", GLOBAL: "全体", MASTER: "マスター",
+  DRUMS: "ドラム", INSTRUMENT: "楽器", LEVEL: "レベル", OSC: "オシレーター",
+  ATK: "アタック", DEC: "ディケイ", SUS: "サステイン", REL: "リリース",
+  LVL: "レベル", AMP: "音量", FLT: "フィルター", FILT: "フィルター", PIT: "ピッチ",
+  SHP: "波形", TRIM: "微調整", RATE: "速度", WAVE: "波形", WAVE2: "波形2", PHS: "位相",
+  FADE: "フェード", MODE: "モード", OCT: "オクターブ", GATE: "ゲート", SWG: "スイング",
+  PROB: "確率", HOLD: "保持", ORD: "順序", ROOT: "ルート", QNT: "量子化",
+  TRN: "移調", LEN: "長さ", DIV: "分割", DST: "歪み", CHO: "コーラス",
+  REV: "リバーブ", CHORD: "コード", VCE: "発音方式", GLD: "グライド", GLMOD: "滑音方式",
+  PRIO: "優先順位", ALLOC: "割当", DTUNE: "デチューン", PAN: "パン", MUTE: "ミュート",
+  SLCR: "スライサー", PAT: "パターン", DEPTH: "深さ", BPM: "BPM", SWING: "スイング",
+  CLICK: "クリック", TUNE: "調律", TIME: "時間", FDBK: "返し量", COLR: "音色",
+  MIX: "ミックス", SIZE: "サイズ", DAMP: "減衰", CRT: "速度", CDP: "深さ",
+  CH: "チャンネル", DUST: "ダスト", DUCK: "ダック", ROLL: "ロール",
+  KIT: "キット", SLOT: "スロット", NAME: "名前", LOAD: "読み込み", SAVE: "保存",
+  SET: "設定", INIT: "初期化", NEW: "新規", SYNC: "同期", ROUT: "出力先",
+  CPU: "CPU", MIDI: "MIDI", ENG: "エンジン", CLRSQ: "全消去",
+  OFF: "オフ", ON: "オン", POLY: "ポリ", MONO: "モノ", LEG: "レガート", UNI: "ユニゾン",
+  SNAP: "スナップ", WHITE: "白鍵", LAST: "後着優先", LOW: "低", HIGH: "高",
+  SIN: "サイン", TRI: "三角", SAW: "ノコギリ", SQR: "矩形", NOIS: "ノイズ",
+  CUT: "カットオフ", RES: "共鳴", DRV: "歪み", TRK: "追従", DTN: "デチューン",
+  NOTE: "音符", TIE: "連結", REST: "休符",
+};
+const DISPLAY_LABELS = { en: Object.fromEntries(Object.keys(LABEL_JA).map((k) => [k, k])), ja: LABEL_JA };
+const displayLabel = (raw) => DISPLAY_LABELS[lang][raw] ?? raw;
+let lang = "ja";
 const t = (k) => TEXT[lang][k] ?? k;
 let lastKey = null, lastArg = "";
 function sayK(k, arg = "") { lastKey = k; lastArg = arg; $("status").textContent = t(k) + arg; }
 function applyLang() {
   document.documentElement.lang = lang;
+  document.title = t("editorTitle");
   document.querySelectorAll("[data-t]").forEach((e) => setLabel(e, t(e.dataset.t)));
   $("lang").textContent = t("other");
   setLabel($("connect"), t(dev ? "disconnect" : "connect"));
@@ -2219,6 +2256,7 @@ function applyLang() {
   renderLib();
   renderBank();
   renderPanels();
+  if (dev && dev.dump) buildGroups();
   if (dev) { renderSlots(); renderStepHead(); renderSamples(); renderTrackbar(); renderMixer(); renderSysinfo(); }
 }
 $("lang").addEventListener("click", () => { lang = lang === "ja" ? "en" : "ja"; applyLang(); });
@@ -2573,21 +2611,21 @@ function buildGroups() {
   const { info } = dev;
   if (info.pcount === EXPECT.pcount && info.gcount === EXPECT.gcount && info.pe0 === EXPECT.pe0) {
     for (const g of LAYOUT(info.pe0)) {
-      const div = el("div", { class: "group" }, el("h2", { ic: HEAD_IC[g.t], text: g.engine ? `EDIT ${info.engines[dev.dump.engine] || ""}` : g.t }));
+      const div = el("div", { class: "group" }, el("h2", { ic: HEAD_IC[g.t], text: g.engine ? `${displayLabel("EDIT")} ${info.engines[dev.dump.engine] || ""}` : displayLabel(g.t) }));
       for (const [title, s, ids] of g.pages) {
         const rows = ids.map((id) => paramRow(s, id)).filter(Boolean);
         if (!rows.length) continue;
         const tt = g.engine && (dev.titles[dev.dump.engine] || [])[g.pages.findIndex((x) => x[0] === title)];
-        if (g.pages.length > 1) div.append(el("h3", { ic: PAGE_IC[tt || title], text: tt || title }));
+        if (g.pages.length > 1) div.append(el("h3", { ic: PAGE_IC[tt || title], text: displayLabel(tt || title) }));
         div.append(...rows);
       }
       groups[g.tab || "groups"].push(div);
     }
   } else {
     /* unknown firmware layout: everything in id order */
-    const a = el("div", { class: "group" }, el("h2", { ic: HEAD_IC.INSTRUMENT, text: "INSTRUMENT" }), el("p", { class: "dim", text: t("layout") }));
-    const b = el("div", { class: "group" }, el("h2", { ic: HEAD_IC.EDIT, text: "EDIT" }));
-    const c = el("div", { class: "group" }, el("h2", { ic: HEAD_IC.GLOBAL, text: "GLOBAL" }));
+    const a = el("div", { class: "group" }, el("h2", { ic: HEAD_IC.INSTRUMENT, text: displayLabel("INSTRUMENT") }), el("p", { class: "dim", text: t("layout") }));
+    const b = el("div", { class: "group" }, el("h2", { ic: HEAD_IC.EDIT, text: displayLabel("EDIT") }));
+    const c = el("div", { class: "group" }, el("h2", { ic: HEAD_IC.GLOBAL, text: displayLabel("GLOBAL") }));
     for (let i = 0; i < info.pcount; i++) { const r = paramRow(0, i); if (r) (i >= info.pe0 ? b : a).append(r); }
     for (let i = 0; i < info.gcount; i++) { const r = paramRow(1, i); if (r) c.append(r); }
     groups.groups.push(a, b);
@@ -2609,7 +2647,7 @@ function paramRow(s, id) {
     for (let v = d.min; v <= d.max; v++) {
       const [txt] = fmtValue(d, v);
       const name = d.fmt === F.ENUM && d.names[v - d.min] == null ? String(v) : txt;
-      input.append(el("option", { value: v, ic: wave && WAVE_IC[name] }, name));
+      input.append(el("option", { value: v, ic: wave && WAVE_IC[name] }, displayLabel(name)));
     }
     input.addEventListener("change", () => userSet(s, id, +input.value, true));
   } else {
@@ -2638,9 +2676,9 @@ function paramRow(s, id) {
       nudge(dir * 10);
     });
   }
-  input.title = d.label;
+  input.title = displayLabel(d.label);
   const out = el("span", { class: "v" });
-  const row = el("div", { class: "row" }, el("span", { text: d.label }), input, out);
+  const row = el("div", { class: "row" }, el("span", { text: displayLabel(d.label) }), input, out);
   ctl.set(k, { input, out, desc: d, scope: s, id, row });
   showValue(k, s ? dev.dump.g[id] : dev.dump.p[id], true);
   return row;
@@ -2650,7 +2688,7 @@ function showValue(k, v, force) {
   const c = ctl.get(k);
   if (!c || v == null) return;
   const [txt, unit] = fmtValue(c.desc, v);
-  c.out.textContent = unit ? `${txt} ${unit}` : txt;
+  c.out.textContent = unit ? `${displayLabel(txt)} ${unit}` : displayLabel(txt);
   if (force || !touched(k)) c.input.value = String(v);
 }
 /* the user is working on this control: polling and pushes must not move it */
@@ -2771,7 +2809,7 @@ function renderSteps() {
   if (dg) { $("noteshelp").textContent = t("drumGridHelp"); renderDrums(); return; }
   const len = stepLen();
   const box = $("steptables");
-  const shape = len + (isDrum() ? "d" : "");
+  const shape = len + (isDrum() ? "d" : "") + lang;
   $("noteshelp").textContent = t(isDrum() ? "drumHelp" : "notesHelp");
   renderGrid();
   /* keep the rows the user is typing in */
@@ -2788,7 +2826,7 @@ function renderSteps() {
 }
 function stepRow(i) {
   const notes = el("input", { type: "text", placeholder: "—", spellcheck: "false" });
-  const time = el("select", {}, ...TIMES.map((n, k) => el("option", { value: k, text: n })));
+  const time = el("select", {}, ...TIMES.map((n, k) => el("option", { value: k, text: displayLabel(n) })));
   const acc = el("input", { type: "checkbox" });
   const sl = el("input", { type: "checkbox" });
   const vel = el("input", { type: "number", min: 0, max: 127 });
@@ -2837,7 +2875,7 @@ function renderGrid() {
     const txt = on ? stepNotes(s) : tie ? "—" : "";
     const marks = s && on ? (s.flags & 1 ? " >" : "") + (s.flags & 2 ? " ~" : "") : "";
     b.className = [on && "on", tie && "tie", on && s.flags & 1 && "acc", i % 4 === 0 && "beat"].filter(Boolean).join(" ");
-    b.title = `${i + 1}: ${on ? txt : tie ? "TIE" : "REST"}${marks}`;
+    b.title = `${i + 1}: ${on ? txt : displayLabel(tie ? "TIE" : "REST")}${marks}`;
     b.replaceChildren(el("span", { class: "n", text: String(i + 1) + marks }), el("span", { class: "x", text: txt }));
   }
 }

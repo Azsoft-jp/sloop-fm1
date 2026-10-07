@@ -1,11 +1,11 @@
 <!doctype html>
 <!-- SPDX-License-Identifier: GPL-3.0-only
      Copyright (C) 2026 Leo Kuroshita (@kurogedelic), Hügelton Instruments -->
-<html lang="en">
+<html lang="ja">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>SLOOP installer</title>
+<title>SLOOP インストーラー</title>
 <style>
   :root { --bg: #000; --fg: #f2f2f2; --dim: #8a8a92; --tile: #16161a; --line: #2a2a30;
           --blue: #287cff; --green: #1ecc70; --yellow: #ffc618; --orange: #ff621a; --red: #ff2c34; }
@@ -55,13 +55,13 @@
   <div class="strip"><i></i><i></i><i></i><i></i></div>
   <!--STUDIO_GUIDE-->
   <!--BANNER-->
-  <h1>Firmware for the M-VAVE FM-1</h1>
-  <p class="lead">A groovebox you play live: four tracks — three synths and a drum machine — 9 synth engines, 68 sounds, 37 drum kits from 808 to techno, amapiano and ambient, your own samples, 16 punch-in effects. House, techno, hip-hop, drum &amp; bass, synthwave, lo-fi, ambient: make what you want. No factory patterns, nothing to load: everything you hear, you play.</p>
+  <h1 data-t="heroTitle"></h1>
+  <p class="lead" data-t="heroLead"></p>
   <div class="tiles">
-    <div class="tile" style="--c: var(--blue)"><b>68</b><span>sounds, 9 engines, your samples</span></div>
-    <div class="tile" style="--c: var(--green)"><b>37</b><span>drum kits, 909 to afro</span></div>
-    <div class="tile" style="--c: var(--yellow)"><b>16</b><span>punch-in fx: hold fx + key</span></div>
-    <div class="tile" style="--c: var(--orange)"><b>rec</b><span>no click: the loop follows you</span></div>
+    <div class="tile" style="--c: var(--blue)"><b>68</b><span data-t="tileSounds"></span></div>
+    <div class="tile" style="--c: var(--green)"><b>37</b><span data-t="tileKits"></span></div>
+    <div class="tile" style="--c: var(--yellow)"><b>16</b><span data-t="tileFx"></span></div>
+    <div class="tile" style="--c: var(--orange)"><b>rec</b><span data-t="tileRec"></span></div>
   </div>
   <p data-t="intro"></p>
   <p data-t="warn"></p>
@@ -86,10 +86,10 @@
     <p><button id="stock-go" disabled data-t="stockGo"></button></p>
     <p class="small" data-t="back"></p>
   </details>
-  <p class="small">SLOOP is based on Felucca by Leo Kuroshita (@kurogedelic), <a href="https://hugelton.com" target="_blank" rel="noopener">Hügelton Instruments</a>.
-    Hold OCT− alone while switching on for USB rescue.<br>
-    Font: Terminus (Dimitar Toshkov Zhekov, SIL OFL 1.1). Samples: Versilian Studios VSCO-2 Community Edition and VCSL (CC0 1.0), and the Hügelton Sample Pack (© Hügelton Instruments, not CC0).<br>
-    M-VAVE and FM-1 are trademarks of their respective owners; SLOOP is not affiliated with them.<br>
+  <p class="small"><span data-t="creditLead"></span> <a href="https://hugelton.com" target="_blank" rel="noopener">Hügelton Instruments</a>.
+    <span data-t="rescue"></span><br>
+    <span data-t="assetCredits"></span><br>
+    <span data-t="trademarks"></span><br>
     <span data-t="license"></span> <a href="https://github.com/hugelton/Felucca" target="_blank" rel="noopener">github.com/hugelton/Felucca</a></p>
 </main>
 <script type="module">
@@ -97,6 +97,13 @@
 const $ = (id) => document.getElementById(id);
 const TEXT = {
   ja: {
+    pageTitle: "SLOOP インストーラー", heroTitle: "M-VAVE FM-1 用ファームウェア",
+    heroLead: "演奏しながら曲を作る4トラックのグルーブボックス。シンセ3トラックとドラム、9種類の音源、68音色、37ドラムキット、自分のサンプル、16種類の演奏用FXを搭載。好きなジャンルをその場で作れます。工場出荷時のパターンはありません。鳴る音は、すべて演奏から始まります。",
+    tileSounds: "音色・9音源・自分のサンプル", tileKits: "ドラムキット", tileFx: "演奏中に使えるFX", tileRec: "演奏に合わせてループを録音",
+    creditLead: "SLOOP は Leo Kuroshita（@kurogedelic）による Felucca を基にしています。",
+    rescue: "電源投入時に OCT− だけを押し続けると USB 復旧モードに入ります。",
+    assetCredits: "フォント: Terminus（SIL OFL 1.1）。日本語UI: Noto Sans JP（SIL OFL 1.1）。サンプル: Versilian Studios（CC0 1.0）と Hügelton Sample Pack（CC0 ではありません）。",
+    trademarks: "M-VAVE と FM-1 は各権利者の商標です。SLOOP は両社と提携していません。",
     intro: "FM-1 を USB で接続してください。（Chrome か Edge で使えます）",
     warn: "書き込み中は USB を抜かないでください。",
     install: "インストール", other: "English",
@@ -122,7 +129,7 @@ const TEXT = {
     license: "GPL-3.0、無保証。ソース:",
     stockTitle: "公式ファームウェア（V15）に戻す",
     stockHelp: "M-VAVE のサイトから公式の FM-1 V15 をダウンロードし、中の FM-1.fwsc（変更していないもの）を選んでください。ファイルはこのブラウザの中で確認され、どこにも送られません。",
-    stockBackup: "公式ファームウェアは SLOOP の曲・プロジェクト・サンプルを開けません。先にエディタでバックアップを保存してください（Projects → Backup）。SLOOP を入れ直せば、エディタから復元できます。",
+    stockBackup: "公式ファームウェアは SLOOP の曲・プロジェクト・サンプルを開けません。先にエディタの「プロジェクト」→「バックアップ」で保存してください。SLOOP を入れ直せば、エディタから復元できます。",
     stockEditor: "エディタを開いてバックアップする", stockSaved: "バックアップをパソコンに保存しました",
     stockFile: "公式の FM-1.fwsc", stockGo: "公式 V15 をインストール",
     stockValid: "公式 V15 を確認しました", stockBad: "公式 V15 ではありません: ",
@@ -131,6 +138,14 @@ const TEXT = {
     back: "M-VAVE のアップデーター M-UPGRADE（Downloads → PC Software）でも戻せます。FM-1 が見つからない場合は、MIDI を使う他のアプリとブラウザのタブを閉じてください。",
   },
   en: {
+    pageTitle: "SLOOP installer", heroTitle: "Firmware for the M-VAVE FM-1",
+    heroLead: "A groovebox you play live: four tracks — three synths and a drum machine — 9 synth engines, 68 sounds, 37 drum kits from 808 to techno, amapiano and ambient, your own samples, 16 punch-in effects. House, techno, hip-hop, drum & bass, synthwave, lo-fi, ambient: make what you want. No factory patterns, nothing to load: everything you hear, you play.",
+    tileSounds: "sounds, 9 engines, your samples", tileKits: "drum kits, 909 to afro",
+    tileFx: "punch-in fx: hold fx + key", tileRec: "no click: the loop follows you",
+    creditLead: "SLOOP is based on Felucca by Leo Kuroshita (@kurogedelic),",
+    rescue: "Hold OCT− alone while switching on for USB rescue.",
+    assetCredits: "Fonts: Terminus and Noto Sans JP (SIL OFL 1.1). Samples: Versilian Studios VSCO-2 Community Edition and VCSL (CC0 1.0), and the Hügelton Sample Pack (not CC0).",
+    trademarks: "M-VAVE and FM-1 are trademarks of their respective owners; SLOOP is not affiliated with them.",
     intro: "Connect the FM-1 by USB. (Works in Chrome or Edge.)",
     warn: "Do not unplug the USB cable while writing.",
     install: "Install", other: "日本語",
@@ -165,11 +180,12 @@ const TEXT = {
     back: "M-VAVE's own updater, M-UPGRADE (Downloads → PC Software), works too. If it does not find the FM-1, close every other app and browser tab that uses MIDI.",
   },
 };
-let lang = (navigator.language || "en").toLowerCase().startsWith("ja") ? "ja" : "en";
+let lang = "ja";
 const t = (k) => TEXT[lang][k];
 let lastKey = null, lastArg = "";
 function applyLang() {
   document.documentElement.lang = lang;
+  document.title = t("pageTitle");
   document.querySelectorAll("[data-t]").forEach((e) => { e.textContent = t(e.dataset.t); });
   $("lang").textContent = t("other");
   if (lastKey) $("status").textContent = t(lastKey) + lastArg;

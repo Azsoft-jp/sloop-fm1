@@ -371,7 +371,7 @@ static void edit_param(uint32_t slot, int32_t steps)
         if (ui.arm != 0xE0u + slot) {                     /* one detent arms, a second one within ~1.5 s acts */
             ui.arm = (uint8_t)(0xE0u + slot);
             ui.arm_t = 90;
-            ui_say("AGAIN: ", UP_GO[slot - 1u]);
+            ui_say(ui_text(UI_AGAIN_PREFIX), UP_GO[slot - 1u]);
             return;
         }
         ui.arm = 0;
@@ -390,7 +390,7 @@ static void edit_param(uint32_t slot, int32_t steps)
         *vp = 0;
         ui.arm = (uint8_t)id;
         ui.arm_t = 90;
-        ui_say("AGAIN: ", d->label);
+        ui_say(ui_text(UI_AGAIN_PREFIX), d->label);
         return;
     }
     ui.arm = 0;
@@ -411,24 +411,24 @@ static void edit_param(uint32_t slot, int32_t steps)
         fm1_irq_off();
         track_defaults_steps(TSEL);
         fm1_irq_on();
-        ui_message("PATTERN CLEARED");
+        ui_message(ui_text(UI_PATTERN_CLEARED));
         break;
     case G_INITSND:
         *vp = 0;
         set_engine(TSEL->eng_req);                              /* engine defaults + its first preset */
-        ui_message("SOUND INIT");
+        ui_message(ui_text(UI_SOUND_INIT));
         ui.force = 1;
         break;
     case G_NEWPRJ:
         *vp = 0;
 #if FELUCCA_ARRANGER
         if (song.playing && arrangement_enabled) {      /* (the song's stop would bring the old loop back) */
-            ui_message("STOP THE SONG FIRST");
+            ui_message(ui_text(UI_STOP_SONG));
             break;
         }
 #endif
         project_new();
-        ui_message("NEW PROJECT");
+        ui_message(ui_text(UI_NEW_PROJECT));
         break;
     default:
         break;
@@ -513,7 +513,7 @@ static void layer_tap(uint32_t layer)
             undo_mark(TSEL, (undo_sess += 4u) | 3u);      /* STEP page: EDIT clears the step */
             step_clear(&TSEL->step[ui.cursor]);
             cursor_set(ui.cursor + 1);
-            ui_message("STEP CLEARED");
+            ui_message(ui_text(UI_STEP_CLEARED));
             break;
         }
         open_family(layer == LY_STEP ? FAM_SEQ : FAM_EDIT);
@@ -636,9 +636,9 @@ static int layers_input(uint32_t note_edges, uint32_t *pressed, uint32_t home)
         if (press) {
             used[held] = 1;
             if (press & ob)
-                ui_message(undo_swap(0) ? "UNDO" : "NOTHING TO UNDO");
+                ui_message(ui_text(undo_swap(0) ? UI_UNDO : UI_NO_UNDO));
             else
-                ui_message(undo_swap(1) ? "REDO" : "NOTHING TO REDO");
+                ui_message(ui_text(undo_swap(1) ? UI_REDO : UI_NO_REDO));
         }
     }
     if (held == LY_STEP) {                                /* SEQ + OCT- / OCT+: the page */
@@ -725,7 +725,7 @@ static void holds_input(uint32_t pressed, uint32_t now_ms)
         t->arp_phys = 0;
         fm1_irq_on();
         b[0] = (char)('1' + ui.hold_trk);
-        ui_say("TRACK ", b);
+        ui_say(ui_text(UI_TRACK_PREFIX), b);
         ui.hold_kind = 0;
         rec_on = 0;                                       /* (until REC is up: nothing more) */
         ui.force = 1;
@@ -818,7 +818,7 @@ static void ui_input(void)
         case B_PLAY:
 #if FELUCCA_ARRANGER
             if (!song.playing && arrangement_enabled && !arr_valid(&arrangement, arrangement_ready())) {
-                ui_message("EMPTY SECTION: REC");
+                ui_message(ui_text(UI_EMPTY_SECTION));
                 break;
             }
 #endif
@@ -893,8 +893,8 @@ static void panel_setup(void)
     uint32_t i, used = 0, t0 = fm1_ms;
     const panel_t old = panel;
     lcd_fill(0, 0, 240, 240, C_BLACK);
-    draw_text_box(0, 10, 240, &FONT_S, "HARDWARE CALIBRATION", C_WHITE, 1);
-    draw_text_box(0, 30, 240, &FONT_S, "TEACH EACH BUTTON AND KNOB", C_GRAY, 1);
+    draw_text_box(0, 10, 240, &FONT_S, ui_text(UI_CALIBRATION), C_WHITE, 1);
+    draw_text_box(0, 30, 240, &FONT_S, ui_text(UI_CAL_TITLE), C_GRAY, 1);
     while (fm1_in.buttons) {                             /* wait for OCT-/OCT+ release */
         fm1_wdt_feed();
         if (fm1_ms - t0 > SETUP_IDLE_MS)
@@ -903,7 +903,7 @@ static void panel_setup(void)
     fm1_input_edges(0);
     for (i = 0; i < NB; i++) {
         uint32_t p = 0, id;
-        draw_text_box(0, 80, 240, &FONT_S, "PRESS", C_GRAY, 1);
+        draw_text_box(0, 80, 240, &FONT_S, ui_text(UI_PRESS), C_GRAY, 1);
         draw_text_box(0, 100, 240, &FONT_L, B_NAME[i], C_WHITE, 1);
         t0 = fm1_ms;
         while (!(p & ~used)) {
@@ -922,7 +922,7 @@ static void panel_setup(void)
     for (i = 0; i < NE; i++) {
         uint32_t e;
         int32_t st = 0;
-        draw_text_box(0, 80, 240, &FONT_S, "TURN RIGHT", C_GRAY, 1);
+        draw_text_box(0, 80, 240, &FONT_S, ui_text(UI_TURN_RIGHT), C_GRAY, 1);
         draw_text_box(0, 100, 240, &FONT_L, E_NAME[i], C_WHITE, 1);
         for (e = 0; e < 7u; e++)
             fm1_enc_take(e);
@@ -952,5 +952,5 @@ timeout:
     panel = old;
     lcd_fill(0, 0, 240, 240, C_BLACK);
     ui.force = 1;
-    ui_message("SETUP CANCELLED");
+    ui_message(ui_text(UI_SETUP_CANCELLED));
 }

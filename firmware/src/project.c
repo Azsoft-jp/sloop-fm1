@@ -310,16 +310,16 @@ static void project_save(uint32_t slot)
 {
     project_t *p = &proj_slot[slot & 3u];
 #if FELUCCA_ARRANGER
-    if (song.playing || transport_req) { ui_message("STOP BEFORE SAVE"); return; }
+    if (song.playing || transport_req) { ui_message(ui_text(UI_STOP_SAVE)); return; }
 #endif
     proj_capture(p);
 #if FELUCCA_FLASH
     if (flash_ok) {
-        ui_message(st_save(OBJ_PROJECT0 + (slot & 3u), p, sizeof *p) ? "SAVE ERROR" : "SAVED");
+        ui_message(ui_text(st_save(OBJ_PROJECT0 + (slot & 3u), p, sizeof *p) ? UI_SAVE_ERROR : UI_SAVED));
         return;
     }
 #endif
-    ui_message("SAVED (RAM)");
+    ui_message(ui_text(UI_SAVED_RAM));
 }
 
 /* a project into the working one: the transport stops, everything sounding is released */
@@ -345,18 +345,18 @@ static void project_load(uint32_t slot)
 {
     project_t *p = &proj_slot[slot & 3u];
 #if FELUCCA_ARRANGER
-    if (song.playing || transport_req) { ui_message("STOP BEFORE LOAD"); return; }
+    if (song.playing || transport_req) { ui_message(ui_text(UI_STOP_LOAD)); return; }
 #endif
 #if FELUCCA_FLASH
     if (flash_ok && !proj_ok(p))
         proj_fetch(slot);
 #endif
     if (!proj_ok(p)) {
-        ui_message("EMPTY SLOT");
+        ui_message(ui_text(UI_EMPTY_SLOT));
         return;
     }
     project_apply(p);
-    ui_message("LOADED");
+    ui_message(ui_text(UI_LOADED));
 }
 
 /* ---- the working project, kept in flash by itself: saved when it changed, the transport is stopped,
@@ -624,15 +624,15 @@ static uint32_t project_restore(uint32_t slot, const void *raw, uint32_t n)
 #if FELUCCA_ARRANGER
 static void arrangement_save(void)
 {
-    if (song.playing || transport_req) { ui_message("STOP BEFORE SAVE"); return; }
+    if (song.playing || transport_req) { ui_message(ui_text(UI_STOP_SAVE)); return; }
     settings_save();
 #if FELUCCA_FLASH
     if (flash_ok) {
-        ui_message(memcmp(&persist_saved.arrangement, &arrangement, sizeof arrangement) ? "SAVE ERROR" : "SONG SAVED");
+        ui_message(ui_text(memcmp(&persist_saved.arrangement, &arrangement, sizeof arrangement) ? UI_SAVE_ERROR : UI_SONG_SAVED));
         return;
     }
 #endif
-    ui_message("SONG IN RAM ONLY");
+    ui_message(ui_text(UI_SONG_RAM));
 }
 
 /* ---- live sections (SAVE + key, ui_layers.c). A section is a project slot (A..D = 1..4): stored into RAM
@@ -691,9 +691,9 @@ static void sections_flush(void)                        /* main loop */
         if (song_dirty) {
             char b[8];
             fmt_int(b, srec_done);
-            ui_say("SONG PARTS ", b);
+            ui_say(ui_text(UI_SONG_PARTS_PREFIX), b);
         } else {
-            ui_message("NO SONG");
+            ui_message(ui_text(UI_NO_SONG));
         }
         srec_done = 0;
     }
@@ -711,7 +711,7 @@ static void sections_flush(void)                        /* main loop */
     tried = fm1_ms;                                     /* (a failed write: again in 5 s, not every frame) */
     sections_write();
     if (sec_dirty)
-        ui_message("SAVE ERROR: RETRYING");
+        ui_message(ui_text(UI_SAVE_RETRY));
 }
 #endif
 #endif /* PROJ_HOST */

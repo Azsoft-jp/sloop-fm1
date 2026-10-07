@@ -3,10 +3,10 @@
 /* SLOOP menu (HOME held): COLOR, LOWCUT, ZOOM, LIGHTS, KEYS, NOTES, USB AUDIO, HARDWARE CALIBRATION, ABOUT. */
 /* ------------------------------------------------------------ menu --- */
 enum { MI_COLOR, MI_LOWCUT, MI_ZOOM, MI_LIGHTS, MI_KEYS, MI_NOTES, MI_USB, MI_PANEL, MI_ABOUT, MI_BACK, MI_COUNT };
-static const char *const MI_NAME[MI_COUNT] = {"COLOR", "LOWCUT", "ZOOM", "LIGHTS", "KEYS", "NOTES", "USB AUDIO",
-                                              "HARDWARE CALIBRATION", "ABOUT", "BACK"};
-static const char *const LIGHTS_NAME[LIGHTS_N] = {"OFF", "LOW", "MID", "HIGH"};   /* every button lit, the labels readable */
-static const char *const KEYS_NAME[KEYS_N] = {"OFF", "C KEYS", "WHITE KEYS"};      /* keys lit too, at the LIGHTS level */
+static const ui_string_id_t MI_NAME[MI_COUNT] = {UI_COLOR, UI_LOWCUT, UI_ZOOM, UI_LIGHTS, UI_KEYS, UI_NOTES,
+                                                UI_USB_AUDIO, UI_PANEL, UI_ABOUT, UI_BACK};
+static const ui_string_id_t LIGHTS_NAME[LIGHTS_N] = {UI_OFF, UI_LOW, UI_MID, UI_HIGH};
+static const ui_string_id_t KEYS_NAME[KEYS_N] = {UI_OFF, UI_C_KEYS, UI_WHITE_KEYS};
 #define MI_DY 18                                   /* rows between two menu lines */
 
 static void draw_menu(void)
@@ -20,7 +20,7 @@ static void draw_menu(void)
     if (ui.force)                                   /* head + rule + two bands cover rows 0..229 */
         lcd_fill(0, H_HEAD + 1 + 124 + 95, 240, 240 - (H_HEAD + 1 + 124 + 95), C_BLACK);
     cv_begin(240, H_HEAD, C_BLACK);
-    cv_text(4, 1, &FONT_S, ui.menu == 2 ? "ABOUT" : "MENU", C_HI);
+    cv_text(4, 1, &FONT_S, ui_text(ui.menu == 2 ? UI_ABOUT : UI_MENU), C_HI);
     cv_blit(0, Y_HEAD);
     lcd_fill(0, H_HEAD, 240, 1, C_LINE);
     for (pass = 0; pass < 2u; pass++) {             /* the canvas holds 124 rows: draw in two bands */
@@ -30,15 +30,15 @@ static void draw_menu(void)
             cv_text(4, 4, &FONT_L, "SLOOP", C_WHITE);
             cv_rect(96, 10, 8, 4, TE_COL[0]), cv_rect(96, 16, 12, 4, TE_COL[1]);   /* the sail */
             cv_rect(96, 22, 16, 4, TE_COL[2]), cv_rect(96, 28, 20, 4, TE_COL[3]);
-            cv_text(4, 36, &FONT_S, "BASED ON FELUCCA", C_AMB);
+            cv_text(4, 36, &FONT_S, ui_text(UI_BASED_ON), C_AMB);
             cv_text(4, 54, &FONT_S, FELUCCA_VERSION, C_HI);
             cv_text(236 - text_w(&FONT_S, __DATE__), 54, &FONT_S, __DATE__, C_GRAY);   /* build date */
             cv_text(cv_text(4, 72, &FONT_S, "LEO KUROSHITA", C_HI) + 8, 72, &FONT_S, "@KUROGEDELIC", C_AMB);
-            cv_text(4, 88, &FONT_S, "H\xDCGELTON INSTRUMENTS", C_HI);   /* Latin-1 U-umlaut */
+            cv_text(4, 88, &FONT_S, "HÜGELTON INSTRUMENTS", C_HI);
             cv_text(4, 104, &FONT_S, "HUGELTON.COM", C_AMB);
             cv_text(4, 119, &FONT_S, "GPL-3.0, NO WARRANTY", C_HI);
             cv_text(4, 132, &FONT_S, "GITHUB.COM/ISOD89/SLOOP-FM1", C_AMB);   /* (the source of this firmware) */
-            cv_text(4, 146, &FONT_S, "FONT: TERMINUS (OFL)", C_DIM);
+            cv_text(4, 146, &FONT_S, "FONT: TERMINUS, NOTO JP (OFL)", C_DIM);
             cv_text(4, 159, &FONT_S, "SAMPLES: VERSILIAN (CC0)", C_DIM);
             cv_text(4, 172, &FONT_S, "+ SONIC PI (CC0)", C_DIM);
             cv_text(4, 185, &FONT_S, "PHASE: CRISPYZEBRA (GPL)", C_DIM);
@@ -49,25 +49,25 @@ static void draw_menu(void)
                 int sel = i == ui.menu_sel;
                 if (sel)
                     cv_rect(4, y + 6, 3, 3, C_WHITE);
-                cv_text(14, y, &FONT_S, MI_NAME[i], sel ? C_WHITE : C_GRAY);
+                cv_text(14, y, &FONT_S, ui_text(MI_NAME[i]), sel ? C_WHITE : C_GRAY);
                 if (i == MI_LOWCUT || i == MI_ZOOM || i == MI_NOTES)
                     cv_text(100, y, &FONT_S, (i == MI_LOWCUT ? settings.lowcut : i == MI_ZOOM ? settings.zoom : lights_notes)
-                                                ? "ON" : "OFF", C_HI);
+                                                ? ui_text(UI_ON) : ui_text(UI_OFF), C_HI);
                 if (i == MI_LIGHTS)
-                    cv_text(100, y, &FONT_S, LIGHTS_NAME[lights_lvl % LIGHTS_N], C_HI);
+                    cv_text(100, y, &FONT_S, ui_text(LIGHTS_NAME[lights_lvl % LIGHTS_N]), C_HI);
                 if (i == MI_USB)                       /* the USB audio input: follows MASTER, or full level */
-                    cv_text(100, y, &FONT_S, usb_full ? "FULL" : "MASTER", C_HI);
+                    cv_text(100, y, &FONT_S, ui_text(usb_full ? UI_FULL : UI_MASTER), C_HI);
                 if (i == MI_KEYS)
-                    cv_text(100, y, &FONT_S, KEYS_NAME[lights_keys % KEYS_N], lights_lvl ? C_HI : C_DIM);   /* (needs LIGHTS) */
+                    cv_text(100, y, &FONT_S, ui_text(KEYS_NAME[lights_keys % KEYS_N]), lights_lvl ? C_HI : C_DIM);
                 if (i == MI_COLOR) {
                     uint32_t k;
-                    cv_text(100, y, &FONT_S, PALETTES[settings.palette].name, C_HI);
+                    cv_text(100, y, &FONT_S, ui_display_name(PALETTES[settings.palette].name), C_HI);
                     for (k = 0; k < 5u; k++)
                         cv_rect(160 + (int32_t)k * 14, y + 3, 10, 10, pal[k]);
                 }
             }
-            cv_text(4, 4 + MI_COUNT * MI_DY + 4, &FONT_S, "PRESETS MOVE  KNOB 1 SET", C_DIM);
-            cv_text(4, 4 + MI_COUNT * MI_DY + 18, &FONT_S, "OCT+ OK   OCT- BACK", C_DIM);
+            cv_text(4, 4 + MI_COUNT * MI_DY + 4, &FONT_S, ui_text(UI_SET_HINT), C_DIM);
+            cv_text(4, 4 + MI_COUNT * MI_DY + 18, &FONT_S, ui_text(UI_BACK_HINT), C_DIM);
         }
         cv_oy = 0;
         cv_blit(0, H_HEAD + 1 + pass * 124u);
@@ -161,4 +161,3 @@ static void menu_input(uint32_t pressed)
     }
     enc_drop();                                        /* swallow the rest while the menu is up */
 }
-

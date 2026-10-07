@@ -79,7 +79,7 @@ static void fm1_fault(const fm1_crash_t *c)
     uint32_t t0;
     fm1_audio_stop();
     lcd_fill(0, 0, 240, 240, RGB(160, 0, 0));
-    draw_text_box(0, 8, 240, &FONT_S, "FELUCCA CRASH", C_WHITE, 1);
+    draw_text_box(0, 8, 240, &FONT_S, ui_text(UI_CRASH), C_WHITE, 1);
     hexs(b, c->vec);
     draw_text_box(10, 40, 220, &FONT_S, b, C_WHITE, 0);
     hexs(b, c->pc);
@@ -196,14 +196,14 @@ static void fm1_main(void)
             uint32_t both = (1u << panel.btn[B_OCTDN]) | (1u << panel.btn[B_OCTUP]);
             if ((fm1_in.buttons & both) != both || song.playing) {
                 if (shown)
-                    ui_say("UPDATE MODE ", "CANCELLED");
+                    ui_message(ui_text(UI_UPDATE_CANCEL));
                 shown = 0;
                 t0 = fm1_ms;
             } else if (fm1_ms - t0 > 2000u && fm1_ms - t0 <= 5000u) {
                 uint32_t left = (5000u - (fm1_ms - t0) + 999u) / 1000u;
                 if (left != shown) {
                     char d[4] = {(char)('0' + left), '.', '.', 0};
-                    ui_say("UPDATE MODE IN ", d);
+                    ui_say(ui_text(UI_UPDATE_IN), d);
                     shown = left;
                 }
             } else if (fm1_ms - t0 > 5000u) {

@@ -1,0 +1,85 @@
+song live: B on the bar (176416), SONG REC -> A 2 bars, B 3 bars PASS
+song audio: 3 synth parts + drums, section at 176416, stop at 352800, no held sequencer notes PASS
+drums: 16 lanes a step (levels, ratchets), the key / GM maps, every kit distinct, bounded audio and finite tails, metronome (OFF/REC/ON, accent), record: first note starts the loop, at once while playing, latency-compensated steps, free takes set the loop and tempo, arm follows the track PASS
+seq2: USB AUDIO FULL: the USB level stays up when MASTER is low, no clipping   ok
+seq2: REC mode FREE, empty project: the first note starts a free take          ok
+seq2: REC mode TEMPO, empty project: the first note starts the loop at 100 BPM, recording ok
+seq2: REC START COUNT: a note only sounds, nothing starts                      ok
+seq2: REC START COUNT: PLAY -> one bar of clicks, not playing yet              ok
+seq2: REC START COUNT: 4 clicks (one bar of 4/4)                               ok
+seq2: REC START COUNT: after the bar the loop starts and records               ok
+seq2: REC START COUNT: REC during the count-in cancels it                      ok
+seq2: REC START COUNT: PLAY again during the count-in: back to armed           ok
+seq2: MIDI clock: stopped, BPM follows the master (120)                        ok
+seq2: MIDI clock: START, 2 bars at 120 -> beat 8 exactly                       ok
+seq2: MIDI clock: the master at 100 -> 2 more bars, BPM 100                    ok
+seq2: MIDI clock: SYNC USB ignores the TRS jack                                ok
+seq2: MIDI clock: STOP                                                         ok
+seq2: MIDI clock: no pulse for 0.5 s -> the internal tempo plays               ok
+seq2: overload: the releasing voice goes first, faded (stage 4)                ok
+seq2: overload: the upper notes thin out, the bass and the MONO lead stay      ok
+seq2: 64 bars at 87..174 BPM: every kick in the block of its downbeat click    ok
+seq2: DIV 1/4 -> 1/32 and 40 -> 240 BPM mid-step: one step a block, no burst   ok
+seq2: SWING 75 %, LEN 3 against LEN 16: in phase after 15 bars (no drift)      ok
+seq2: LEN 32 -> 16 while playing: in phase with a 16-step track                ok
+seq2: drums: a hat x4 plays 4 even hits in its step, the next step plays       ok
+seq2: synth: a note x3 starts 3 times in its step                              ok
+seq2: roll 1/32 held 8 steps: ~16 hits                                         ok
+seq2: roll 1/32 recorded: one hit a step, ratchet x2                           ok
+seq2: EDIT + hat while playing steps 4..7: those hats gone, the rest and the kicks kept ok
+seq2: undo: the erased hats are back                                           ok
+seq2: EDIT + hat while stopped: every hat gone                                 ok
+seq2: OCT- / OCT+ held on the drums: a ghost snare and a hard kick recorded    ok
+seq2: ... and played at 42 / 127                                               ok
+seq2: chord 9TH on C4 in C minor: C Eb Bb D                                    ok
+seq2: chord TRIAD on D4 in C minor: D F Ab                                     ok
+seq2: chord mode: the black keys are silent                                    ok
+seq2: drum track muted: no hits                                                ok
+seq2: track 1 soloed: the drums silent (faded out)                             ok
+seq2: solo off: the drums back                                                 ok
+seq2: all checks ok
+punch-in FX: 16 effects change the mix while held, bounded, exact dry mix after release; FX-held keys pick effects, play and record nothing PASS
+layout: P_CHORD just before P_E0 (50), P_COUNT = format 3's + 1    ok
+format 4 fits one flash object; 4 slots fit .noinit                ok
+FUN3 -> FUN4: converted, valid format 4 slot                       ok
+FUN3 -> FUN4: globals (swing 50 -> 40: the MPC scale), the new ones default ok
+FUN3 -> FUN4: parameters (P_E0.. moved), steps, drum notes -> lanes ok
+FUN2 image is 2552 bytes (as stored)                               ok
+FUN2 -> FUN4: converted, valid format 4 slot                       ok
+FUN2 -> FUN4: globals and selected track                           ok
+FUN2 -> FUN4: every parameter mapped, SLICER OFF, CHORD OFF (4 tracks) ok
+FUN2 -> FUN4: engine bytes kept (WHEEL 7, ANALOG 0, TRIO 6), drum 0 ok
+FUN4 -> FUN4: as stored (levels, ratchets, lanes, engine 8)        ok
+FUN2 with a bad checksum: refused                                  ok
+FUN2 with a wrong length: refused                                  ok
+FUN4 size with a FUN3 magic: refused                               ok
+FUN3 with a bad checksum: refused                                  ok
+FUN1 -> FUN4: track 1 mapped, tracks 2..4 defaults                 ok
+the working project: capture -> apply round trip (levels, lanes, DUST) ok
+project format test passed
+UP_PUT frame < 640 bytes                       ok
+UP_PUT parses                                  ok
+UP_PUT values (negative v14 too)               ok
+pattern: rest drops flags, tie has no note     ok
+UP_PUT short frame -> args                     ok
+UP_PUT slot 32 -> args                         ok
+UP_PUT bad engine -> args                      ok
+UP_PUT empty name -> args                      ok
+UP_PUT 13-char name -> args                    ok
+UP_PUT 12-char name ok                         ok
+name shown upper case                          ok
+bank fits one object                           ok
+bank save                                      ok
+bank load: the record is back                  ok
+other slots empty                              ok
+bank 0 never written -> empty                  ok
+banks in 0xDC000..0xDFFFF                      ok
+bank with another record size -> empty         ok
+record with another version -> empty           ok
+np < P_COUNT: mapped by count                  ok
+old record (np 53): SLICER and CHORD defaults, E0..E7 kept ok
+SLOOP 1.0 record (np 57): CHORD default, the rest kept ok
+np == P_COUNT: as stored                       ok
+steps -> pattern                               ok
+empty sequencer -> empty pattern               ok
+user preset test passed

@@ -67,6 +67,7 @@ static void te_lower(char *d, const char *s, uint32_t n)
 }
 static void te_text_c(int32_t cx, int32_t y, const char *s, uint16_t c)   /* centred on cx */
 {
+    s = ui_display_name(s);
     cv_text(cx - text_w(&FONT_S, s) / 2, y, &FONT_S, s, c);
 }
 
@@ -96,7 +97,7 @@ static void te_dials(int32_t y0, const char *const lab[4], const char *const val
         if (!lab[k][0])
             continue;
         te_dial(cx, 12, 11, ratio[k], TE_COL[k], TE_DIM[k]);
-        te_text_c(cx, 24, lab[k], TE_G3);
+        te_text_c(cx, 24, str_eq(lab[k], "steps") ? ui_text(UI_STEPS_LAB) : lab[k], TE_G3);
     }
     cv_blit(0, (uint32_t)y0);
     cv_begin(240, 16, C_BLACK);                         /* the values: white while turned */
@@ -124,13 +125,13 @@ static void rec_toggle(void)
     if (ft_owns_press())
         return;
     if (song.playing && arrangement_enabled) {
-        ui_message("STOP THE SONG FIRST");
+        ui_message(ui_text(UI_STOP_SONG));
         return;
     }
     if (song.rec || rec_wait) {
         song.rec = 0;
         rec_wait = 0;
-        ui_message("REC OFF");
+        ui_message(ui_text(UI_REC_OFF));
         return;
     }
     arrangement_enabled = 0;
@@ -202,7 +203,7 @@ static void studio_tracks_draw(void)
 {
     static uint32_t head, rows[NTRK], footer;
     uint32_t i, j;
-    te_header("tracks", TE_G3, &head);
+    te_header(ui_text(UI_TRACKS_LIVE), TE_G3, &head);
     for (i = 0; i < NTRK; i++) {
         track_t *t = &trk[i];
         char b[24], e[16];
@@ -327,8 +328,9 @@ static void drum_screen_draw(void)
         fmt_int(b, (int32_t)kit + 1);
         cv_text(19 - text_w(&FONT_S, b) / 2, 13, &FONT_S, b, C_BLACK);
         cv_text(44, 6, &FONT_L, DRUM_KIT_NAMES[kit], C_WHITE);
-        cv_text(202, 4, &FONT_S, "grid", drum_page == 0 ? C_WHITE : TE_G3);
-        cv_text(202, 22, &FONT_S, "kit", drum_page == 1 ? C_WHITE : TE_G3);
+        const char *grid = ui_text(UI_GRID), *kit = ui_text(UI_KIT);
+        cv_text(236 - text_w(&FONT_S, grid), 4, &FONT_S, grid, drum_page == 0 ? C_WHITE : TE_G3);
+        cv_text(236 - text_w(&FONT_S, kit), 22, &FONT_S, kit, drum_page == 1 ? C_WHITE : TE_G3);
         cv_rect(196, drum_page ? 26 : 8, 3, 9, TE_DRUM);
         cv_blit(0, 40);
     }
@@ -422,7 +424,7 @@ static void drum_screen_input(uint32_t pressed, uint32_t home)
         b = k;
         if (b == B_PLAY) {
             if (ft_owns_press()) ;
-            else if (!song.playing && arrangement_enabled && !arr_valid(&arrangement, arrangement_ready())) ui_message("EMPTY SECTION: REC");
+            else if (!song.playing && arrangement_enabled && !arr_valid(&arrangement, arrangement_ready())) ui_message(ui_text(UI_EMPTY_SECTION));
             else transport_req = song.playing ? 2 : 1;
         } else if (b == B_SEQ || b == B_EDIT) {
             drum_page = (uint8_t)((drum_page + 1u) % 2u);
@@ -453,7 +455,7 @@ static void drum_screen_input(uint32_t pressed, uint32_t home)
             if (k == 0) drum_lane = (uint8_t)clamp(drum_lane + s, 0, DRUM_LANES - 1);
             if (k == 1) drum_cursor = (uint8_t)clamp(drum_cursor + s, 0, TDRUM->p[P_SLEN] - 1);
             if (k >= 2) {
-                if (song.playing && arrangement_enabled) { ui_message("STOP THE SONG FIRST"); continue; }
+                if (song.playing && arrangement_enabled) { ui_message(ui_text(UI_STOP_SONG)); continue; }
                 undo_mark(TDRUM, ui.step_sess ? ui.step_sess : (ui.step_sess = (undo_sess += 4u) | 3u));
                 fm1_irq_off();
                 if (k == 2) {
@@ -547,7 +549,7 @@ static void rec_screen_draw(void)
     }
     rec_shown = 1;
     layout = (uint8_t)lay;
-    te_header(take ? "free take" : count ? "count-in" : "rec ready", TE_RED, &head);
+    te_header(ui_text(take ? UI_FREE_TAKE : count ? UI_COUNT_IN : UI_REC_READY), TE_RED, &head);
     if (take) {                                         /* free take: the time, the loop it makes */
         sig = 1000003u + rt * 7919u + blink * 31u + secs * 131u + bars * 17u + bpm * 3u;
         if (ui.force || sig != body) {
@@ -571,15 +573,15 @@ static void rec_screen_draw(void)
             } else {
                 cv_text(146, 4, &FONT_L, "-", TE_G3);
             }
-            te_text_c(120, 80, "press rec on the 1", TE_RED);
+            te_text_c(120, 80, ui_text(UI_PRESS_REC), TE_RED);
             cv_blit(0, 42);
         }
         rec_rows(rt, take, 148u, &rows);
         if (ui.force || foot != 1u) {
             foot = 1u;
             cv_begin(240, 16, C_BLACK);
-            cv_text(4, 0, &FONT_S, "rec: close", TE_G3);
-            cv_text(236 - text_w(&FONT_S, "play: drop"), 0, &FONT_S, "play: drop", TE_G3);
+            cv_text(4, 0, &FONT_S, ui_text(UI_REC_CLOSE), TE_G3);
+            cv_text(236 - text_w(&FONT_S, ui_text(UI_PLAY_DROP)), 0, &FONT_S, ui_text(UI_PLAY_DROP), TE_G3);
             cv_blit(0, 224);
         }
         return;
@@ -588,23 +590,23 @@ static void rec_screen_draw(void)
     /* armed / counting in: what happens next */
     sig = 2000003u + empty * 7u + free * 11u + rec_count * 13u + count * 17u + ci_beat * 19u + blink * 31u;
     if (ui.force || sig != body) {
-        static const char *const L1[3] = {"play freely", "play a note", "press play"};
-        static const char *const L2[3] = {"then rec on the 1", "it starts the loop", "4 clicks, then rec"};
-        static const char *const L3[3] = {"the tempo follows you", "play: go  rec: cancel", "rec: cancel"};
+        static const ui_string_id_t L1[3] = {UI_PLAY_FREELY, UI_PLAY_NOTE, UI_PRESS_PLAY};
+        static const ui_string_id_t L2[3] = {UI_THEN_REC, UI_STARTS_LOOP, UI_FOUR_CLICKS};
+        static const ui_string_id_t L3[3] = {UI_TEMPO_FOLLOWS, UI_PLAY_GO_REC_CANCEL, UI_REC_CANCEL};
         uint32_t m = free ? 0u : rec_count ? 2u : 1u;
         body = sig;
         cv_begin(240, 64, C_BLACK);
         if (count) {                                    /* the count-in: 4, 3, 2, 1 */
             te_digit(96, 4, 30, 54, 6, 4u - (ci_beat > 3u ? 3u : ci_beat), C_WHITE);
             te_disc(60, 31, 12, TE_RED);
-            cv_text(144, 14, &FONT_S, "count-in", TE_G4);
-            cv_text(144, 34, &FONT_S, "rec: cancel", TE_G3);
+            cv_text(144, 14, &FONT_S, ui_text(UI_COUNT_IN), TE_G4);
+            cv_text(144, 34, &FONT_S, ui_text(UI_REC_CANCEL), TE_G3);
         } else {
             te_disc(28, 30, 18, blink ? TE_RED : TE_DIM[3]);
             te_disc(28, 30, 7, C_BLACK);
-            cv_text(60, 6, &FONT_S, L1[m], C_WHITE);
-            cv_text(60, 24, &FONT_S, L2[m], TE_G4);
-            cv_text(60, 42, &FONT_S, L3[m], TE_G3);
+            cv_text(60, 6, &FONT_S, ui_text(L1[m]), C_WHITE);
+            cv_text(60, 24, &FONT_S, ui_text(L2[m]), TE_G4);
+            cv_text(60, 42, &FONT_S, ui_text(L3[m]), TE_G3);
         }
         cv_blit(0, 42);
     }

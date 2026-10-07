@@ -1,0 +1,120 @@
+editor: INFO                                                     ok
+editor: DESC for every parameter                                 ok
+editor: SLICER parameters 45..48 (mock == params.c)              ok
+editor: a factory preset turns the SLICER off                    ok
+editor: all 16 scale names exposed                               ok
+editor: new scale selection is not clamped to the old range      ok
+editor: DUMP                                                     ok
+editor: SET clamps to the range                                  ok
+editor: STEP_SET                                                 ok
+editor: PROJECT save                                             ok
+editor: sample upload (CRC checked by the mock)                  ok
+editor: no reply -> timeout after the retries                    ok
+librarian: parameter keys unique (label#n, E0..E7)               ok
+librarian: UP_LIST, 32 slots in 2 frames                         ok
+librarian: capture = DUMP + first 16 steps                       ok
+librarian: UP_PUT -> UP_GET round trip                           ok
+librarian: UP_PUT to a slot past the bank -> rc 1                ok
+librarian: device names (ASCII, 1..12)                           ok
+librarian: UP_STORE keeps the current sound                      ok
+librarian: UP_LOAD applies the sound, the sequencer stays empty (LIVE) ok
+librarian: UP_ERASE, UP_LOAD of an empty slot -> rc 1            ok
+librarian: audition = G_ENGSEL + SETs of the sound; no pattern, mix, LEN or key; no flash write ok
+librarian: audition keeps the sequencer as it is                 ok
+librarian: pattern ties / rests normalised like the firmware     ok
+librarian: UP_STORE with no name -> automatic name               ok
+library file: versioned, with P_COUNT, labels and engines        ok
+library file: write -> read round trip                           ok
+library file: other ids / engine order mapped by label and name  ok
+library file: a patch for an unknown engine is skipped           ok
+library file: bank export keeps slot numbers                     ok
+library file: reads the old "Save to file" format                ok
+library file: unknown format -> error                            ok
+live: WATCH on                                                   ok
+live: CHANGED while DUMP waits -> push handler, reply still matched ok
+live: RELOAD and STEP_CHANGED routed                             ok
+live: RELOAD after an editor PRESET too, nothing after its STEP_SET ok
+live: PING keeps WATCH on                                        ok
+live: WATCH ends by itself without requests                      ok
+live: drag SETs coalesce (2 frames for 40 values, latest kept)   ok
+live: no timeouts                                                ok
+live: older firmware -> WATCH unanswered (fall back to polling), no bank ok
+tracks: INFO NTRK, TRACK lists 4 (track 4 = drums, engine NENGINES) ok
+tracks: TRACK selects; DUMP / SET act on it, TRACK_DUMP reads any track ok
+tracks: TRACK_STEP set / get on another track                    ok
+tracks: TRACK_MIX level / mute (drums: G_DRLVL)                  ok
+tracks: drum track selected -> DUMP engine NENGINES, UP_STORE / UP_LOAD rc 1 ok
+tracks: WATCH on                                                 ok
+tracks: RELOAD / STEP_CHANGED carry the selected track           ok
+tracks: PROJECT save / load keeps every track and the selection  ok
+tracks: older firmware parses (no tracks)                        ok
+mixer: read = TRACK + pan of every track (TRACK_DUMP)            ok
+mixer: TRACK_MIX level / mute round trip (drums: G_DRLVL, clamped) ok
+mixer: WATCH on                                                  ok
+mixer: pan of any track via SET (other track selected for a moment, then back; no push) ok
+mixer: device-side level (CHANGED push) and REC arm read back    ok
+mixer: drum level on the device pushes G_DRLVL                   ok
+mixer: the mock drum track holds a GM pattern (KICK CHH ...)     ok
+mixer: GM drum names parse (unique, 35..81)                      ok
+v4: WATCH 1 answers 1 as before (no TRACK_CHANGED pushes)        ok
+v4: WATCH 3 -> 3 (TRACK_PARAM / TRACK_CHANGED known)             ok
+v4: TRACK_PARAM get / set on other tracks (clamped as SET, selection kept, no push) ok
+v4: TRACK_PARAM of track 5: no reply                             ok
+v4: TRACK_CHANGED pushes for the other tracks, CHANGED for the selected one ok
+v4: v3 firmware -> WATCH 1, no TRACK_PARAM (pan by select / restore) ok
+v5/v6: INFO ends with the protocol version (6: backup)           ok
+v5/v6: command numbers and INFO == editor.c                      ok
+v5: CHORD, DUST, DUCK, FILT, ROLL, NEW (mock == params.c)        ok
+v5: SWING 50..75 %, FILT LP / OFF / HP, PCT of the range         ok
+v5: STEP_SET / STEP_GET level and ratchet bytes (8 bits each), none for an old step ok
+v5: DRUM_STEP round trip (16 lanes, levels, ratchets)            ok
+v5: the drum track through TRACK_STEP: lanes <-> GM notes        ok
+v5: the 16 lanes (kick .. cowbell), 4 levels                     ok
+v5: lane notes == drums.c LANE_NOTE                              ok
+v5: the drum track's KIT (37 kits, == drums.c)                   ok
+v5: TRACK reports the soloed tracks                              ok
+v5: no unmatched replies                                         ok
+v5: older firmware -> proto 0, no DRUM_STEP (the editor keeps GM notes) ok
+backup: INFO protocol v6                                         ok
+backup: the object ids == editor.c ED_BK_IDS                     ok
+backup: LIST + GET: 11 objects (project in C, sample in USR2, B empty) ok
+backup: restore -> the same bytes again (presets, projects, samples, settings) ok
+backup: a damaged file is refused before anything is written     ok
+backup: firmware without it says protocol 5 (the editor hides backup) ok
+editor: 7 tabs, one panel each (sound sequencer tracks library samples projects settings) ok
+editor: last tab in localStorage (try/catch) and in the URL hash ok
+editor: every string in ja and en (191 used)                     ok
+editor: page script compiles                                     ok
+editor: no colours beyond the black / white tokens in the new styles ok
+editor: every icon name is in GLYPH (37 used)                    ok
+editor: fukiai.ttf and FUKIAI-LICENSE.txt next to editor.html    ok
+editor: icons hidden until the font has loaded                   ok
+samples: editor == sampleio.py (4 WAV formats, 7737 B)           ok
+chop: hits found (8 of 8, each within 3 ms of its attack)        ok
+chop: low sensitivity keeps the hard hits only                   ok
+chop: a TAP 35 ms late / 30 ms early lands on its hit; away from hits it stays ok
+chop: grid (16 beats at 90 BPM) and equal parts                  ok
+chop: chops end at the next marker or the max length             ok
+chop: one key each from C4, levels kept (a ghost stays quiet), faded in ok
+chop: one chop over the whole keyboard                           ok
+chop: slot header (8 zones, one key each)                        ok
+chop: WAV writer round trip                                      ok
+chop: ZIP of the WAVs (Python reads it)                          ok
+chop: options (left out, own length over the max, never past the next marker) ok
+chop: left-out chops: the kept ones on consecutive keys, files keep their numbers ok
+chop: 40 chops: the first 16 kept go to the slot; mode 1 the selected ok
+chop: 20 s recording, 10 chops kept: they fit                    ok
+chop: Fit to slot: 16 x 0.5 s cut to 0.461 s each, the slot builds ok
+chop: fit keeps short chops whole, cuts the long ones            ok
+packages: skipped (run ./build.sh first)
+fm1ota.js: install: running firmware -> loader -> Felucca (11 reads) ok
+fm1ota.js: recovery mode -> loader -> normal firmware            ok
+fm1ota.js: boot into recovery is not reported as successful installation ok
+fm1ota.js: unplugged during the write -> stops at once           ok
+fm1ota.js: unplugged in step 1 -> error code 'lost'              ok
+fm1ota.js: no device -> error code 'notfound'                    ok
+fm1ota.js: another firmware's loader is never resumed ('foreign') ok
+fm1ota.js: return to official: its own loader resumed, V15 checked when back ok
+fm1ota.js: return to official: another firmware coming back is not 'done' ok
+fm1pkg.js: only the exact official V15 is accepted (SHA-256)     ok
+web tests passed

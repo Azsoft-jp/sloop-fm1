@@ -13,6 +13,7 @@ bearings); rows top to bottom, 2 pixels per byte (high nibble first),
 alpha 0..15.
 """
 import sys
+import re
 from pathlib import Path
 
 from PIL import Image, ImageDraw, ImageFont
@@ -23,6 +24,13 @@ FONTS = Path(__file__).resolve().parents[1] / "assets" / "fonts"
 SIZES = [("S", "ter-u16n.bdf", 16, 1, True, 32, 255),   # Latin-1 (Hügelton needs the umlaut)
          ("L", "ter-u16n.bdf", 16, 2, True, 32, 95)]   # values / titles: digits, signs, capitals
 PAD = 2
+
+
+def ui_kana():
+    """Only glyphs present in the firmware display resources enter the image."""
+    src = (FONTS.parent.parent / "firmware/src/ui_strings.def").read_text()
+    ja = re.findall(r'UI_STRING\([^,]+,\s*"[^"]*",\s*"([^"]*)"\)', src)
+    return sorted({c for s in ja for c in s if ord(c) > 255})
 
 
 def upscale(px_, w, h, scale):
@@ -143,6 +151,31 @@ def main(out):
                      f"FONT_{name}_ADV, FONT_{name}_BW, FONT_{name}_OFF, FONT_{name}_DATA }};")
         lines.append("")
         print(f"font {name}: {ttf} {px}px h {h}, digit adv {glyphs[ord('0') - first][0]}, {len(data)} B")
+
+    kana = ui_kana()
+    jp_font = ImageFont.truetype(str(FONTS / "NotoSansJP-ui.ttf"), 16)
+    # The Japanese source is a licensed subset; only actually used glyphs are
+    # serialized. The thresholded glyphs are 1 bpp (20x16 = 40 B each), not
+    # alpha nibbles. FONT_L reuses these bitmaps at 2x in the renderer.
+    jp_data, jp_off = [], []
+    for ch in kana:
+        jp_off.append(len(jp_data))
+        img = Image.new("L", (20, 16), 0)
+        ImageDraw.Draw(img).text((PAD, -4), ch, font=jp_font, fill=255)
+        px = [v >= 100 for v in img.tobytes()]
+        for start in range(0, 20 * 16, 8):
+            jp_data.append(sum((1 << (7 - bit)) for bit in range(8) if px[start + bit]))
+    assert len(jp_data) < 65536
+    lines.append(f"static const uint16_t FONT_J_CODE[{len(kana)}] = {{" +
+                 ", ".join(f"0x{ord(c):04x}" for c in kana) + "};")
+    lines.append(f"static const uint16_t FONT_J_OFF[{len(kana)}] = {{" +
+                 ", ".join(map(str, jp_off)) + "};")
+    lines.append(f"static const uint8_t FONT_J_DATA[{len(jp_data)}] = {{")
+    for i in range(0, len(jp_data), 24):
+        lines.append("    " + ", ".join(f"0x{b:02x}" for b in jp_data[i:i + 24]) + ",")
+    lines.append("};")
+    lines.append(f"#define FONT_J_COUNT {len(kana)}")
+    print(f"font J: {len(kana)} used glyphs, {len(jp_data)} B (shared at 1x/2x)")
     Path(out).write_text("\n".join(lines))
 
 

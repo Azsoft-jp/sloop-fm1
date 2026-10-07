@@ -147,20 +147,21 @@ static int ota_prog(uint32_t off, const void *p, uint32_t n)
 static int ota_fread(uint32_t off, void *p, uint32_t n) { return st_read(off, p, n); }
 static void ota_show(uint32_t step, int32_t code)
 {
-    static const char *const STEP[] = {"", "PACKAGE", "CHECK HEAD", "LOADER", "CONFIRM", "RESTART"};
+    static const ui_string_id_t STEP[] = {UI_UPDATE, UI_OTA_PACKAGE, UI_OTA_CHECK_HEAD,
+        UI_OTA_LOADER, UI_OTA_CONFIRM, UI_OTA_RESTART};
     char b[24];
     if (recovery_active) return;             /* keep polled USB alive during OTA */
     lcd_fill(0, 0, 240, 240, C_BLACK);
-    draw_text_box(0, 92, 240, &FONT_S, "UPDATE", C_WHITE, 1);
+    draw_text_box(0, 92, 240, &FONT_S, ui_text(UI_UPDATE), C_WHITE, 1);
     if (step < 9u) {
-        draw_text_box(0, 124, 240, &FONT_S, STEP[step < 6u ? step : 0], C_HI, 1);
+        draw_text_box(0, 124, 240, &FONT_S, step < 6u && step ? ui_text(STEP[step]) : "", C_HI, 1);
         return;
     }
     if (code == 1)
-        str_cpy(b, "DRY RUN OK", sizeof b);
+        text_copy(b, sizeof b, ui_text(UI_OTA_DRY_OK));
     else {
         uint32_t k = 0, v = (uint32_t)-code;
-        str_cpy(b, "FAILED  -", sizeof b);
+        text_copy(b, sizeof b, ui_text(UI_OTA_FAILED));
         while (b[k])
             k++;
         if (v >= 10u)

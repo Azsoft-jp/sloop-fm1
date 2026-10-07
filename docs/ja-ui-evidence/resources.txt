@@ -1,0 +1,2 @@
+resources: 206 EN/JA IDs, 74 sparse glyphs, all used, no direct Japanese in C
+glyphs: アィイウェエオカガキギクグケコサザシジスズセゼソゾタダチッツヅテデトドナニネノハバパヒビフブプヘベペホボポマミムメモャヤュユョヨラリルレロワヲン・ー
