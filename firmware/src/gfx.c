@@ -9,11 +9,12 @@ typedef struct {               /* proportional, see tools/gen_font.py */
     uint8_t first, last;
     uint8_t sh;                /* 1: the bitmaps are another font's, drawn at 2x (L = S at 2x, no copy) */
     const uint8_t *adv;        /* advance per glyph */
-    const uint8_t *bw;         /* bitmap width per glyph (starts FONT_PAD left of the pen) */
+    const uint8_t *bw;         /* bitmap width per glyph (BDF side bearings are cropped) */
     const uint16_t *off;       /* byte offset of each glyph */
     const uint8_t *data;
     uint8_t bits;              /* SLOOP 2.6: 1 = 1 bit a pixel (a pixel font: glyph rows one after the other, high
                                 * bit first, each glyph from a whole byte); 0 = 2 pixels a byte, alpha 0..15 */
+    uint8_t fixed_adv, fixed_bw, stride; /* uniform metrics/byte stride replace three flash tables */
 } felucca_font_t;
 #include "felucca_font.h"
 #include "ui_strings.h"
@@ -136,6 +137,19 @@ static uint32_t glyph(const felucca_font_t *f, uint32_t ch)
     return ch - f->first;
 }
 
+static uint32_t font_adv(const felucca_font_t *f, uint32_t gi)
+{
+    return f->adv ? f->adv[gi] : f->fixed_adv;
+}
+static uint32_t font_bw(const felucca_font_t *f, uint32_t gi)
+{
+    return f->bw ? f->bw[gi] : f->fixed_bw;
+}
+static uint32_t font_off(const felucca_font_t *f, uint32_t gi)
+{
+    return f->off ? f->off[gi] : gi * f->stride;
+}
+
 /* Small, bounded UTF-8 decoder: malformed sequences consume one byte and
  * become '?'. U+00DC remains available for the About screen's Latin-1 font. */
 static uint32_t utf8_next(const char **s)
@@ -175,14 +189,10 @@ static uint32_t utf8_next(const char **s)
 
 static int32_t jp_glyph(uint32_t cp)
 {
-    int32_t lo = 0, hi = FONT_J_COUNT - 1;
-    while (lo <= hi) {
-        int32_t mid = (lo + hi) / 2;
-        if (FONT_J_CODE[mid] == cp) return mid;
-        if (FONT_J_CODE[mid] < cp) lo = mid + 1;
-        else hi = mid - 1;
-    }
-    return -1;
+    uint32_t idx;
+    if (cp < FONT_J_FIRST || cp - FONT_J_FIRST >= FONT_J_SPAN) return -1;
+    idx = FONT_J_MAP[cp - FONT_J_FIRST];
+    return idx ? (int32_t)idx - 1 : -1;
 }
 
 /* Copy without splitting a UTF-8 character at a fixed UI buffer boundary. */
@@ -221,7 +231,7 @@ static int32_t cv_text(int32_t x, int32_t y, const felucca_font_t *f, const char
         const uint8_t *gd;
         if (ji >= 0) {
             w = 16u * scale;
-            gd = FONT_J_DATA + FONT_J_OFF[ji];
+            gd = FONT_J_DATA + ((uint32_t)ji << 5);
             for (gy = 0; gy < f->h; gy++)
                 for (gx = 0; gx < w; gx++) {
                     uint32_t pixel = (gy / scale) * 16u + gx / scale;
@@ -230,8 +240,8 @@ static int32_t cv_text(int32_t x, int32_t y, const felucca_font_t *f, const char
                 }
         } else {
             gi = glyph(f, cp);
-            w = f->bw[gi];
-            gd = f->data + f->off[gi];
+            w = font_bw(f, gi);
+            gd = f->data + font_off(f, gi);
             if (f->bits == 1u) {               /* Terminus Bold, shared at 1x and 2x */
                 uint32_t sw = w >> f->sh;
                 for (gy = 0; gy < f->h; gy++)
@@ -251,7 +261,7 @@ static int32_t cv_text(int32_t x, int32_t y, const felucca_font_t *f, const char
                     }
             }
         }
-        x += ji >= 0 ? 16 * (int32_t)scale : f->adv[gi];
+        x += ji >= 0 ? 16 * (int32_t)scale : (int32_t)font_adv(f, gi);
     }
     return x;
 }
@@ -261,7 +271,7 @@ static int32_t text_w(const felucca_font_t *f, const char *s)
     int32_t w = 0;
     while (*s) {
         uint32_t cp = utf8_next(&s);
-        w += cp > 255u && jp_glyph(cp) >= 0 ? (f == &FONT_L ? 32 : 16) : f->adv[glyph(f, cp)];
+        w += cp > 255u && jp_glyph(cp) >= 0 ? (f == &FONT_L ? 32 : 16) : font_adv(f, glyph(f, cp));
     }
     return w;
 }

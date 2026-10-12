@@ -4,7 +4,7 @@
   "localized_ref": "codex/ja-localization-sloop-2.6",
   "firmware": {
     "baseline_bytes": 573052,
-    "localized_bytes": 581252,
+    "localized_bytes": 577972,
     "baseline_ram": 92696,
     "localized_ram": 92968,
     "ram_budget": 98304,
@@ -14,9 +14,12 @@
     "baseline_ramtext_sha256": "0d0540c3071b9230d6275623cb0874c4f61bbe18a1d02ba9f1aadc27d3582f36",
     "localized_ramtext_sha256": "0d0540c3071b9230d6275623cb0874c4f61bbe18a1d02ba9f1aadc27d3582f36",
     "app_slot_bytes": 581564,
-    "localized_slot_free_bytes": 312,
+    "localized_slot_free_bytes": 3592,
     "package_bytes": 610019,
-    "package_sha256": "99603e66ec5f1ffe4de68c0f8d4e4244091093c5e5c96b93762073812fe0e110"
+    "package_sha256": "8976732861a36d70fb7cd19ede06b084c645a4d453deffd2221b699b9c780d83",
+    "previous_ja_bytes": 581252,
+    "bytes_saved_from_previous_ja": 3280,
+    "previous_slot_free_bytes": 312
   },
   "web": {
     "baseline_editor_bytes": 574533,
@@ -26,5 +29,7 @@
   },
   "glyphs": 75,
   "glyph_bytes": 2400,
-  "string_ids": 263
+  "string_ids": 263,
+  "ascii_font_bytes": 3584,
+  "ja_blob_bytes": 3457
 }

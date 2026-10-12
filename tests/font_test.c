@@ -1,14 +1,14 @@
 /* SPDX-License-Identifier: GPL-3.0-only */
 /* The screen font (gfx.c cv_text, tools/gen_font.py). SLOOP 2.6: Terminus Bold, in capitals only, stored at 1 bit a
- * pixel (5376 bytes instead of 21504). Checked: every character 32..255 draws exactly the BDF's pixels of its capital
+ * pixel (3584 bytes after trimming blank side bearings). Checked: every character 32..255 draws exactly the BDF's pixels of its capital
  * (assets/fonts/ter-u16b.bdf, read here); every glyph of FONT_S (1x, Latin-1) and FONT_L (2x) in several colours, at
  * several offsets (clipped at every edge of the canvas, and with a graph y offset), hashed, and the same through the
- * 4-bit format (anti-aliased fonts); the advance and bitmap widths (text_w: the layout of 2.5, unchanged); the data
+ * 4-bit format (anti-aliased fonts); unchanged advances and trimmed storage widths; the data
  * size. Exit status: the number of failed checks. */
 #include <stdint.h>
 #define FONT_S_HASH 0x1c34aa9cu         /* Terminus Bold, capitals (2.6) */
 #define FONT_L_HASH 0x730ceccbu
-#define FONT_W_HASH 0x6840d800u         /* the widths of 2.5 (the regular font's): the same */
+#define FONT_W_HASH 0xf8b58000u         /* same 8/16px advances, 8/16px stored ink widths */
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
@@ -73,8 +73,8 @@ static uint32_t capital(uint32_t c) { return (c >= 'a' && c <= 'z') || (c >= 0xE
 int main(int argc, char **argv)
 {
     uint32_t hs = render_all(&FONT_S, 255u), hl = render_all(&FONT_L, 95u), wsum = 0, c;
-    for (c = 0; c < 224u; c++) wsum = wsum * 31u + FONT_S.adv[c] * 7u + FONT_S.bw[c];
-    for (c = 0; c < 64u; c++) wsum = wsum * 31u + FONT_L.adv[c] * 7u + FONT_L.bw[c];
+    for (c = 0; c < 224u; c++) wsum = wsum * 31u + font_adv(&FONT_S, c) * 7u + font_bw(&FONT_S, c);
+    for (c = 0; c < 64u; c++) wsum = wsum * 31u + font_adv(&FONT_L, c) * 7u + font_bw(&FONT_L, c);
     if (argc > 1) {
         printf("%08x %08x %08x %u\n", hs, hl, wsum, (unsigned)sizeof FONT_S_DATA);
         return 0;
@@ -105,28 +105,29 @@ int main(int argc, char **argv)
     }
     check(hs == FONT_S_HASH, "FONT_S: every glyph, 4 colours, 6 places (clipped)");
     check(hl == FONT_L_HASH, "FONT_L (2x): every glyph, 4 colours, 6 places (clipped): S's bitmaps at 2x");
-    check(wsum == FONT_W_HASH, "advance and bitmap widths unchanged (the layout)");
+    check(wsum == FONT_W_HASH && text_w(&FONT_S, "SLOOP") == 40 && text_w(&FONT_L, "SLOOP") == 80,
+          "advances unchanged; only blank side bearings removed from bitmaps");
     {   /* the 4-bit path (anti-aliased fonts) still draws: FONT_S unpacked to 2 pixels a byte, the same pixels */
-        static uint8_t d4[21504];
+        static uint8_t d4[14336];
         static uint16_t off4[224];
         felucca_font_t s4 = FONT_S, l4 = FONT_L;
         uint32_t g, n = 0, y, xx;
         for (g = 0; g < 224u; g++) {
-            uint32_t w = FONT_S.bw[g], bpr = (w + 1u) / 2u;
+            uint32_t w = font_bw(&FONT_S, g), bpr = (w + 1u) / 2u;
             off4[g] = (uint16_t)n;
             for (y = 0; y < FONT_S.h; y++)
                 for (xx = 0; xx < w; xx++) {
-                    uint32_t i = y * w + xx, on = (FONT_S_DATA[FONT_S_OFF[g] + i / 8u] >> (7u - i % 8u)) & 1u;
+                    uint32_t i = y * w + xx, on = (FONT_S_DATA[font_off(&FONT_S, g) + i / 8u] >> (7u - i % 8u)) & 1u;
                     if (on)
                         d4[n + y * bpr + xx / 2u] |= (uint8_t)(xx & 1u ? 15u : 15u << 4);
                 }
             n += FONT_S.h * bpr;
         }
         s4.data = l4.data = d4; s4.off = l4.off = off4; s4.bits = l4.bits = 0;
-        check(n == 21504u && render_all(&s4, 255u) == FONT_S_HASH && render_all(&l4, 95u) == FONT_L_HASH,
+        check(n == 14336u && render_all(&s4, 255u) == FONT_S_HASH && render_all(&l4, 95u) == FONT_L_HASH,
               "the 4-bit format (anti-aliased fonts) still draws the same pixels");
     }
-    check(sizeof FONT_S_DATA == 5376u && FONT_S.bits == 1u, "the Terminus bitmaps at 1 bit a pixel: 5376 bytes (21504 at 4 bits)");
+    check(sizeof FONT_S_DATA == 3584u && FONT_S.bits == 1u, "the Terminus bitmaps at 1 bit a pixel: 3584 bytes (14336 at 4 bits)");
     printf("%s\n", bad ? "FONT TEST FAILED" : "font test passed");
     return bad;
 }

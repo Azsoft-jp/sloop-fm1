@@ -36,10 +36,10 @@
 
 ### FM-1本体
 
-- `firmware/src/ui_strings.def`に英語・日本語を263 IDで1対1に定義。`tools/gen_ui_hash.py`が日本語文字列の圧縮されたbyte blobとoffset、既存英語表示名の検索用hashを生成し、`ui_strings.h`の`ui_text()`が参照する。英語リソースは定義側に保持し、Phase 3では`UI_ENABLE_LANGUAGE_SWITCH`を有効にして言語別テーブルを選べる。
+- `firmware/src/ui_strings.def`に英語・日本語を263 IDで1対1に定義。`tools/gen_ui_hash.py`が日本語文字列のbyte blobとoffset、既存英語表示名の検索用hashを生成し、`ui_strings.h`の`ui_text()`が参照する。同じ語と、長い語の末尾に一致する短い語は格納領域を共有する。英語リソースは定義側に保持し、Phase 3では`UI_ENABLE_LANGUAGE_SWITCH`を有効にして言語別テーブルを選べる。
 - `ui_display_name()`はプロトコルで使う英語の音色・パラメーター名を表示時だけ日本語へ変換する。SysEx、保存ファイルの識別子、プロトコル値は変えない。
 - `tools/gen_font.py`は実際の日本語文字列から使う文字だけを抽出し、**75字・2,400 B**の疎な1bpp 16×16 glyphを生成する。収録文字: `アィイウェエオカガキギクグケコサザシジスズセゼソゾタダチッツヅテデトドナニネノハバパヒビピフブプヘベペホボポマミムメモャヤュユョヨラリルレロワヲン・ー`。ライセンスは`assets/fonts/NotoSansJP-OFL.txt`。
-- `gfx.c`へ境界付きの小型UTF-8 decoderと疎なglyph lookupを追加した。ASCII、既存Latin-1、収録カタカナを表示し、不正な列や未登録glyphは`?`にする。元のASCIIビットマップ、幅、描画位置はフォント試験で照合した。大フォントは既存の2倍表示を再利用する。
+- `gfx.c`へ境界付きの小型UTF-8 decoderとglyph lookupを追加した。ASCII、既存Latin-1、収録カタカナを表示し、不正な列や未登録glyphは`?`にする。日本語glyphの固定長offset表とTerminusの固定幅・送り・offset表を省き、Terminusの無画素の左右2列も保存しない。ASCIIの描画画素と送り幅は全字のフォント試験で従来版と完全一致した。大フォントは同じbitmapの2倍表示を再利用する。
 - 2.6で追加されたTEXTURE、INSERT、MIDI、LEARN、Song、Drum Synth関連も表示側で日本語化した。狭い行は短い語にし、幅検査にかけた。継続的な文字スクロールは追加していない。
 
 ### Web Editorとブラウザー更新
@@ -52,13 +52,13 @@
 
 | 項目 | 上流2.6 | 日本語版 | 差 |
 |---|---:|---:|---:|
-| `felucca.bin` | 573,052 B | 581,252 B | +8,200 B |
+| `felucca.bin` | 573,052 B | 577,972 B | +4,920 B |
 | RAM `.data+.bss` | 92,696 B | 92,968 B | +272 B |
 | RAM `.pool` | 333,900 B | 333,900 B | 0 B |
 | `web/editor.html` | 574,533 B | 578,209 B | +3,676 B |
 | `web/index_pkg.html` | 19,659 B | 20,977 B | +1,318 B |
 
-アプリ領域の残りは**312 B**。今後のFW機能追加時には再測定が必須。`fwsc`は610,019 Bの固定長で、SHA-256は`99603e66ec5f1ffe4de68c0f8d4e4244091093c5e5c96b93762073812fe0e110`。`.ram_text`は上流2.6と同じSHA-256 `0d0540c3071b9230d6275623cb0874c4f61bbe18a1d02ba9f1aadc27d3582f36`。UI描画の実機フレーム時間は未測定。
+前回の日本語版581,252 Bから**3,280 B削減**し、アプリ領域の残りは**3,592 B**になった。日本語文字列blobは3,742 Bから3,457 B、Terminusのbitmapは5,376 Bから3,584 B。RAMとpoolは前回日本語版から変化なし。今後のFW機能追加時には再測定が必要。`fwsc`は610,019 Bの固定長で、SHA-256は`8976732861a36d70fb7cd19ede06b084c645a4d453deffd2221b699b9c780d83`。`.ram_text`は上流2.6と同じSHA-256 `0d0540c3071b9230d6275623cb0874c4f61bbe18a1d02ba9f1aadc27d3582f36`。UI描画の実機フレーム時間は未測定。
 
 ## 試験・画面証跡
 
@@ -88,7 +88,7 @@ SLOOP_PDF_FONT=/path/to/static/NotoSansJP.ttf .venv/bin/python tools/build_ja_ui
 - 漢字全般、任意Unicode、他言語、言語設定UI・永続化・起動時選択、ユーザーフォント、横スクロールは対象外。
 - エンジン・音色・プリセット・ノート名、FX/BPM/MIDI/USB/RECなどの小さい略語は英字のまま。保存形式と通信識別子は変更しない。
 - 2.6のプロジェクト形式は2.5へ書き戻せない。更新前にWeb Editorで全体バックアップを保存する。2.5以前へのダウングレードとデータ復元は別途慎重に検証する。
-- 2.6のアプリ領域はほぼ上限。上流が機能を追加した場合、このフォント集合や文字列を再調整する必要がある。
+- 2.6のアプリ領域の空きは3,592 B。上流が機能を追加した場合は再測定し、必要ならこのフォント集合や文字列を調整する。
 
 ## Phase 3の日英切替で変更するファイルと処理
 
