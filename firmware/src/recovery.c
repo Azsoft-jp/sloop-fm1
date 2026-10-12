@@ -2,6 +2,7 @@
 /* Application-level recovery, not a second firmware bank. The intact app's
  * startup, RAM flash driver and USB stack are still required. TIMER5, audio,
  * settings, samples, projects, editor and normal UI are never started here. */
+#include "ui_strings.h"
 static uint32_t recovery_last, recovery_fraction, recovery_usb_last;
 
 static void recovery_poll(void)
@@ -59,11 +60,11 @@ static void recovery_main(void)
     flash_ok = FL_FAR(fl_jedec_ram)() == 0x856014u;
     lcd_init();
     lcd_fill(0, 0, 240, 240, C_BLACK);
-    draw_text_box(0, 64, 240, &FONT_S, "SLOOP USB RESCUE", C_WHITE, 1);
-    draw_text_box(0, 96, 240, &FONT_S, "CONNECT USB", C_WHITE, 1);
+    draw_text_box(0, 64, 240, &FONT_S, ui_text(UI_RESCUE), C_WHITE, 1);
+    draw_text_box(0, 96, 240, &FONT_S, ui_text(UI_CONNECT_USB), C_WHITE, 1);
     draw_text_box(0, 124, 240, &FONT_S,
-                  flash_ok ? "OPEN THE INSTALLER" : "UNKNOWN FLASH", C_WHITE, 1);
-    draw_text_box(0, 164, 240, &FONT_S, "AUDIO OFF", C_WHITE, 1);
+                  ui_text(flash_ok ? UI_OPEN_INSTALLER : UI_UNKNOWN_FLASH), C_WHITE, 1);
+    draw_text_box(0, 164, 240, &FONT_S, ui_text(UI_AUDIO_OFF), C_WHITE, 1);
     lcd_sync();
     usb_start();
     for (;;) recovery_step();

@@ -21,13 +21,19 @@ after the install.
 import base64
 import hashlib
 import json
+import os
 import re
 import shutil
 import sys
 from pathlib import Path
 
 HERE = Path(__file__).resolve().parent
-ONLINE = "https://isod89.github.io/sloop-fm1/"                 # (the offline editor's links)
+ONLINE = os.environ.get("SLOOP_ONLINE_URL", "https://isod89.github.io/sloop-fm1/").rstrip("/") + "/"
+
+
+def clean_empty_lines(html):
+    """Placeholder removal should not leave whitespace-only lines in the site."""
+    return re.sub(r"(?m)^[ \t]+$", "", html)
 
 
 def offline_editor(html):
@@ -97,9 +103,9 @@ def main(pkg, version, out):
     dl = f'download="sloop-editor-{re.sub(r"[^A-Za-z0-9.-]", "-", version)}.html"'
     if ed_html.count('download="sloop-editor.html"') != 1 or html.count('download="sloop-editor.html"') != 1:
         raise SystemExit('editor.html and index_pkg.html must link download="sloop-editor.html" once; update make_site.py')
-    (ed / "index.html").write_text(ed_html.replace('download="sloop-editor.html"', dl), encoding="utf-8")
-    (ed / "sloop-editor.html").write_text(offline_editor(ed_html), encoding="utf-8")
-    (inst / "index.html").write_text(html.replace('download="sloop-editor.html"', dl), encoding="utf-8")
+    (ed / "index.html").write_text(clean_empty_lines(ed_html.replace('download="sloop-editor.html"', dl)), encoding="utf-8")
+    (ed / "sloop-editor.html").write_text(clean_empty_lines(offline_editor(ed_html)), encoding="utf-8")
+    (inst / "index.html").write_text(clean_empty_lines(html.replace('download="sloop-editor.html"', dl)), encoding="utf-8")
     for f in ("fukiai.ttf", "FUKIAI-LICENSE.txt"):
         if (HERE / f).exists():
             shutil.copy(HERE / f, ed / f)

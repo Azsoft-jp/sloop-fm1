@@ -14,8 +14,10 @@ Terminus pixel font) is stored at 1 bit a pixel (SLOOP 2.6: 5376 bytes
 instead of 21504), the glyph's rows one after the other, high bit first, each
 glyph from a whole byte, and marked bits = 1; an anti-aliased one (TTF) stays at
 2 pixels per byte (high nibble first), alpha 0..15, bits = 0 (gfx.c cv_text).
+The sparse Japanese bitmaps use 2-bit alpha, four pixels per byte.
 """
 import sys
+import re
 from pathlib import Path
 
 from PIL import Image, ImageDraw, ImageFont
@@ -28,6 +30,13 @@ FONTS = Path(__file__).resolve().parents[1] / "assets" / "fonts"
 SIZES = [("S", "ter-u16b.bdf", 16, 1, True, 32, 255),   # Latin-1 (Hügelton needs the umlaut)
          ("L", "ter-u16b.bdf", 16, 2, True, 32, 95)]   # values / titles: digits, signs, capitals
 PAD = 2
+
+
+def ui_kana():
+    """Only glyphs present in the firmware display resources enter the image."""
+    src = (FONTS.parent.parent / "firmware/src/ui_strings.def").read_text()
+    ja = re.findall(r'UI_STRING\([^,]+,\s*"[^"]*",\s*"([^"]*)"\)', src)
+    return sorted({c for s in ja for c in s if ord(c) > 255})
 
 
 def upscale(px_, w, h, scale):
@@ -179,6 +188,39 @@ def main(out):
         if scale == 1:
             base = (name, first, h, glyphs, one)
         print(f"font {name}: {ttf} {px}px h {h}, digit adv {glyphs[ord('0') - first][0]}, {len(data)} B")
+
+    kana = ui_kana()
+    jp_font = ImageFont.truetype(str(FONTS / "NotoSansJP-ui.ttf"), 16)
+    # Store only the Japanese UI glyphs. The 2.6 app slot leaves less room than
+    # 2.4, so these match the 1-bit Terminus renderer (16x16 = 32 B each).
+    # FONT_L reuses the same bitmap at 2x.
+    jp_data, jp_off = [], []
+    for ch in kana:
+        jp_off.append(len(jp_data))
+        # Render with a guard band so even anti-aliased edge pixels cannot be
+        # silently cut by the 16px cell. -5 centers the font and keeps ヘ's
+        # bottom stroke, which was cropped at -4.
+        guarded = Image.new("L", (20, 48), 0)
+        ImageDraw.Draw(guarded).text((PAD, 16 - 5), ch, font=jp_font, fill=255)
+        assert guarded.crop((0, 0, 20, 16)).getbbox() is None, f"{ch}: clipped above cell"
+        assert guarded.crop((0, 32, 20, 48)).getbbox() is None, f"{ch}: clipped below cell"
+        small = guarded.crop((0, 16, 20, 32)).point(lambda v: 255 if v >= 80 else 0)
+        bounds = small.getbbox()
+        assert bounds is None or (bounds[0] >= PAD and bounds[2] <= 20 - PAD), f"{ch}: clipped at side"
+        px = [v != 0 for v in small.crop((PAD, 0, 20 - PAD, 16)).tobytes()]
+        for start in range(0, 16 * 16, 8):
+            jp_data.append(sum(int(px[start + bit]) << (7 - bit) for bit in range(8)))
+    assert len(jp_data) < 65536
+    lines.append(f"static const uint16_t FONT_J_CODE[{len(kana)}] = {{" +
+                 ", ".join(f"0x{ord(c):04x}" for c in kana) + "};")
+    lines.append(f"static const uint16_t FONT_J_OFF[{len(kana)}] = {{" +
+                 ", ".join(map(str, jp_off)) + "};")
+    lines.append(f"static const uint8_t FONT_J_DATA[{len(jp_data)}] = {{")
+    for i in range(0, len(jp_data), 24):
+        lines.append("    " + ", ".join(f"0x{b:02x}" for b in jp_data[i:i + 24]) + ",")
+    lines.append("};")
+    lines.append(f"#define FONT_J_COUNT {len(kana)}")
+    print(f"font J: {len(kana)} used glyphs, {len(jp_data)} B (shared at 1x/2x)")
     Path(out).write_text("\n".join(lines))
 
 

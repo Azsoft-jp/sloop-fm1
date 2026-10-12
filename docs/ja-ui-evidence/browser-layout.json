@@ -1,0 +1,232 @@
+[
+  {
+    "width": 375,
+    "tab": "sound",
+    "lang": "ja",
+    "pageWidth": 375,
+    "viewport": 375,
+    "pageHeight": 6512,
+    "viewportHeight": 820,
+    "visible": true,
+    "clippedParameterLabels": []
+  },
+  {
+    "width": 375,
+    "tab": "sequencer",
+    "lang": "ja",
+    "pageWidth": 375,
+    "viewport": 375,
+    "pageHeight": 1932,
+    "viewportHeight": 820,
+    "visible": true,
+    "clippedParameterLabels": []
+  },
+  {
+    "width": 375,
+    "tab": "tracks",
+    "lang": "ja",
+    "pageWidth": 375,
+    "viewport": 375,
+    "pageHeight": 2135,
+    "viewportHeight": 820,
+    "visible": true,
+    "clippedParameterLabels": []
+  },
+  {
+    "width": 375,
+    "tab": "song",
+    "lang": "ja",
+    "pageWidth": 375,
+    "viewport": 375,
+    "pageHeight": 820,
+    "viewportHeight": 820,
+    "visible": true,
+    "clippedParameterLabels": []
+  },
+  {
+    "width": 375,
+    "tab": "library",
+    "lang": "ja",
+    "pageWidth": 375,
+    "viewport": 375,
+    "pageHeight": 2045,
+    "viewportHeight": 820,
+    "visible": true,
+    "clippedParameterLabels": []
+  },
+  {
+    "width": 375,
+    "tab": "samples",
+    "lang": "ja",
+    "pageWidth": 375,
+    "viewport": 375,
+    "pageHeight": 2048,
+    "viewportHeight": 820,
+    "visible": true,
+    "clippedParameterLabels": []
+  },
+  {
+    "width": 375,
+    "tab": "kits",
+    "lang": "ja",
+    "pageWidth": 375,
+    "viewport": 375,
+    "pageHeight": 3388,
+    "viewportHeight": 820,
+    "visible": true,
+    "clippedParameterLabels": []
+  },
+  {
+    "width": 375,
+    "tab": "drumsynth",
+    "lang": "ja",
+    "pageWidth": 375,
+    "viewport": 375,
+    "pageHeight": 821,
+    "viewportHeight": 820,
+    "visible": true,
+    "clippedParameterLabels": []
+  },
+  {
+    "width": 375,
+    "tab": "projects",
+    "lang": "ja",
+    "pageWidth": 375,
+    "viewport": 375,
+    "pageHeight": 1629,
+    "viewportHeight": 820,
+    "visible": true,
+    "clippedParameterLabels": []
+  },
+  {
+    "width": 375,
+    "tab": "settings",
+    "lang": "ja",
+    "pageWidth": 375,
+    "viewport": 375,
+    "pageHeight": 2822,
+    "viewportHeight": 820,
+    "visible": true,
+    "clippedParameterLabels": []
+  },
+  {
+    "width": 1280,
+    "tab": "sound",
+    "lang": "ja",
+    "pageWidth": 1280,
+    "viewport": 1280,
+    "pageHeight": 4065,
+    "viewportHeight": 820,
+    "visible": true,
+    "clippedParameterLabels": []
+  },
+  {
+    "width": 1280,
+    "tab": "sequencer",
+    "lang": "ja",
+    "pageWidth": 1280,
+    "viewport": 1280,
+    "pageHeight": 930,
+    "viewportHeight": 820,
+    "visible": true,
+    "clippedParameterLabels": []
+  },
+  {
+    "width": 1280,
+    "tab": "tracks",
+    "lang": "ja",
+    "pageWidth": 1280,
+    "viewport": 1280,
+    "pageHeight": 986,
+    "viewportHeight": 820,
+    "visible": true,
+    "clippedParameterLabels": []
+  },
+  {
+    "width": 1280,
+    "tab": "song",
+    "lang": "ja",
+    "pageWidth": 1280,
+    "viewport": 1280,
+    "pageHeight": 820,
+    "viewportHeight": 820,
+    "visible": true,
+    "clippedParameterLabels": []
+  },
+  {
+    "width": 1280,
+    "tab": "library",
+    "lang": "ja",
+    "pageWidth": 1280,
+    "viewport": 1280,
+    "pageHeight": 912,
+    "viewportHeight": 820,
+    "visible": true,
+    "clippedParameterLabels": []
+  },
+  {
+    "width": 1280,
+    "tab": "samples",
+    "lang": "ja",
+    "pageWidth": 1280,
+    "viewport": 1280,
+    "pageHeight": 1179,
+    "viewportHeight": 820,
+    "visible": true,
+    "clippedParameterLabels": []
+  },
+  {
+    "width": 1280,
+    "tab": "kits",
+    "lang": "ja",
+    "pageWidth": 1280,
+    "viewport": 1280,
+    "pageHeight": 1685,
+    "viewportHeight": 820,
+    "visible": true,
+    "clippedParameterLabels": []
+  },
+  {
+    "width": 1280,
+    "tab": "drumsynth",
+    "lang": "ja",
+    "pageWidth": 1280,
+    "viewport": 1280,
+    "pageHeight": 820,
+    "viewportHeight": 820,
+    "visible": true,
+    "clippedParameterLabels": []
+  },
+  {
+    "width": 1280,
+    "tab": "projects",
+    "lang": "ja",
+    "pageWidth": 1280,
+    "viewport": 1280,
+    "pageHeight": 820,
+    "viewportHeight": 820,
+    "visible": true,
+    "clippedParameterLabels": []
+  },
+  {
+    "width": 1280,
+    "tab": "settings",
+    "lang": "ja",
+    "pageWidth": 1280,
+    "viewport": 1280,
+    "pageHeight": 1699,
+    "viewportHeight": 820,
+    "visible": true,
+    "clippedParameterLabels": []
+  },
+  {
+    "width": 375,
+    "tab": "installer",
+    "visible": true,
+    "lang": "ja",
+    "pageWidth": 375,
+    "viewport": 375,
+    "pageHeight": 1441,
+    "viewportHeight": 820
+  }
+]

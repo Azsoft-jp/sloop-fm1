@@ -31,6 +31,7 @@ fail=0
 run() { echo "== $1"; shift; "$@" || fail=1; }
 
 [ -f build/felucca.fwsc ] || { echo "run ./build.sh first"; exit 1; }
+run "Japanese UI resources: EN/JA IDs, used glyphs, no direct C literals" python3 tests/check_ja_resources.py
 # the generated headers the FM6 engine needs (tools/build.py generate() makes them too; no Pillow needed)
 mkdir -p build/gen
 [ build/gen/felucca_tables.h -nt tools/gen_tables.py ] || python3 tools/gen_tables.py build/gen/felucca_tables.h

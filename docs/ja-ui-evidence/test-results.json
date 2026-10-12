@@ -1,0 +1,21 @@
+{
+  "basis": "upstream v2.6 d30d6553353373cf5506b9ed285fc4a2aa0c30ef vs codex/ja-localization-sloop-2.6",
+  "target_build": "passed; app 581252 B; RAM 92968 B; pool 333900 B; slot free 312 B",
+  "japanese_resources": "263 EN/JA IDs; 75 used sparse 1bpp glyphs (2400 B); no direct Japanese C literals",
+  "host_ui": "passed; 20000-frame fuzz, ASCII/UTF-8/kana/fallback, menu widths, 2.6 descriptor labels, menu transitions and key operations",
+  "stress": "passed; 5000 frames and 3000 frames under ASan/UBSan; all voices released after stop",
+  "soak": "passed; 1 minute random live use; bounded output and no hanging voices",
+  "audio_golden": "182 renders, zero changed, zero missing; zero health/voice/routing failures",
+  "ramtext": "925 instructions, no calls; SHA-256 identical to pristine upstream v2.6",
+  "web_protocol": "passed; 10 tabs, editor protocol, samples, drum synth, song, projects, backup, firmware update mock",
+  "browser_layout": "passed; 21 views at 375 and 1280 px; no horizontal overflow or clipped parameter labels; dialog, tooltip, EN switch",
+  "browser_package": "passed; local HTTP installer fetched and hash-verified 2.6-ja FWSC; Install button enabled; no horizontal overflow at 375 px",
+  "html_report": "passed; 98 image references including 71 unique native LCD screens, 12 Web views and 9 GIFs; 375 and 1280 px",
+  "pdf_report": "generated and visually inspected; 13 A4 pages, 71 LCD screens, 12 Web views, 9 GIFs represented by start/end frames",
+  "full_suite": "exit 1 only for two budget gates reproduced unchanged on pristine upstream v2.6; all functional tests passed",
+  "upstream_budget_failures": [
+    "PHASE/03_RESO_PLUCK CPU 1131 vs baseline 899 (+26%, limit +25%)",
+    "fm1_alnk0_irq target cost 268 vs budget 174 (+54%, limit +10%)"
+  ],
+  "hardware": "not tested; no FM-1 detected on USB"
+}

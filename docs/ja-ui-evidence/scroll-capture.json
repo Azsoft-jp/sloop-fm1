@@ -1,0 +1,74 @@
+{
+  "viewport": {
+    "width": 375,
+    "height": 820
+  },
+  "results": [
+    {
+      "label": "sound",
+      "height": 6512,
+      "frames": 18,
+      "gif": "scroll-sound.gif"
+    },
+    {
+      "label": "sequencer",
+      "height": 1892,
+      "frames": 13,
+      "gif": "scroll-sequencer.gif"
+    },
+    {
+      "label": "tracks",
+      "height": 2095,
+      "frames": 15,
+      "gif": "scroll-tracks.gif"
+    },
+    {
+      "label": "song",
+      "height": 820,
+      "frames": 0,
+      "gif": null
+    },
+    {
+      "label": "library",
+      "height": 2005,
+      "frames": 14,
+      "gif": "scroll-library.gif"
+    },
+    {
+      "label": "samples",
+      "height": 2008,
+      "frames": 14,
+      "gif": "scroll-samples.gif"
+    },
+    {
+      "label": "kits",
+      "height": 3328,
+      "frames": 18,
+      "gif": "scroll-kits.gif"
+    },
+    {
+      "label": "drumsynth",
+      "height": 820,
+      "frames": 0,
+      "gif": null
+    },
+    {
+      "label": "projects",
+      "height": 1589,
+      "frames": 10,
+      "gif": "scroll-projects.gif"
+    },
+    {
+      "label": "settings",
+      "height": 2782,
+      "frames": 18,
+      "gif": "scroll-settings.gif"
+    },
+    {
+      "label": "installer",
+      "height": 1462,
+      "frames": 10,
+      "gif": "scroll-installer.gif"
+    }
+  ]
+}
